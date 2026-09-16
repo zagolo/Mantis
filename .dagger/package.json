@@ -1,0 +1,8 @@
+{
+  "name": "mantis-qualification",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@dagger.io/dagger": "0.21.8"
+  }
+}
