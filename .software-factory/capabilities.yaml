@@ -1,0 +1,90 @@
+schemaVersion: software-factory.capabilities/v1
+setupRequirements:
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.GOOGLE_OAUTH_CLIENT_ID
+    logicalName: GOOGLE_OAUTH_CLIENT_ID
+    label: Google Calendar OAuth client ID
+    description: Optional public OAuth client identifier for Calendar runtime access; requires the separate client secret.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: GOOGLE_OAUTH_CLIENT_ID }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.TWILIO_ACCOUNT_SID
+    logicalName: TWILIO_ACCOUNT_SID
+    label: Twilio account identifier
+    description: Optional account identifier, not an authentication credential by itself; used for live calling at runtime.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: TWILIO_ACCOUNT_SID }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.TWILIO_API_KEY_SID
+    logicalName: TWILIO_API_KEY_SID
+    label: Twilio API key identifier
+    description: Optional key identifier paired with the separately protected key secret for live Voice tokens.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: TWILIO_API_KEY_SID }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.TWILIO_TWIML_APP_SID
+    logicalName: TWILIO_TWIML_APP_SID
+    label: Twilio Voice application identifier
+    description: Optional TwiML app resource identifier for live calling at runtime.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: TWILIO_TWIML_APP_SID }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.LLM_BASE_URL
+    logicalName: LLM_BASE_URL
+    label: AI endpoint
+    description: Optional credential-free OpenAI-compatible API base URL. Supply authentication only through LLM_API_KEY.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: LLM_BASE_URL }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.LLM_MODEL
+    logicalName: LLM_MODEL
+    label: AI model
+    description: Optional provider-specific model for campaign generation and coaching; requires endpoint and API key.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: LLM_MODEL }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.RESEARCH_BASE_URL
+    logicalName: RESEARCH_BASE_URL
+    label: Research endpoint
+    description: Optional credential-free Responses-compatible research URL. Authentication belongs in RESEARCH_API_KEY.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: RESEARCH_BASE_URL }
+    validation: { type: string, minLength: 1 }
+  - schemaVersion: software-factory.setup-requirement/v1
+    id: settings.RESEARCH_MODEL
+    logicalName: RESEARCH_MODEL
+    label: Research model
+    description: Optional research model override; defaults in application code to the configured LLM model.
+    kind: setting
+    required: false
+    environmentScope: project_environment
+    consumers: [{ type: workspace }]
+    delivery: { type: environment, name: RESEARCH_MODEL }
+    validation: { type: string, minLength: 1 }
