@@ -42,20 +42,16 @@ function shingleMatches(needleWords: string[], haystacks: string[], size = 4): b
 export function evidenceInContext(
   evidence: string | null,
   utterances: PublicUtterance[],
-  snapshot: LeadSnapshot
+  _snapshot: LeadSnapshot
 ): boolean {
   if (!evidence || !evidence.trim()) {
     return false;
   }
-  const haystacks = [
-    ...utterances.filter((row) => row.text !== "[gap]").map((row) => row.text),
-    snapshot.fullName,
-    snapshot.company,
-    snapshot.role,
-    snapshot.phone,
-    snapshot.phoneE164,
-    snapshot.leadId
-  ];
+  // Qualification must be grounded in the contact's words. Caller assertions
+  // and CRM identity fields can provide context, but cannot confirm fit.
+  const haystacks = utterances
+    .filter((row) => row.speaker === "contact" && row.text !== "[gap]")
+    .map((row) => row.text);
   // Fast path: exact case-insensitive substring (previous behavior).
   const needle = evidence.trim().toLowerCase();
   if (haystacks.some((text) => text.toLowerCase().includes(needle))) {

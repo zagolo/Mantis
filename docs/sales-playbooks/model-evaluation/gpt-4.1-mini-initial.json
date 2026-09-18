@@ -1,0 +1,616 @@
+{
+  "method": "Configured-model synthetic rehearsal through the real agent loader; no call, CRM, calendar or web-research actions. Acceptance checks are not sent to the model.",
+  "model": "gpt-4.1-mini",
+  "generatedAt": "2026-09-18T11:36:26.265Z",
+  "skills": [
+    {
+      "agent": "campaign-interview",
+      "skill": "mantis-campaign-intake",
+      "version": "1.0.0",
+      "procedureChars": 1804
+    },
+    {
+      "agent": "campaign-generation",
+      "skill": "mantis-campaign-strategy",
+      "version": "1.1.0",
+      "procedureChars": 4050
+    },
+    {
+      "agent": "prospect-research",
+      "skill": "prospect-research-playbook",
+      "version": "1.1.0",
+      "procedureChars": 4234
+    },
+    {
+      "agent": "live-coach",
+      "skill": "live-cold-call-coach",
+      "version": "1.1.0",
+      "procedureChars": 4115
+    },
+    {
+      "agent": "post-call",
+      "skill": "mantis-post-call-evidence",
+      "version": "1.0.0",
+      "procedureChars": 4090
+    },
+    {
+      "agent": "call-review",
+      "skill": "mantis-call-review",
+      "version": "1.0.0",
+      "procedureChars": 4780
+    }
+  ],
+  "cases": [
+    {
+      "id": "intake-vague-target",
+      "agent": "campaign-interview",
+      "fingerprint": "e305dff2af208bc372c781970a4bf0fad3f4bac26ceadd3c4a985f8627e38bc9",
+      "elapsedMs": 2987,
+      "schemaValid": true,
+      "output": {
+        "message": "Thanks! To clarify, what specific problems does Omni Example solve with AI automation? And who exactly is your first target customer segment?",
+        "ready": false,
+        "brief": null
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "intake-update-without-proof",
+      "agent": "campaign-interview",
+      "fingerprint": "e305dff2af208bc372c781970a4bf0fad3f4bac26ceadd3c4a985f8627e38bc9",
+      "elapsedMs": 2300,
+      "schemaValid": true,
+      "output": {
+        "message": "Got it. The target customer is now facilities operations teams. The rest remains the same: offering name is Flow Example, it maps request handoffs before agreeing to a workflow pilot, and the call objective is to agree to a discovery conversation. Is there anything else you'd like to update?",
+        "ready": true,
+        "brief": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps request handoffs before agreeing to a workflow pilot.",
+          "targetCustomer": "Facilities operations teams",
+          "objective": "Agree to a discovery conversation",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [],
+          "sheetCampaignValue": ""
+        }
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "fingerprint": "c7059c730cd3fed49f5269c26ed18920a1cdbe8faeea8933224041124d46191a",
+      "elapsedMs": 5118,
+      "schemaValid": false,
+      "output": {
+        "name": "Workflow Study for Residential Property-Management Operations Leaders",
+        "positioning": "This research study explores how maintenance requests are managed and moved between people in residential property management operations. By discussing recent maintenance request workflows, we seek to understand potential inefficiencies or challenges without any product sales involved. We aim to learn from your experience and, if relevant, request permission for a brief follow-up interview to discuss potential improvements.",
+        "opening": "Hello, this is [Name] calling about a brief research study on how maintenance requests are handled in residential property management. May I ask a few quick questions?",
+        "questions": [
+          {
+            "id": "recent_request_workflow",
+            "prompt": "Could you describe how a recent maintenance request moved between your team members?",
+            "purpose": "workflow understanding",
+            "required": true
+          },
+          {
+            "id": "workflow_challenges",
+            "prompt": "What challenges, if any, have you noticed in how maintenance requests are currently handled?",
+            "purpose": "problem identification",
+            "required": false
+          },
+          {
+            "id": "ownership_of_process",
+            "prompt": "Who typically oversees or manages the maintenance request workflow in your operation?",
+            "purpose": "process ownership",
+            "required": false
+          },
+          {
+            "id": "interest_in_follow_up",
+            "prompt": "Would you be open to a brief follow-up interview to explore these topics further if useful?",
+            "purpose": "permission for follow-up",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "is_residential_property_management",
+            "prompt": "The prospect leads or is closely involved in operations for residential property management.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "handles_maintenance_requests",
+            "prompt": "Maintenance request workflows are relevant to the prospect's current responsibilities.",
+            "required": true,
+            "onNo": "defer"
+          }
+        ],
+        "disqualifiers": [
+          "Not involved in residential property management operations leadership",
+          "Does not handle or oversee maintenance request workflows"
+        ],
+        "objections": [
+          {
+            "objection": "Not interested",
+            "response": "I understand, this is simply a brief research call to learn about your experience, no sales involved; may I ask if maintenance request handling has been a challenge?"
+          },
+          {
+            "objection": "Too busy",
+            "response": "I appreciate you’re busy; this will only take a moment and could provide useful insights for your workflow challenges; may I quickly ask one question?"
+          },
+          {
+            "objection": "No follow-up needed",
+            "response": "Thanks for letting me know; we appreciate your time and may check back later if your situation changes."
+          }
+        ],
+        "nextStep": "Ask permission for a brief follow-up interview if the workflow discussion indicates potential insights.",
+        "successOutcomes": [
+          "permission_to_follow_up"
+        ]
+      },
+      "issues": [
+        {
+          "origin": "string",
+          "code": "too_big",
+          "maximum": 140,
+          "inclusive": true,
+          "path": [
+            "objections",
+            0,
+            "response"
+          ],
+          "message": "Too big: expected string to have <=140 characters"
+        },
+        {
+          "origin": "string",
+          "code": "too_big",
+          "maximum": 140,
+          "inclusive": true,
+          "path": [
+            "objections",
+            1,
+            "response"
+          ],
+          "message": "Too big: expected string to have <=140 characters"
+        }
+      ]
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "fingerprint": "c7059c730cd3fed49f5269c26ed18920a1cdbe8faeea8933224041124d46191a",
+      "elapsedMs": 4285,
+      "schemaValid": true,
+      "output": {
+        "name": "Flow Example Workflow Discovery for Property Management Teams",
+        "positioning": "Residential property-management operations often experience inefficient handoffs for resident requests, leading to delays and dissatisfaction. Flow Example addresses this by mapping your existing workflow before agreeing to a pilot, ensuring any scoped pilot accurately targets your true process challenges. This approach can help identify bottlenecks or gaps before committing to changes. Would you be open to a brief workflow discovery meeting to explore if this could help your operations?",
+        "opening": "Hi, this is [Your Name] calling about Flow Example; do you handle resident request workflows in property management? We map requests handoffs before proposing pilots to ensure fit. Could I ask a quick question?",
+        "questions": [
+          {
+            "id": "current_workflow_description",
+            "prompt": "Can you describe how resident requests are currently handed off within your team?",
+            "purpose": "workflow/problem understanding",
+            "required": true
+          },
+          {
+            "id": "operational_impact",
+            "prompt": "Have you noticed any delays or issues caused by these handoffs?",
+            "purpose": "impact probing",
+            "required": false
+          },
+          {
+            "id": "pilot_interest",
+            "prompt": "Would understanding your current workflow in detail be helpful before exploring any solution pilots?",
+            "purpose": "validating interest",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "manages_resident_requests",
+            "prompt": "The team manages residential property resident requests directly.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "open_to_workflow_discussion",
+            "prompt": "The team is willing to discuss and share workflow details for discovery purposes.",
+            "required": true,
+            "onNo": "defer"
+          }
+        ],
+        "disqualifiers": [
+          "The team does not handle residential property resident requests.",
+          "The team is unwilling to discuss their workflow."
+        ],
+        "objections": [
+          {
+            "objection": "Not interested",
+            "response": "I understand, may I ask if you've tried mapping the request handoff process before?"
+          },
+          {
+            "objection": "Too busy",
+            "response": "I appreciate your time is limited; could we schedule a short call when more convenient?"
+          },
+          {
+            "objection": "We already have a system",
+            "response": "That's great to hear. Does your current system include mapping of handoffs before new pilots?"
+          }
+        ],
+        "nextStep": "Schedule a short workflow discovery meeting to explore potential improvements together.",
+        "successOutcomes": [
+          "meeting_booked"
+        ]
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "postcall-seller-assertion",
+      "agent": "post-call",
+      "fingerprint": "c93f9777a23c9ce97799186da7bd16ead1384080039b3c345bece4408ab0655c",
+      "elapsedMs": 2924,
+      "schemaValid": false,
+      "output": {
+        "semanticOutcome": "permission_to_follow_up",
+        "qualification": "disqualify",
+        "qualificationReason": "Contact did not confirm a relevant workflow problem. Contact said, \"I didn't say that. Just send a short outline of what you do.\" No evidence of problem confirmed.",
+        "criteria": {
+          "relevant_problem": {
+            "state": "no",
+            "evidence": "I didn't say that.",
+            "confidence": 1
+          }
+        },
+        "painOrResearchFindings": [],
+        "objections": [
+          "Contact declined to confirm any relevant workflow problem."
+        ],
+        "nextStep": "Send a short outline as requested by the contact.",
+        "followUpAt": null,
+        "summary": "The contact refused to confirm having a backlog or budget problem, explicitly saying, \"I didn't say that. Just send a short outline of what you do.\" No relevant workflow problem could be confirmed. The contact requested a brief outline to be sent, but no meeting or follow-up was agreed.",
+        "callerCommitments": [
+          "I will send a short outline of what you do."
+        ],
+        "contactCommitments": [],
+        "transcriptComplete": true,
+        "confidence": 0.8
+      },
+      "issues": [
+        {
+          "code": "invalid_value",
+          "values": [
+            "qualified",
+            "disqualified",
+            "defer",
+            "unknown"
+          ],
+          "path": [
+            "qualification"
+          ],
+          "message": "Invalid option: expected one of \"qualified\"|\"disqualified\"|\"defer\"|\"unknown\""
+        }
+      ]
+    },
+    {
+      "id": "postcall-incomplete-dnc",
+      "agent": "post-call",
+      "fingerprint": "c93f9777a23c9ce97799186da7bd16ead1384080039b3c345bece4408ab0655c",
+      "elapsedMs": 2999,
+      "schemaValid": true,
+      "output": {
+        "semanticOutcome": "do_not_contact",
+        "qualification": "disqualified",
+        "qualificationReason": "The contact explicitly stated 'Remove my number. Do not call me again.' indicating a do not contact request.",
+        "criteria": {
+          "relevant_problem": {
+            "state": "unknown",
+            "evidence": null,
+            "confidence": 0
+          }
+        },
+        "painOrResearchFindings": [],
+        "objections": [
+          "Contact expressly requested no further contact."
+        ],
+        "nextStep": "",
+        "followUpAt": null,
+        "summary": "The contact explicitly requested that their number be removed and that they not be called again. No information about relevant workflow problems was obtained. The call was not complete but the do not contact request is clear.",
+        "callerCommitments": [],
+        "contactCommitments": [
+          "Remove my number. Do not call me again."
+        ],
+        "transcriptComplete": false,
+        "confidence": 1
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "review-edit-without-write",
+      "agent": "call-review",
+      "fingerprint": "f86ddede2349e523b167c0637428b683f2cb7ea40cc4fd95b1be7afd32298910",
+      "elapsedMs": 1057,
+      "schemaValid": true,
+      "output": {
+        "message": "Changing next_step from \"Book a demo\" to \"Send the short outline.\" Not writing it to the Sheet yet.",
+        "action": "propose_fields",
+        "fields": {
+          "next_step": "Send the short outline"
+        }
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "review-failed-write-calendar-ambiguity",
+      "agent": "call-review",
+      "fingerprint": "f86ddede2349e523b167c0637428b683f2cb7ea40cc4fd95b1be7afd32298910",
+      "elapsedMs": 1969,
+      "schemaValid": false,
+      "output": {
+        "message": "The Sheet update did not succeed due to a rate limit error; the next_step remains as pending edit \"Discuss outline\". I'll prepare a reminder draft for Wednesday afternoon — please provide a specific time and timezone for scheduling.",
+        "action": "none",
+        "calendarProposal": {
+          "intent": "reminder",
+          "start": "",
+          "end": "",
+          "timezone": "UTC",
+          "attendees": [],
+          "meet": false,
+          "notes": ""
+        }
+      },
+      "issues": [
+        {
+          "origin": "string",
+          "code": "too_small",
+          "minimum": 1,
+          "inclusive": true,
+          "path": [
+            "calendarProposal",
+            "start"
+          ],
+          "message": "Too small: expected string to have >=1 characters"
+        },
+        {
+          "origin": "string",
+          "code": "too_small",
+          "minimum": 1,
+          "inclusive": true,
+          "path": [
+            "calendarProposal",
+            "end"
+          ],
+          "message": "Too small: expected string to have >=1 characters"
+        }
+      ]
+    },
+    {
+      "id": "richter-industry-is-not-company",
+      "agent": "prospect-research",
+      "fingerprint": "7391fbf44a1e2cf1c2985364b5cabc905adf326ae56ba47ce1cbbdf0373f925b",
+      "elapsedMs": 5523,
+      "schemaValid": true,
+      "output": {
+        "company": [
+          {
+            "text": "Cedar Example manages residential properties in Austin.",
+            "sourceIds": [
+              "source_1"
+            ]
+          }
+        ],
+        "prospect": [
+          {
+            "text": "Maya Example is the operations lead in residential property management.",
+            "sourceIds": [
+              "source_1"
+            ]
+          }
+        ],
+        "hypotheses": [
+          "Routing resident requests efficiently may be a challenge for your operations team.",
+          "There could be benefit in mapping your current resident-request workflows before pilots."
+        ],
+        "unknowns": [
+          "Is the current resident request routing causing delays or errors?",
+          "Does Maya have authority to approve a pilot project?",
+          "Is there budget set for workflow improvements?"
+        ],
+        "relevance": "As operations lead at a residential property manager in Austin, Maya may see value in clarifying resident-request workflows to improve efficiency.",
+        "opening": "Hi Maya, I’m calling about Cedar Example’s resident request processes. Some peers face routing challenges that slow responses. Would it be ok to ask if this is a concern for your team?",
+        "questions": [
+          {
+            "id": "routing_challenge",
+            "prompt": "Are resident-request routing delays or errors impacting your operations today?",
+            "purpose": "Confirm relevance of request routing issues",
+            "required": true
+          },
+          {
+            "id": "pilot_interest",
+            "prompt": "Would mapping your current resident-request workflow first help before considering any pilot?",
+            "purpose": "Test interest in workflow discovery",
+            "required": false
+          },
+          {
+            "id": "decision_authority",
+            "prompt": "Do you have authority to approve exploring a pilot for process improvement?",
+            "purpose": "Verify decision maker role",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "We have no interest in pilots right now.",
+            "response": "I understand. If it helps, we start by mapping current workflows with no pilot commitment required. Is understanding your routing helpful?"
+          }
+        ],
+        "nextStep": "Schedule a brief call to explore mapping your resident-request routing workflow if relevant."
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "richter-stale-identity",
+      "agent": "prospect-research",
+      "fingerprint": "7391fbf44a1e2cf1c2985364b5cabc905adf326ae56ba47ce1cbbdf0373f925b",
+      "elapsedMs": 4751,
+      "schemaValid": true,
+      "output": {
+        "company": [],
+        "prospect": [],
+        "hypotheses": [
+          "Residential property-management teams may face inefficiencies in resident-request handoffs needing clearer workflows"
+        ],
+        "unknowns": [
+          "Current COO identity at Cedar Example is unclear",
+          "Morgan Lee's role and authority at Cedar Example is unverified",
+          "Budget and interest in workflow mapping pilots are unknown"
+        ],
+        "relevance": "Austin residential property management operations face complex resident-request workflows; a brief discovery could show workflow mapping value.",
+        "opening": "Hi, this is calling about simplifying resident-request handoffs for residential property management. Are you the right person to discuss how your team handles workflow mapping, or should I speak with someone else?",
+        "questions": [
+          {
+            "id": "workflow_ownership",
+            "prompt": "Who currently manages workflow processes for resident-request handoffs in your operations?",
+            "purpose": "Identify the right contact and ownership",
+            "required": true
+          },
+          {
+            "id": "workflow_pain",
+            "prompt": "Have you noticed any challenges or delays in resident-request handoffs recently?",
+            "purpose": "Understand pain points in current workflow",
+            "required": false
+          },
+          {
+            "id": "pilot_interest",
+            "prompt": "Would exploring a mapped workflow before considering pilot projects be of interest to your team?",
+            "purpose": "Gauge openness to pilot prep",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "We already have workflows figured out",
+            "response": "That’s great to hear; could I still ask if routine mapping has helped prevent any recent handoff issues?"
+          }
+        ],
+        "nextStep": "Schedule a brief call to explore your current resident-request handoff workflows and see if mapping might add value."
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "gap-impact-without-numbers",
+      "agent": "live-coach",
+      "fingerprint": "736480018732cac86fc775a514c47d98acfb73f70dbde3c95f0f9ed16eae8213",
+      "elapsedMs": 1641,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "discovery",
+        "shouldShow": true,
+        "cueType": "question",
+        "cue": "You mentioned re-entering requests between two systems and some uncertainty about the cause and time involved; is this causing delays or errors your team is finding costly or frustrating?",
+        "say": "Is the re-entry between systems causing costly delays or errors for your team?",
+        "reason": "Clarify impact of the identified workflow problem to assess meaningful cost impact and qualify further discovery.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.7,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "objections-prospecting-existing-system",
+      "agent": "live-coach",
+      "fingerprint": "736480018732cac86fc775a514c47d98acfb73f70dbde3c95f0f9ed16eae8213",
+      "elapsedMs": 1600,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "hook",
+        "shouldShow": true,
+        "cueType": "question",
+        "cue": "I understand you're using Helpdesk X; may I ask if you've noticed any delays or miscommunications in your resident request handoff process lately?",
+        "say": "I understand you're using Helpdesk X; may I ask if you've noticed any delays or miscommunications in your resident request handoff process lately?",
+        "reason": "Gently explore if the existing tool fully resolves workflow issues before explaining Flow Example's differentiator.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.8,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "objections-microcommitment-value",
+      "agent": "live-coach",
+      "fingerprint": "736480018732cac86fc775a514c47d98acfb73f70dbde3c95f0f9ed16eae8213",
+      "elapsedMs": 1665,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "value_proposition",
+        "shouldShow": true,
+        "cueType": "cta",
+        "cue": "We map your resident-request handoffs to find friction points before proposing any pilot—it's a clear picture, no guesswork. Does that sound worth a brief call to explore?",
+        "say": "Our conversation maps your resident-request handoffs to uncover friction before any pilot is proposed. Would that be useful for you?",
+        "reason": "Directly addresses their 'what's in it' question with a clear value proposition and invites an agreed next step.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.9,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "objections-buying-price-uncertainty",
+      "agent": "live-coach",
+      "fingerprint": "736480018732cac86fc775a514c47d98acfb73f70dbde3c95f0f9ed16eae8213",
+      "elapsedMs": 1875,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "objection",
+        "shouldShow": true,
+        "cueType": "objection",
+        "cue": "I understand your concern about cost. Our approach maps your current workflow first to ensure the pilot targets the most impactful improvements. Could you share if the current resident-request handoff process is causing delays or errors for your team?",
+        "say": "I understand your concern about cost. Our approach maps your current workflow first to ensure the pilot targets the most impactful improvements. Could you share if the current resident-request handoff process is causing delays or errors for your team?",
+        "reason": "Cost objection raised; address by linking mapping phase to targeting improvements, then clarify if workflow issues exist.",
+        "detectedObjection": "price_concern",
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.9,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "objections-firm-no",
+      "agent": "live-coach",
+      "fingerprint": "736480018732cac86fc775a514c47d98acfb73f70dbde3c95f0f9ed16eae8213",
+      "elapsedMs": 1606,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "closed",
+        "shouldShow": true,
+        "cueType": "warning",
+        "cue": "Thank you for your time, Maya. I'll respect your wishes and end the call now. Have a good day.",
+        "say": "I understand, Maya. I won't take more of your time. Thank you for your time, and have a good day.",
+        "reason": "Contact explicitly refused and asked to end conversation; comply and close call.",
+        "detectedObjection": "refusal",
+        "qualificationUpdates": [],
+        "recommendedOutcome": "not_interested",
+        "confidence": 1,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false
+    }
+  ]
+}

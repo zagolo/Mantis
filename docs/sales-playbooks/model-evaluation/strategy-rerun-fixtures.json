@@ -1,0 +1,52 @@
+{
+  "purpose": "Synthetic post-fold-in evaluation of all six loaded skills; checks withheld from model. No real contacts or external actions.",
+  "cases": [
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "input": {
+        "offering": {
+          "offeringName": "Workflow Study",
+          "offeringDescription": "Interview operations leaders about how maintenance requests move between people. No product offer.",
+          "targetCustomer": "Residential property-management operations leaders",
+          "objective": "Learn about a recent request and obtain permission for a follow-up interview if useful",
+          "type": "research",
+          "website": "",
+          "approvedFacts": [],
+          "sheetCampaignValue": ""
+        }
+      },
+      "checks": [
+        "Valid 3-4 questions and meaningful required criterion",
+        "No meeting_booked outcome or sales close",
+        "Neutral experience questions",
+        "No invented incentive, product promise or budget gate"
+      ]
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "input": {
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery meeting",
+          "type": "sales",
+          "website": "https://flow.example",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed"
+          ],
+          "sheetCampaignValue": ""
+        }
+      },
+      "checks": [
+        "No invented savings, integration, customers or size thresholds",
+        "Opener <=280 with no unresolved placeholders",
+        "Criteria distinguish hard mismatch and temporary/unknown readiness",
+        "Next step reflects discovery, not closed-won"
+      ]
+    }
+  ],
+  "methodNote": "Uses production-style field names/envelopes and configured objection vocabulary. The evaluation script loads core procedures and schemas; it does not run engine validators/executors."
+}

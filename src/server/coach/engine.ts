@@ -53,6 +53,7 @@ type SessionCoach = {
   latestContactSequence: number;
   sawObjection: boolean;
   talkWarnIssued: boolean;
+  doNotContact: boolean;
 };
 
 const DNC_CUE = "Acknowledge and end respectfully. They asked not to be contacted.";
@@ -108,7 +109,7 @@ export class CoachEngine {
   }
 
   consider(utterance: PublicUtterance): void {
-    if (this.paused || this.stopped.has(utterance.sessionId)) {
+    if (this.paused || this.stopped.has(utterance.sessionId) || this.sessions.get(utterance.sessionId)?.doNotContact) {
       return;
     }
     const talkPublished = this.publishTalk(utterance.sessionId);
@@ -163,7 +164,7 @@ export class CoachEngine {
     }
     const session = getSession(this.deps.db, sessionId);
     const campaign = session ? sessionCampaign(session, this.deps.campaigns) : undefined;
-    if (campaign && snapshot.talkRatio.warn) {
+    if (campaign && snapshot.talkRatio.warn && !this.sessions.get(sessionId)?.doNotContact) {
       const state = this.stateFor(sessionId, campaign);
       if (!state.talkWarnIssued) {
         state.talkWarnIssued = true;
@@ -192,7 +193,8 @@ export class CoachEngine {
         inFlightSequence: null,
         latestContactSequence: 0,
         sawObjection: false,
-        talkWarnIssued: false
+        talkWarnIssued: false,
+        doNotContact: false
       };
       this.sessions.set(sessionId, state);
     }
@@ -218,6 +220,9 @@ export class CoachEngine {
     utterance: PublicUtterance,
     options: { rateLimit: boolean; operatorNote?: string; skipContactCheck?: boolean }
   ): Promise<void> {
+    if (this.paused || this.stopped.has(utterance.sessionId)) {
+      return;
+    }
     const row = getSession(this.deps.db, utterance.sessionId);
     if (!row || row.status !== "in_progress") {
       return;
@@ -228,6 +233,9 @@ export class CoachEngine {
     }
     const snapshot = JSON.parse(row.lead_snapshot_json) as LeadSnapshot;
     const state = this.stateFor(utterance.sessionId, campaign);
+    if (state.doNotContact) {
+      return;
+    }
     if (!options.skipContactCheck) {
       state.latestContactSequence = Math.max(state.latestContactSequence, utterance.sequence);
     }
@@ -279,6 +287,10 @@ export class CoachEngine {
     const utterances = listUtterances(this.deps.db, utterance.sessionId);
     const talk = computeTalkRatio(utterances, row.connected_at, this.deps.playbook);
     const calendarAvailability = await this.availabilityNote();
+    if (this.paused || this.stopped.has(utterance.sessionId) || state.doNotContact ||
+      getSession(this.deps.db, utterance.sessionId)?.status !== "in_progress") {
+      return;
+    }
     const prompt = buildCoachPrompt({
       campaign,
       playbook: this.deps.playbook,
@@ -301,6 +313,10 @@ export class CoachEngine {
     }
     try {
       const raw = await this.deps.llm.completeJson(prompt);
+      if (this.paused || this.stopped.has(utterance.sessionId) || state.doNotContact ||
+        getSession(this.deps.db, utterance.sessionId)?.status !== "in_progress") {
+        return;
+      }
       if (!options.skipContactCheck && utterance.sequence < state.latestContactSequence) {
         return;
       }
@@ -352,6 +368,25 @@ export class CoachEngine {
     output: LiveCoachOutput,
     doNotContact: boolean
   ): void {
+    if (state.doNotContact) {
+      return;
+    }
+    state.doNotContact = doNotContact || output.detectedObjection === "do_not_contact";
+    if (state.doNotContact) {
+      // DNC is terminal for this call, including pending operator/model turns.
+      // It is separate from stop(), which finalization uses for any outcome.
+      output = {
+        ...output,
+        stage: "closed",
+        cueType: "warning",
+        cue: DNC_CUE,
+        say: DNC_CUE,
+        shouldShow: true,
+        qualificationUpdates: [],
+        calendarProposal: null,
+        calendarReminder: null
+      };
+    }
     state.criteria = applyQualificationUpdates(
       campaign,
       state.criteria,

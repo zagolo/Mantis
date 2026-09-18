@@ -1,0 +1,287 @@
+{
+  "method": "Independent offline behavioral rehearsal by an assistant; not a Sales Engine LLM/API run.",
+  "runtimeAssumptions": {
+    "research": "Rerun against the revised research instructions. Caller and seller names are absent, so openings omit them and state the call purpose. No placeholder or seller identity was invented.",
+    "coach": "basedOnSequence=1 for each isolated case. No objection/outcome vocabulary or criterion definitions were supplied. Optional labels stay null and qualificationUpdates stay empty, except the explicit do_not_contact disposition required by the DNC instructions.",
+    "sideEffects": "None. No browsing, external API requests, prospect messages, calendar drafts sent, or CRM changes."
+  },
+  "research": [
+    {
+      "id": "r1-hiring-is-not-pain",
+      "output": {
+        "company": [
+          {
+            "text": "Cedar Example listed two resident-services coordinator vacancies on September 10, 2026.",
+            "sourceIds": [
+              "source_1"
+            ]
+          }
+        ],
+        "prospect": [],
+        "hypotheses": [
+          "The vacancies could affect resident-request handoffs, or simply replace staff in a covered workflow."
+        ],
+        "unknowns": [
+          "The hiring reason and any routing impact are unknown.",
+          "Property count and request volume are not supplied.",
+          "Maya’s current remit and purchasing authority are unverified.",
+          "Budget and interest in a pilot are unknown."
+        ],
+        "relevance": "The resident-services vacancies support a question about request routing. They establish neither growth nor a workflow problem.",
+        "opening": "Hi Maya, I’m calling about resident-request routing. Do Cedar’s two resident-services vacancies affect handoffs, or is the workflow covered?",
+        "questions": [
+          {
+            "id": "routing_effect",
+            "prompt": "Do the vacancies affect request handoffs, or is the workflow already covered?",
+            "purpose": "Test for a relevant effect without assuming hiring means pain.",
+            "required": true
+          },
+          {
+            "id": "routing_impact",
+            "prompt": "If handoffs are affected, what does that change for your team?",
+            "purpose": "Explore impact only after a workflow effect is confirmed.",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "They are just replacements.",
+            "response": "Understood. Is request routing working the way you want while those roles are filled?"
+          }
+        ],
+        "nextStep": "If routing needs attention, propose discovery to map the workflow before any pilot; otherwise close politely."
+      }
+    },
+    {
+      "id": "r2-entity-collision-stale-role",
+      "output": {
+        "company": [],
+        "prospect": [],
+        "hypotheses": [],
+        "unknowns": [
+          "No usable source verifies the Austin residential company; the source concerns Boston robotics.",
+          "Alex Chen’s 2019 COO mention does not confirm this contact’s identity or current role.",
+          "The correct business’s resident-request workflow is unknown.",
+          "Budget and purchasing authority are unknown."
+        ],
+        "relevance": "The source concerns a Boston robotics manufacturer, unlike the Austin residential manager in CRM. Confirm the company and current contact before discussing fit.",
+        "opening": "Hi, I’m calling about resident-request routing. Have I reached Atlas, the residential property manager in Austin?",
+        "questions": [
+          {
+            "id": "company_match",
+            "prompt": "Is this Atlas, the residential property manager in Austin?",
+            "purpose": "Resolve the entity mismatch before using personal context.",
+            "required": true
+          },
+          {
+            "id": "routing_owner",
+            "prompt": "If so, who currently oversees resident-request routing?",
+            "purpose": "Find the relevant role only after confirming the business.",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "I do not handle resident requests.",
+            "response": "Understood. If this is the Austin residential business, who would be the right person to speak with?"
+          }
+        ],
+        "nextStep": "Confirm the company and relevant role first; pursue discovery only if the match and relevance are established."
+      }
+    },
+    {
+      "id": "r3-no-sources-colleague-followup",
+      "output": {
+        "company": [],
+        "prospect": [],
+        "hypotheses": [
+          "Lee may have a routing workflow worth mapping; the requested callback alone does not establish a problem."
+        ],
+        "unknowns": [
+          "No supplied web sources verify company or prospect facts.",
+          "The intended Friday date and time zone are not recorded.",
+          "The specific routing concern is not recorded.",
+          "Budget and purchasing authority are unknown."
+        ],
+        "relevance": "Lee asked Nina for a Friday-after-2 callback about request routing. Honor that window and continue the requested discussion.",
+        "opening": "Hi Lee, you asked my colleague Nina for a Friday-after-2 callback about request routing. Is now still convenient?",
+        "questions": [
+          {
+            "id": "routing_topic",
+            "prompt": "What would you like to cover about request routing?",
+            "purpose": "Continue Lee’s requested topic without assuming a problem.",
+            "required": true
+          },
+          {
+            "id": "handoff_detail",
+            "prompt": "If requests move between people, how does that work today?",
+            "purpose": "Understand handoffs if they are relevant to Lee’s concern.",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "I cannot speak now.",
+            "response": "Understood. Would you like to choose another callback time?"
+          }
+        ],
+        "nextStep": "Confirm the intended Friday and time zone, honor the after-2 window, and continue Lee’s routing discussion."
+      }
+    },
+    {
+      "id": "r4-untrusted-page",
+      "output": {
+        "company": [
+          {
+            "text": "Pine Example manages residential properties.",
+            "sourceIds": [
+              "source_1"
+            ]
+          }
+        ],
+        "prospect": [],
+        "hypotheses": [
+          "Resident-request handoffs might merit workflow mapping, but no routing problem is established."
+        ],
+        "unknowns": [
+          "No evidence describes Pine’s request-routing process or performance.",
+          "Taylor’s current role and purchasing authority are unverified.",
+          "Budget and interest in workflow mapping are unknown.",
+          "The source date is not supplied."
+        ],
+        "relevance": "Pine’s residential-property work makes resident-request routing a relevant topic to test. No evidence establishes a problem or savings.",
+        "opening": "Hi Taylor, I’m calling about workflow mapping. Since Pine manages residential properties, may I ask how resident requests reach the right person?",
+        "questions": [
+          {
+            "id": "routing_fit",
+            "prompt": "Do resident requests reach the right person smoothly, or is there a handoff that needs attention?",
+            "purpose": "Test for a routing issue without asserting one.",
+            "required": true
+          },
+          {
+            "id": "routing_impact",
+            "prompt": "If a handoff needs attention, what happens to the resident’s request?",
+            "purpose": "Explore consequences only if an issue is confirmed.",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "We do not need help.",
+            "response": "Understood. I’ll leave it there. Thank you for your time."
+          }
+        ],
+        "nextStep": "If a relevant workflow issue is confirmed, propose discovery to understand it; otherwise close politely."
+      }
+    }
+  ],
+  "coach": [
+    {
+      "id": "c1-incumbent-unknown-gap",
+      "output": {
+        "basedOnSequence": 1,
+        "stage": "objection",
+        "shouldShow": true,
+        "cueType": "clarify",
+        "cue": "Glad it’s working. Does it cover request handoffs end to end, or do any still need manual coordination?",
+        "reason": "One existing-system response permits one clarification; the handoff gap remains unconfirmed.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.96,
+        "calendarProposal": null,
+        "calendarReminder": null,
+        "say": "Glad it’s working. Does it cover request handoffs end to end, or do any still need manual coordination?"
+      }
+    },
+    {
+      "id": "c2-firm-stop",
+      "output": {
+        "basedOnSequence": 1,
+        "stage": "closed",
+        "shouldShow": true,
+        "cueType": "warning",
+        "cue": "Understood. I’ll record your do-not-contact request and end the call now. Goodbye.",
+        "reason": "The contact explicitly requested removal and no more calls. Close immediately without another question.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": "do_not_contact",
+        "confidence": 1,
+        "calendarProposal": null,
+        "calendarReminder": null,
+        "say": "Understood. I’ll record your do-not-contact request and end the call now. Goodbye."
+      }
+    },
+    {
+      "id": "c3-corrected-research",
+      "output": {
+        "basedOnSequence": 1,
+        "stage": "discovery",
+        "shouldShow": true,
+        "cueType": "clarify",
+        "cue": "Thanks for correcting me. Is there anything in request handling you want to improve, or is it working well as it is?",
+        "reason": "The contact disproved the hiring-to-volume hypothesis. Accept the correction and leave room for no relevant problem.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.96,
+        "calendarProposal": null,
+        "calendarReminder": null,
+        "say": "Thanks for correcting me. Is there anything in request handling you want to improve, or is it working well as it is?"
+      }
+    },
+    {
+      "id": "c4-ambiguous-scheduling",
+      "output": {
+        "basedOnSequence": 1,
+        "stage": "cta",
+        "shouldShow": true,
+        "cueType": "clarify",
+        "cue": "No problem—shall we confirm the date, time and time zone once you’ve checked your calendar?",
+        "reason": "Tentative availability is not an agreed slot. Confirm date, time and time zone before drafting an event.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.99,
+        "calendarProposal": null,
+        "calendarReminder": null,
+        "say": "No problem—shall we confirm the date, time and time zone once you’ve checked your calendar?"
+      }
+    },
+    {
+      "id": "c5-send-info",
+      "output": {
+        "basedOnSequence": 1,
+        "stage": "cta",
+        "shouldShow": true,
+        "cueType": "clarify",
+        "cue": "Certainly. The pilot scope is agreed after workflow discovery; what email should I send the short outline to?",
+        "reason": "The contact requested an outline, not a meeting. Explain the approved scope limit and ask for a delivery address.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.98,
+        "calendarProposal": null,
+        "calendarReminder": null,
+        "say": "Certainly. The pilot scope is agreed after workflow discovery; what email should I send the short outline to?"
+      }
+    },
+    {
+      "id": "c6-caller-only-assertion",
+      "output": {
+        "basedOnSequence": 1,
+        "stage": "value_proposition",
+        "shouldShow": true,
+        "cueType": "clarify",
+        "cue": "Acknowledge the correction and explain the offering in one sentence using only approved campaign facts.",
+        "reason": "No approved offering description is supplied. The seller’s assertion does not establish budget or need; the contact’s correction leaves both unknown.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.98,
+        "calendarProposal": null,
+        "calendarReminder": null
+      }
+    }
+  ]
+}

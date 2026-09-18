@@ -4,7 +4,7 @@ import { insertUtterance } from "../../src/server/transcript/utterances.js";
 import { EXAMPLE_HEADERS } from "../../src/server/sheets/fixture.js";
 import { MemorySheetStore } from "../../src/server/sheets/memory.js";
 import { expectedTwilioSignature } from "../../src/server/twilio/signature.js";
-import { getProposal } from "../../src/server/review/store.js";
+import { getProposal, markProposalRetry } from "../../src/server/review/store.js";
 import {
   extractStreamToken,
   getAppContext,
@@ -14,6 +14,7 @@ import {
 } from "../helpers/app.js";
 import { createFakeDeepgramFactory, type FakeDeepgramConnection } from "../helpers/deepgram.js";
 import { FakeLlmClient, postCallOutput } from "../helpers/llm.js";
+import type { PublicProposal } from "../../src/shared/contracts.js";
 
 function signedForm(path: string, params: Record<string, string>) {
   const url = `http://127.0.0.1:3000${path}`;
@@ -108,6 +109,241 @@ describe("Post-call CRM hardening", () => {
     expect(proposal.criteria.find((c) => c.id === "meaningful_cost")?.state).toBe("unknown");
     expect(proposal.warnings.join(" ")).toMatch(/reset to unknown|grounded/i);
     await app.close();
+  });
+
+  it("does not turn caller opt-out wording into a contact do-not-contact request", async () => {
+    const llm = new FakeLlmClient();
+    llm.enqueueJson(postCallOutput());
+    const { app, cookie, ctx, sessionId } = await startSession(llm);
+    try {
+      connectSession(ctx, sessionId);
+      insertUtterance(ctx.db, {
+        sessionId,
+        speaker: "caller",
+        text: "You can ask us to stop calling at any time.",
+        startMs: 1300,
+        endMs: 1800,
+        confidence: 1
+      });
+      const finalized = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/finalize`,
+        headers: { cookie }
+      });
+      expect(finalized.statusCode).toBe(200);
+      const proposal = finalized.json() as PublicProposal;
+      expect(llm.calls).toHaveLength(1);
+      expect(proposal.semanticOutcome).toBe("permission_to_follow_up");
+      expect(proposal.proposedFields.call_status).toBe("Completed");
+    } finally {
+      await app.close();
+    }
+  });
+
+  it.each(["connected", "non_connect"] as const)("limits approve edits for a %s proposal to its review fields", async (kind) => {
+    const llm = new FakeLlmClient();
+    if (kind === "connected") llm.enqueueJson(postCallOutput());
+    const { app, cookie, ctx, sessionId } = await startSession(llm);
+    try {
+      if (kind === "connected") connectSession(ctx, sessionId);
+      else applyTransportStatus(ctx.db, sessionId, "no-answer");
+      const finalized = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/finalize`,
+        headers: { cookie }
+      });
+      expect(finalized.statusCode).toBe(200);
+      const before = finalized.json() as PublicProposal;
+      const approved = await app.inject({
+        method: "POST",
+        url: `/api/proposals/${before.id}/approve`,
+        headers: { cookie },
+        payload: { fields: {
+          call_status: kind === "connected" ? "Completed" : "Retry",
+          call_attempts: "999",
+          last_called_at: "2001-01-01T00:00:00.000Z",
+          twilio_call_sid: "CAforged",
+          recording_sid: "REforged",
+          qualification: "defer",
+          next_step: "Operator chose a Tuesday callback",
+          call_summary: "Operator corrected summary"
+        } }
+      });
+      expect(approved.statusCode).toBe(200);
+      const after = (approved.json() as { proposal: PublicProposal }).proposal;
+      expect(after.status).toBe("applied");
+      const store = ctx.adapter?.store as MemorySheetStore;
+      const row = (await store.getDataRows()).find((item) => item.values[0] === "L-100");
+      for (const key of ["call_attempts", "last_called_at", "twilio_call_sid", "recording_sid"] as const) {
+        expect(after.proposedFields[key]).toBe(before.proposedFields[key]);
+        expect(row?.values[EXAMPLE_HEADERS.indexOf(ctx.sheetsConfig!.write_columns[key])]).toBe(before.proposedFields[key]);
+      }
+      if (kind === "connected") {
+        expect(after.nextStep).toBe("Operator chose a Tuesday callback");
+        expect(after.summary).toBe("Operator corrected summary");
+        expect(after.qualification).toBe("defer");
+      } else {
+        for (const key of ["qualification", "next_step", "call_summary"] as const) {
+          expect(after.proposedFields[key]).toBe(before.proposedFields[key]);
+          expect(row?.values[EXAMPLE_HEADERS.indexOf(ctx.sheetsConfig!.write_columns[key])]).toBe(before.proposedFields[key]);
+        }
+      }
+    } finally {
+      await app.close();
+    }
+  });
+
+  it.each(["direct", "chat"] as const)("rejects a connected-call skip through the %s route without writing", async (route) => {
+    const llm = new FakeLlmClient();
+    llm.enqueueJson(postCallOutput());
+    const { app, cookie, ctx, sessionId } = await startSession(llm);
+    try {
+      connectSession(ctx, sessionId);
+      const finalized = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/finalize`,
+        headers: { cookie }
+      });
+      const proposal = finalized.json() as PublicProposal;
+      const before = getProposal(ctx.db, proposal.id)!;
+      const store = ctx.adapter?.store as MemorySheetStore;
+      const writesBefore = store.writeCount;
+      const skipped = route === "direct"
+        ? await app.inject({ method: "POST", url: `/api/proposals/${proposal.id}/skip`, headers: { cookie } })
+        : await app.inject({
+            method: "POST",
+            url: `/api/calls/${sessionId}/review/interview`,
+            headers: { cookie },
+            payload: { messages: [{ role: "user", content: "skip" }] }
+          });
+      expect(skipped.statusCode).toBe(400);
+      expect(skipped.json().error).toMatch(/non-connect/i);
+      expect(store.writeCount).toBe(writesBefore);
+      expect(getProposal(ctx.db, proposal.id)?.status).toBe("pending_review");
+      expect(getProposal(ctx.db, proposal.id)?.proposed_json).toBe(before.proposed_json);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("still allows skipping a non-connect proposal", async () => {
+    const llm = new FakeLlmClient();
+    const { app, cookie, ctx, sessionId } = await startSession(llm);
+    try {
+      applyTransportStatus(ctx.db, sessionId, "no-answer");
+      const finalized = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/finalize`,
+        headers: { cookie }
+      });
+      const proposal = finalized.json() as PublicProposal;
+      const skipped = await app.inject({
+        method: "POST",
+        url: `/api/proposals/${proposal.id}/skip`,
+        headers: { cookie }
+      });
+      expect(skipped.statusCode).toBe(200);
+      const after = (skipped.json() as { proposal: PublicProposal }).proposal;
+      expect(after.status).toBe("applied");
+      expect(after.proposedFields.call_status).toBe("Skipped");
+      expect(after.proposedFields.call_summary).toBe(proposal.proposedFields.call_summary);
+      expect(llm.calls).toHaveLength(0);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it.each([
+    { action: "approve", kind: "connected", question: "Explain this proposal.", command: "Write this update", status: "pending_review" },
+    { action: "retry_write", kind: "connected", question: "Did the Sheet update? Also remind me Wednesday afternoon to call them.", command: "Retry write", status: "pending_retry" },
+    { action: "skip", kind: "non_connect", question: "What would skipping this contact do?", command: "Skip this contact", status: "pending_review" }
+  ] as const)("blocks provider-origin $action until the operator sends its explicit command", async ({ action, kind, question, command, status }) => {
+    const llm = new FakeLlmClient();
+    if (kind === "connected") llm.enqueueJson(postCallOutput());
+    const { app, cookie, ctx, sessionId } = await startSession(llm);
+    try {
+      if (kind === "connected") connectSession(ctx, sessionId);
+      else applyTransportStatus(ctx.db, sessionId, "no-answer");
+      const finalized = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/finalize`,
+        headers: { cookie }
+      });
+      const proposal = finalized.json() as PublicProposal;
+      if (status === "pending_retry") markProposalRetry(ctx.db, proposal.id, "Sheet write failed: rate limit");
+      const before = getProposal(ctx.db, proposal.id)!;
+      const store = ctx.adapter?.store as MemorySheetStore;
+      const writesBefore = store.writeCount;
+      llm.enqueueJson({ message: "The Sheet was written successfully.", action });
+      const suggested = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/review/interview`,
+        headers: { cookie },
+        payload: { messages: [{ role: "user", content: question }] }
+      });
+      expect(suggested.statusCode, suggested.body).toBe(200);
+      expect(suggested.json()).toMatchObject({ wrote: false, leftReview: false, proposal: { status } });
+      expect(suggested.json().text).toContain(command);
+      expect(suggested.json().text).not.toContain("written successfully");
+      expect(store.writeCount).toBe(writesBefore);
+      expect(getProposal(ctx.db, proposal.id)?.proposed_json).toBe(before.proposed_json);
+
+      const modelCalls = llm.calls.length;
+      const confirmed = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/review/interview`,
+        headers: { cookie },
+        payload: { messages: [{ role: "user", content: command }] }
+      });
+      expect(confirmed.statusCode, confirmed.body).toBe(200);
+      expect(confirmed.json()).toMatchObject({ wrote: true, leftReview: true, proposal: { status: "applied" } });
+      expect(store.writeCount).toBe(writesBefore + 1);
+      expect(llm.calls).toHaveLength(modelCalls);
+      if (action === "skip") expect(confirmed.json().proposal.proposedFields.call_status).toBe("Skipped");
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("still returns a requested calendar draft without writing the Sheet", async () => {
+    const llm = new FakeLlmClient();
+    llm.enqueueJson(postCallOutput());
+    const { app, cookie, ctx, sessionId } = await startSession(llm);
+    try {
+      connectSession(ctx, sessionId);
+      await app.inject({ method: "POST", url: `/api/calls/${sessionId}/finalize`, headers: { cookie } });
+      const store = ctx.adapter?.store as MemorySheetStore;
+      const writesBefore = store.writeCount;
+      llm.enqueueJson({
+        message: "Here is the reminder draft for your approval.",
+        action: "none",
+        calendarProposal: {
+          intent: "reminder",
+          title: "Review the outline",
+          start: "2026-10-01T14:00:00Z",
+          end: "2026-10-01T14:15:00Z",
+          timezone: "UTC",
+          attendees: [],
+          meet: false
+        }
+      });
+      const drafted = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/review/interview`,
+        headers: { cookie },
+        payload: { messages: [{ role: "user", content: "Remind me to review the outline on October 1, 2026 at 14:00 UTC for 15 minutes. Do not write the Sheet." }] }
+      });
+      expect(drafted.statusCode, drafted.body).toBe(200);
+      expect(drafted.json()).toMatchObject({
+        wrote: false,
+        leftReview: false,
+        proposal: { status: "pending_review" },
+        calendarProposal: { intent: "reminder", status: "pending" }
+      });
+      expect(store.writeCount).toBe(writesBefore);
+    } finally {
+      await app.close();
+    }
   });
 
   it("preserves operator edits across a failed Sheet write and applies them on retry", async () => {

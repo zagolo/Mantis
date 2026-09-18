@@ -18,6 +18,8 @@
     "proxy:down": "docker compose --env-file .env -f infra/litellm/compose.yaml down",
     "proxy:login": "bash scripts/login-proxy.sh",
     "typecheck": "tsc --noEmit",
+    "skills:check": "tsx scripts/check-skills.ts",
+    "skills:eval": "tsx scripts/evaluate-skills.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "VITE_E2E=true vite build --outDir dist/e2e-client && playwright test",

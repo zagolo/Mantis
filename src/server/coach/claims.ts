@@ -8,9 +8,13 @@ export function cueClaimsApproved(cue: string, campaign: CampaignConfig): boolea
   if (!text) {
     return true;
   }
-  const lower = text.toLowerCase();
-  if (campaign.approved_claims.some((claim) => lower.includes(claim.text.toLowerCase()))) {
-    return true;
+  let remaining = text.toLowerCase();
+  // One approved statement must not authorize an extra invented promise in
+  // the same cue. Remove approved spans, then check the remaining language.
+  const approved = campaign.approved_claims.map(claim => claim.text.toLowerCase().trim())
+    .filter(Boolean).sort((a, b) => b.length - a.length);
+  for (const claim of approved) {
+    remaining = remaining.replaceAll(claim, "");
   }
-  return !INVENTION.test(text);
+  return !INVENTION.test(remaining);
 }

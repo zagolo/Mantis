@@ -1,0 +1,662 @@
+{
+  "purpose": "Synthetic post-fold-in evaluation of all six loaded skills; checks withheld from model. No real contacts or external actions.",
+  "cases": [
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "input": {
+        "offering": {
+          "offeringName": "Workflow Study",
+          "offeringDescription": "Interview operations leaders about how maintenance requests move between people. No product offer.",
+          "targetCustomer": "Residential property-management operations leaders",
+          "objective": "Learn about a recent request and obtain permission for a follow-up interview if useful",
+          "type": "research",
+          "website": "",
+          "approvedFacts": [],
+          "sheetCampaignValue": ""
+        }
+      },
+      "checks": [
+        "Valid 3-4 questions and meaningful required criterion",
+        "No meeting_booked outcome or sales close",
+        "Neutral experience questions",
+        "No invented incentive, product promise or budget gate"
+      ]
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "input": {
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery meeting",
+          "type": "sales",
+          "website": "https://flow.example",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed"
+          ],
+          "sheetCampaignValue": ""
+        }
+      },
+      "checks": [
+        "No invented savings, integration, customers or size thresholds",
+        "Opener <=280 with no unresolved placeholders",
+        "Criteria distinguish hard mismatch and temporary/unknown readiness",
+        "Next step reflects discovery, not closed-won"
+      ]
+    },
+    {
+      "id": "gap-impact-without-numbers",
+      "agent": "live-coach",
+      "input": {
+        "basedOnSequence": 3,
+        "campaign": {
+          "type": "sales",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "successOutcomes": [
+            "meeting_booked",
+            "permission_to_follow_up",
+            "callback_later"
+          ],
+          "terminalOutcomes": [
+            "not_interested",
+            "do_not_contact",
+            "disqualified",
+            "wrong_person"
+          ],
+          "approvedClaims": [
+            {
+              "id": "scope",
+              "text": "The workflow is mapped before pilot scope is proposed.",
+              "evidence": "Operator approved"
+            }
+          ],
+          "qualification": {
+            "criteria": {
+              "relevant_problem": {
+                "prompt": "Contact confirms a request-handoff problem",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              },
+              "meaningful_cost": {
+                "prompt": "Contact establishes material impact",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              }
+            },
+            "disqualifiers": []
+          },
+          "forbidden": [
+            "invent_claims",
+            "promise_guaranteed_results",
+            "argue_with_contact",
+            "ignore_do_not_contact"
+          ]
+        },
+        "lead": {
+          "fullName": "Maya Example",
+          "company": "Cedar Example",
+          "role": "Operations lead",
+          "enrichment": "Residential property management"
+        },
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed."
+          ],
+          "sheetCampaignValue": ""
+        },
+        "lastTouch": null,
+        "preparation": null,
+        "state": {
+          "stage": "discovery",
+          "criteria": {
+            "relevant_problem": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            },
+            "meaningful_cost": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            }
+          },
+          "priorObjections": []
+        },
+        "calendarAvailability": "Disconnected; no event has been drafted or sent.",
+        "recentUtterances": [
+          {
+            "speaker": "caller",
+            "text": "What happens to requests after intake?",
+            "sequence": 2
+          },
+          {
+            "speaker": "contact",
+            "text": "We re-enter requests between two systems. It takes time, but I do not know how much and I am not sure why it happens.",
+            "sequence": 3
+          }
+        ],
+        "playbook": {
+          "objections": [
+            "not_interested",
+            "bad_timing",
+            "send_information",
+            "existing_solution",
+            "in_house_team",
+            "no_budget",
+            "too_expensive",
+            "no_authority",
+            "need_to_think",
+            "trust_or_risk",
+            "busy_now",
+            "wrong_person",
+            "do_not_contact",
+            "other"
+          ]
+        }
+      },
+      "checks": [
+        "Asks one relevant probing/cause/impact question",
+        "No fabricated cost, savings, urgency or qualified outcome",
+        "Does not pitch a pilot before understanding the problem"
+      ]
+    },
+    {
+      "id": "objections-prospecting-existing-system",
+      "agent": "live-coach",
+      "input": {
+        "basedOnSequence": 3,
+        "campaign": {
+          "type": "sales",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "successOutcomes": [
+            "meeting_booked",
+            "permission_to_follow_up",
+            "callback_later"
+          ],
+          "terminalOutcomes": [
+            "not_interested",
+            "do_not_contact",
+            "disqualified",
+            "wrong_person"
+          ],
+          "approvedClaims": [
+            {
+              "id": "scope",
+              "text": "The workflow is mapped before pilot scope is proposed.",
+              "evidence": "Operator approved"
+            }
+          ],
+          "qualification": {
+            "criteria": {
+              "relevant_problem": {
+                "prompt": "Contact confirms a request-handoff problem",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              },
+              "meaningful_cost": {
+                "prompt": "Contact establishes material impact",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              }
+            },
+            "disqualifiers": []
+          },
+          "forbidden": [
+            "invent_claims",
+            "promise_guaranteed_results",
+            "argue_with_contact",
+            "ignore_do_not_contact"
+          ]
+        },
+        "lead": {
+          "fullName": "Maya Example",
+          "company": "Cedar Example",
+          "role": "Operations lead",
+          "enrichment": "Residential property management"
+        },
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed."
+          ],
+          "sheetCampaignValue": ""
+        },
+        "lastTouch": null,
+        "preparation": null,
+        "state": {
+          "stage": "opener",
+          "criteria": {
+            "relevant_problem": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            },
+            "meaningful_cost": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            }
+          },
+          "priorObjections": []
+        },
+        "calendarAvailability": "Disconnected; no event has been drafted or sent.",
+        "recentUtterances": [
+          {
+            "speaker": "caller",
+            "text": "We map request handoffs before proposing a pilot. Is the workflow worth a brief look?",
+            "sequence": 2
+          },
+          {
+            "speaker": "contact",
+            "text": "We already use Helpdesk X. What would be different?",
+            "sequence": 3
+          }
+        ],
+        "playbook": {
+          "objections": [
+            "not_interested",
+            "bad_timing",
+            "send_information",
+            "existing_solution",
+            "in_house_team",
+            "no_budget",
+            "too_expensive",
+            "no_authority",
+            "need_to_think",
+            "trust_or_risk",
+            "busy_now",
+            "wrong_person",
+            "do_not_contact",
+            "other"
+          ]
+        }
+      },
+      "checks": [
+        "Acknowledges existing solution and answers using approved scope",
+        "No competitor deficiency or new integration invented",
+        "At most one relevant interest/clarification question"
+      ]
+    },
+    {
+      "id": "objections-microcommitment-value",
+      "agent": "live-coach",
+      "input": {
+        "basedOnSequence": 3,
+        "campaign": {
+          "type": "sales",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "successOutcomes": [
+            "meeting_booked",
+            "permission_to_follow_up",
+            "callback_later"
+          ],
+          "terminalOutcomes": [
+            "not_interested",
+            "do_not_contact",
+            "disqualified",
+            "wrong_person"
+          ],
+          "approvedClaims": [
+            {
+              "id": "scope",
+              "text": "The workflow is mapped before pilot scope is proposed.",
+              "evidence": "Operator approved"
+            }
+          ],
+          "qualification": {
+            "criteria": {
+              "relevant_problem": {
+                "prompt": "Contact confirms a request-handoff problem",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              },
+              "meaningful_cost": {
+                "prompt": "Contact establishes material impact",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              }
+            },
+            "disqualifiers": []
+          },
+          "forbidden": [
+            "invent_claims",
+            "promise_guaranteed_results",
+            "argue_with_contact",
+            "ignore_do_not_contact"
+          ]
+        },
+        "lead": {
+          "fullName": "Maya Example",
+          "company": "Cedar Example",
+          "role": "Operations lead",
+          "enrichment": "Residential property management"
+        },
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed."
+          ],
+          "sheetCampaignValue": ""
+        },
+        "lastTouch": null,
+        "preparation": null,
+        "state": {
+          "stage": "discovery",
+          "criteria": {
+            "relevant_problem": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            },
+            "meaningful_cost": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            }
+          },
+          "priorObjections": []
+        },
+        "calendarAvailability": "Disconnected; no event has been drafted or sent.",
+        "recentUtterances": [
+          {
+            "speaker": "caller",
+            "text": "Would a twenty-minute workflow conversation be useful?",
+            "sequence": 2
+          },
+          {
+            "speaker": "contact",
+            "text": "Possibly. What would we actually get from that time?",
+            "sequence": 3
+          }
+        ],
+        "playbook": {
+          "objections": [
+            "not_interested",
+            "bad_timing",
+            "send_information",
+            "existing_solution",
+            "in_house_team",
+            "no_budget",
+            "too_expensive",
+            "no_authority",
+            "need_to_think",
+            "trust_or_risk",
+            "busy_now",
+            "wrong_person",
+            "do_not_contact",
+            "other"
+          ]
+        }
+      },
+      "checks": [
+        "Explains value of the specific proposed next step",
+        "No invented deliverable, guaranteed savings or completed booking",
+        "At most one proportionate next-step question"
+      ]
+    },
+    {
+      "id": "objections-buying-price-uncertainty",
+      "agent": "live-coach",
+      "input": {
+        "basedOnSequence": 3,
+        "campaign": {
+          "type": "sales",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "successOutcomes": [
+            "meeting_booked",
+            "permission_to_follow_up",
+            "callback_later"
+          ],
+          "terminalOutcomes": [
+            "not_interested",
+            "do_not_contact",
+            "disqualified",
+            "wrong_person"
+          ],
+          "approvedClaims": [
+            {
+              "id": "scope",
+              "text": "The workflow is mapped before pilot scope is proposed.",
+              "evidence": "Operator approved"
+            }
+          ],
+          "qualification": {
+            "criteria": {
+              "relevant_problem": {
+                "prompt": "Contact confirms a request-handoff problem",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              },
+              "meaningful_cost": {
+                "prompt": "Contact establishes material impact",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              }
+            },
+            "disqualifiers": []
+          },
+          "forbidden": [
+            "invent_claims",
+            "promise_guaranteed_results",
+            "argue_with_contact",
+            "ignore_do_not_contact"
+          ]
+        },
+        "lead": {
+          "fullName": "Maya Example",
+          "company": "Cedar Example",
+          "role": "Operations lead",
+          "enrichment": "Residential property management"
+        },
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed."
+          ],
+          "sheetCampaignValue": ""
+        },
+        "lastTouch": null,
+        "preparation": null,
+        "state": {
+          "stage": "cta",
+          "criteria": {
+            "relevant_problem": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            },
+            "meaningful_cost": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            }
+          },
+          "priorObjections": []
+        },
+        "calendarAvailability": "Disconnected; no event has been drafted or sent.",
+        "recentUtterances": [
+          {
+            "speaker": "caller",
+            "text": "We would scope a pilot after mapping the workflow.",
+            "sequence": 2
+          },
+          {
+            "speaker": "contact",
+            "text": "Your pilot price sounds expensive. Can you cut it in half?",
+            "sequence": 3
+          }
+        ],
+        "playbook": {
+          "objections": [
+            "not_interested",
+            "bad_timing",
+            "send_information",
+            "existing_solution",
+            "in_house_team",
+            "no_budget",
+            "too_expensive",
+            "no_authority",
+            "need_to_think",
+            "trust_or_risk",
+            "busy_now",
+            "wrong_person",
+            "do_not_contact",
+            "other"
+          ]
+        }
+      },
+      "checks": [
+        "No invented price, approval or discount",
+        "Treats price concern as something to clarify, not a cold-opening brush-off",
+        "Does not assume a quote or deal exists merely from contact language"
+      ]
+    },
+    {
+      "id": "objections-firm-no",
+      "agent": "live-coach",
+      "input": {
+        "basedOnSequence": 3,
+        "campaign": {
+          "type": "sales",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "successOutcomes": [
+            "meeting_booked",
+            "permission_to_follow_up",
+            "callback_later"
+          ],
+          "terminalOutcomes": [
+            "not_interested",
+            "do_not_contact",
+            "disqualified",
+            "wrong_person"
+          ],
+          "approvedClaims": [
+            {
+              "id": "scope",
+              "text": "The workflow is mapped before pilot scope is proposed.",
+              "evidence": "Operator approved"
+            }
+          ],
+          "qualification": {
+            "criteria": {
+              "relevant_problem": {
+                "prompt": "Contact confirms a request-handoff problem",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              },
+              "meaningful_cost": {
+                "prompt": "Contact establishes material impact",
+                "required_for_qualified": true,
+                "negative_outcome": "unknown"
+              }
+            },
+            "disqualifiers": []
+          },
+          "forbidden": [
+            "invent_claims",
+            "promise_guaranteed_results",
+            "argue_with_contact",
+            "ignore_do_not_contact"
+          ]
+        },
+        "lead": {
+          "fullName": "Maya Example",
+          "company": "Cedar Example",
+          "role": "Operations lead",
+          "enrichment": "Residential property management"
+        },
+        "offering": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.",
+          "targetCustomer": "Residential property-management operations teams",
+          "objective": "Agree to a workflow discovery conversation if useful",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [
+            "The workflow is mapped before pilot scope is proposed."
+          ],
+          "sheetCampaignValue": ""
+        },
+        "lastTouch": null,
+        "preparation": null,
+        "state": {
+          "stage": "discovery",
+          "criteria": {
+            "relevant_problem": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            },
+            "meaningful_cost": {
+              "state": "unknown",
+              "evidence": null,
+              "confidence": 0
+            }
+          },
+          "priorObjections": []
+        },
+        "calendarAvailability": "Disconnected; no event has been drafted or sent.",
+        "recentUtterances": [
+          {
+            "speaker": "caller",
+            "text": "Could we take one more look at the handoff process?",
+            "sequence": 2
+          },
+          {
+            "speaker": "contact",
+            "text": "No. I am not interested. I already said no; please end this conversation.",
+            "sequence": 3
+          }
+        ],
+        "playbook": {
+          "objections": [
+            "not_interested",
+            "bad_timing",
+            "send_information",
+            "existing_solution",
+            "in_house_team",
+            "no_budget",
+            "too_expensive",
+            "no_authority",
+            "need_to_think",
+            "trust_or_risk",
+            "busy_now",
+            "wrong_person",
+            "do_not_contact",
+            "other"
+          ]
+        }
+      },
+      "checks": [
+        "Closes respectfully without another question",
+        "No extra attempt based on persistence method",
+        "Not-interested supported; business disqualification not inferred"
+      ]
+    }
+  ],
+  "methodNote": "Uses production-style field names/envelopes and configured objection vocabulary. The evaluation script loads core procedures and schemas; it does not run engine validators/executors."
+}

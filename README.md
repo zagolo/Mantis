@@ -146,14 +146,22 @@ When `LLM_BASE_URL` points to `api.openai.com`, web research reuses that key and
 
 The AI capabilities are eve-framework agents under `agents/` — one directory per agent with `agent.ts`, `instructions.md`, and optional `skills/` packs (eve: skills are scoped to the agent that declares them):
 
-- `live-coach` — Farrokh + Blount (`skills/`); live cues also load `config/playbooks/cold-calling.yaml`
-- `post-call` — Sobczak + Blount cheatsheets
-- `campaign-generation` — Weinberg + Sobczak
-- `campaign-interview` — Weinberg
-- `prospect-research` — Farrokh + Sobczak
-- `call-review` — instructions only
+- `live-coach` — one compiled `live-cold-call-coach` selected in `skills.json`; live cues also load `config/playbooks/cold-calling.yaml`
+- `post-call` — `mantis-post-call-evidence`: grounded transcript extraction
+- `campaign-generation` — `mantis-campaign-strategy`: combined targeting, story and qualification method
+- `campaign-interview` — `mantis-campaign-intake`: offering inputs and readiness
+- `prospect-research` — one compiled `prospect-research-playbook` selected in `skills.json`
+- `call-review` — `mantis-call-review`: proposal edits, approval and action state
 
-Do not paste book chapters into prompts. The loader advertises each pack’s description and preloads `cheatsheet.md` only. Live coach turns stay scannable (prefer one sentence, cap 400 characters). `src/server/agents/loader.ts` renders the system prompt; the existing OpenAI-compatible transport executes single structured turns. The full eve runtime (durable sessions, AI Gateway) is intentionally not used. Edit `instructions.md` for identity; edit a cheatsheet for procedure. Contracts live in the zod schemas referenced by `agent.ts`. `tests/unit/agents.test.ts` guards both.
+Do not paste book chapters into prompts. The loader advertises each selected pack’s description and preloads `cheatsheet.md` only. All six deployed agents must select one compiled pack in `skills.json`; application startup validates them before opening the database. Original author packs remain inactive references. The lower-level loader retains directory discovery for legacy callers, but the six-role application requires explicit selection. Missing or empty selected procedures fail visibly. Live coach turns stay scannable (prefer one sentence, cap 400 characters). `src/server/agents/loader.ts` renders the system prompt; the existing OpenAI-compatible transport executes single structured turns. The full eve runtime (durable sessions, AI Gateway) is intentionally not used. Edit `instructions.md` for identity; edit a cheatsheet for procedure. Changes to the rendered research prompt/schema invalidate old prospect briefs while raw web evidence retains its own cache. Contracts live in the zod schemas referenced by `agent.ts`.
+
+See the [sales resource guide](docs/sales-playbooks/resource-guide.md) for the two five-book curricula, verified articles/video transcripts and actual source coverage. All seven unique core books have now been supplied and their relevant methods folded into the compiled skills. Source notes distinguish full-text extraction, targeted reading and public material.
+
+Run `npm run skills:check` for an offline deployment check. `tests/integration/skill-invocation.test.ts` verifies that each real service path sends its selected procedure to the LLM boundary. To run synthetic scenarios against the configured model, use `npm run skills:eval -- --live docs/sales-playbooks/book-foldin-cases.json .firecrawl/skill-evaluation.json`; this uses model credits and requires behavioral review of the saved output. It does not call prospects or perform CRM/calendar actions.
+
+The [agent inventory](agents/README.md) lists all six role skills. The [Mantis integration plan](docs/sales-playbooks/mantis-integration.md) records the upstream comparison, completed source integration and files that must accompany any future publication.
+
+See [skill readiness](docs/sales-playbooks/skill-readiness.md) for the final software checks, recorded model failures and reruns, local model settings, and remaining call-rehearsal requirements.
 
 ## Tunnel / `APP_BASE_URL`
 

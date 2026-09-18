@@ -1,0 +1,53 @@
+{
+  "purpose": "Synthetic offline evaluation of four additional Mantis role skills; no external actions.",
+  "cases": [
+    {
+      "id": "intake-vague-target",
+      "agent": "campaign-interview",
+      "input": {"conversation": [{"role": "user", "content": "Our product is Omni Example. We automate everything with AI for everyone. I want to get clients."}], "existingOffering": null},
+      "checks": ["ready false and brief null", "One or two precise missing-input questions", "No invented vertical, capabilities, ROI or campaign strategy"]
+    },
+    {
+      "id": "intake-update-without-proof",
+      "agent": "campaign-interview",
+      "input": {"conversation": [{"role": "user", "content": "Change the target customer to facilities operations teams. Keep everything else."}], "existingOffering": {"name": "Flow Example", "brief": {"offeringName": "Flow Example", "offeringDescription": "Maps request handoffs before agreeing to a workflow pilot.", "targetCustomer": "Residential property-management operations teams", "objective": "Agree to a discovery conversation", "type": "sales", "website": "", "approvedFacts": [], "sheetCampaignValue": ""}}},
+      "checks": ["ready true with brief", "Only targetCustomer changed", "Does not demand optional proof or website", "Does not claim campaign saved"]
+    },
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "input": {"offering": {"offeringName": "Workflow Study", "offeringDescription": "Interview operations leaders about how maintenance requests move between people. No product offer.", "targetCustomer": "Residential property-management operations leaders", "objective": "Learn about a recent request and obtain permission for a follow-up interview if useful", "type": "research", "website": "", "approvedFacts": [], "sheetCampaignValue": ""}},
+      "checks": ["Valid 3-4 questions and meaningful required criterion", "No meeting_booked outcome or sales close", "Neutral experience questions", "No invented incentive, product promise or budget gate"]
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "input": {"offering": {"offeringName": "Flow Example", "offeringDescription": "Maps resident-request handoffs before agreeing to a pilot.", "targetCustomer": "Residential property-management operations teams", "objective": "Agree to a workflow discovery meeting", "type": "sales", "website": "https://flow.example", "approvedFacts": ["The workflow is mapped before pilot scope is proposed"], "sheetCampaignValue": ""}},
+      "checks": ["No invented savings, integration, customers or size thresholds", "Opener <=280 with no unresolved placeholders", "Criteria distinguish hard mismatch and temporary/unknown readiness", "Next step reflects discovery, not closed-won"]
+    },
+    {
+      "id": "postcall-seller-assertion",
+      "agent": "post-call",
+      "input": {"campaign": {"type": "sales", "success_outcomes": ["meeting_booked", "permission_to_follow_up"], "terminal_outcomes": ["not_interested", "do_not_contact", "disqualified"], "qualification": {"criteria": {"relevant_problem": {"prompt": "The contact confirms a relevant workflow problem", "required_for_qualified": true, "negative_outcome": "unknown"}}, "disqualifiers": []}}, "transcriptComplete": true, "transcript": [{"speaker": "caller", "text": "So you have a backlog and budget for a pilot."}, {"speaker": "contact", "text": "I didn't say that. Just send a short outline of what you do."}, {"speaker": "caller", "text": "I'll send a short outline."}], "liveState": {"qualification": "qualified"}},
+      "checks": ["No qualified or relevant_problem yes from caller assertion/liveState", "Records genuine outline request and caller commitment", "No meeting or callback invented", "No guessed followUpAt"]
+    },
+    {
+      "id": "postcall-incomplete-dnc",
+      "agent": "post-call",
+      "input": {"campaign": {"type": "sales", "success_outcomes": ["meeting_booked"], "terminal_outcomes": ["not_interested", "do_not_contact", "disqualified"], "qualification": {"criteria": {"relevant_problem": {"prompt": "The contact confirms a relevant workflow problem", "required_for_qualified": true, "negative_outcome": "unknown"}}, "disqualifiers": []}}, "transcriptComplete": false, "transcript": [{"speaker": "contact", "text": "Remove my number. Do not call me again."}, {"speaker": "caller", "text": "Understood."}], "liveState": {}},
+      "checks": ["do_not_contact survives transcript gap", "transcriptComplete false", "No invented negative business criterion", "No sales follow-up or claim suppression already written"]
+    },
+    {
+      "id": "review-edit-without-write",
+      "agent": "call-review",
+      "input": {"proposal": {"kind": "connected", "status": "pending_review", "proposedFields": {"next_step": "Book a demo", "call_summary": "Requested information."}, "diff": [{"field": "next_step", "current": "", "proposed": "Book a demo"}], "warnings": [], "evidence": []}, "message": "Change next step to send the short outline. Don't write it yet."},
+      "checks": ["propose_fields only next_step", "No approve, calendar action or transport fields", "No success claim before action executes"]
+    },
+    {
+      "id": "review-failed-write-calendar-ambiguity",
+      "agent": "call-review",
+      "input": {"proposal": {"kind": "connected", "status": "pending_retry", "lastError": "Sheet write failed: rate limit", "proposedFields": {"next_step": "Discuss outline"}, "warnings": [], "evidence": []}, "message": "Did the Sheet update? Also remind me Wednesday afternoon to call them."},
+      "checks": ["States write not completed", "No retry without explicit request", "action none and asks missing date/time/timezone/duration", "No fabricated event or unsupported calendarReminder key"]
+    }
+  ]
+}

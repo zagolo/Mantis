@@ -84,7 +84,7 @@ export async function registerReviewApi(app: FastifyInstance, ctx: AppContext): 
     const intent = resolveReviewTurn(parsed.data.messages, proposal);
     if (intent) {
       try {
-        return await applyReviewInterviewAction(ctx, proposal, intent.action, intent.fields, intent.message);
+        return await applyReviewInterviewAction(ctx, proposal, intent.action, intent.fields, intent.message, undefined, "operator");
       } catch (error) {
         return sendReviewError(reply, error);
       }

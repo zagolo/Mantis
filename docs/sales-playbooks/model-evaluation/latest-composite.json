@@ -1,0 +1,557 @@
+{
+  "method": "Composite of the latest unedited response for each of 15 synthetic cases, across four explicitly recorded Luna batches. This is not one clean run or a controlled model comparison. See README.md for failures and limits.",
+  "model": "gpt-5.6-luna",
+  "apiMode": "responses",
+  "fixtureHash": "88c3f24d46d3d68835cd0e3706b1bbbcaa1b3ec528a0704da820ff9df8ceec68",
+  "cases": [
+    {
+      "id": "intake-vague-target",
+      "agent": "campaign-interview",
+      "fingerprint": "e305dff2af208bc372c781970a4bf0fad3f4bac26ceadd3c4a985f8627e38bc9",
+      "elapsedMs": 2344,
+      "schemaValid": true,
+      "output": {
+        "message": "What specific workflow does Omni Example automate, and what problem does it solve? Also, who is the first buyer or customer segment you want to reach, and what should they agree to after the call?",
+        "ready": false,
+        "brief": null
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-first.json"
+    },
+    {
+      "id": "intake-update-without-proof",
+      "agent": "campaign-interview",
+      "fingerprint": "e305dff2af208bc372c781970a4bf0fad3f4bac26ceadd3c4a985f8627e38bc9",
+      "elapsedMs": 2301,
+      "schemaValid": true,
+      "output": {
+        "message": "Updated the target customer to facilities operations teams; everything else is unchanged.",
+        "ready": true,
+        "brief": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps request handoffs before agreeing to a workflow pilot.",
+          "targetCustomer": "Facilities operations teams",
+          "objective": "Agree to a discovery conversation",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [],
+          "sheetCampaignValue": ""
+        }
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-first.json"
+    },
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "fingerprint": "f544c816a4a75580fce193dda2066ef4fc2d5139bcbbb4d5e1fd76f11cef3f24",
+      "elapsedMs": 7071,
+      "schemaValid": true,
+      "output": {
+        "name": "Maintenance Request Workflow Study",
+        "positioning": "A brief research conversation with residential property-management operations leaders about how a recent maintenance request moved between people. The goal is to learn about the workflow, not offer a product, and ask permission for a follow-up interview if useful.",
+        "opening": "Hi, I\u2019m conducting a brief study with residential property-management operations leaders about how maintenance requests move between people. Could I ask about a recent request?",
+        "questions": [
+          {
+            "id": "recent_request",
+            "prompt": "Could you walk me through a recent maintenance request from start to finish?",
+            "purpose": "Understand the workflow",
+            "required": true
+          },
+          {
+            "id": "handoffs",
+            "prompt": "Who handled the request at each stage, and how was it passed along?",
+            "purpose": "Identify people and handoffs",
+            "required": false
+          },
+          {
+            "id": "friction_points",
+            "prompt": "Where, if anywhere, did the request become difficult to track or move forward?",
+            "purpose": "Explore workflow friction",
+            "required": false
+          },
+          {
+            "id": "follow_up_permission",
+            "prompt": "Would a follow-up interview about this workflow be useful if there are open questions?",
+            "purpose": "Test permission for follow-up",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "target_role",
+            "prompt": "The participant is a residential property-management operations leader involved in how maintenance requests move between people.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "recent_example_available",
+            "prompt": "The participant can discuss at least one recent maintenance request and its path between people.",
+            "required": true,
+            "onNo": "defer"
+          },
+          {
+            "id": "workflow_relevance",
+            "prompt": "The participant has direct knowledge of the people or process involved in handling maintenance requests.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "follow_up_permission",
+            "prompt": "The participant is open to considering a follow-up interview if additional discussion would be useful.",
+            "required": false,
+            "onNo": "unknown"
+          }
+        ],
+        "disqualifiers": [
+          "The person is not a residential property-management operations leader."
+        ],
+        "objections": [
+          {
+            "objection": "I\u2019m busy.",
+            "response": "Understood. Is there a better time to ask about one recent maintenance request?"
+          },
+          {
+            "objection": "We don\u2019t participate in studies.",
+            "response": "Understood. Thanks for letting me know."
+          },
+          {
+            "objection": "What is this for?",
+            "response": "It is research on how maintenance requests move between people, with no product offer."
+          }
+        ],
+        "nextStep": "Ask permission to follow up for a separate interview if the workflow discussion leaves useful questions.",
+        "successOutcomes": [
+          "permission_to_follow_up",
+          "callback_later",
+          "reference_received"
+        ]
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-strategy-rerun.json"
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "fingerprint": "f544c816a4a75580fce193dda2066ef4fc2d5139bcbbb4d5e1fd76f11cef3f24",
+      "elapsedMs": 11076,
+      "schemaValid": true,
+      "output": {
+        "name": "Resident-Request Handoff Discovery",
+        "positioning": "Residential property-management operations teams may find resident-request handoffs difficult to see across their workflow, which could make it harder to understand where requests move or stall. Flow Example maps those handoffs before pilot scope is proposed, creating a shared workflow view before deciding what a pilot should include.",
+        "opening": "Hi, I\u2019m calling because resident-request handoffs can sometimes be difficult to see across property-management operations. We map them before a pilot is scoped\u2014could I ask how you handle them today?",
+        "questions": [
+          {
+            "id": "current_handoff_process",
+            "prompt": "How do resident requests move between teams today?",
+            "purpose": "Understand the current workflow",
+            "required": true
+          },
+          {
+            "id": "handoff_visibility",
+            "prompt": "Where, if anywhere, are those handoffs difficult to see or explain?",
+            "purpose": "Surface possible workflow friction",
+            "required": false
+          },
+          {
+            "id": "business_impact",
+            "prompt": "When a handoff is unclear, what effect does that have on the workflow, if any?",
+            "purpose": "Explore potential impact",
+            "required": false
+          },
+          {
+            "id": "discovery_relevance",
+            "prompt": "Would mapping that workflow before discussing pilot scope be useful?",
+            "purpose": "Test relevance and interest",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "target_operations_team",
+            "prompt": "The contact is part of a residential property-management operations team or directly responsible for its resident-request workflows.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "resident_request_handoffs_relevant",
+            "prompt": "Resident-request handoffs are a relevant workflow area for the team.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "workflow_discovery_interest",
+            "prompt": "The contact is willing to discuss how resident-request handoffs work today.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "meeting_value",
+            "prompt": "A workflow discovery meeting could be useful before pilot scope is proposed.",
+            "required": false,
+            "onNo": "unknown"
+          }
+        ],
+        "disqualifiers": [
+          "The contact is not part of, and does not support, a residential property-management operations team.",
+          "The contact declines further outreach or asks not to be contacted."
+        ],
+        "objections": [
+          {
+            "objection": "We already have a process",
+            "response": "That makes sense. How do you currently make the handoffs visible before defining pilot scope?"
+          },
+          {
+            "objection": "Send me information",
+            "response": "Happy to. Which part of your resident-request handoffs would be most useful to address?"
+          },
+          {
+            "objection": "I\u2019m too busy",
+            "response": "Understood. Would a later callback be more suitable for a brief workflow discussion?"
+          }
+        ],
+        "nextStep": "If relevant, agree on a workflow discovery meeting to map current resident-request handoffs before discussing pilot scope.",
+        "successOutcomes": [
+          "meeting_booked",
+          "permission_to_follow_up",
+          "callback_later"
+        ]
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-strategy-rerun.json"
+    },
+    {
+      "id": "postcall-seller-assertion",
+      "agent": "post-call",
+      "fingerprint": "2233f55ffd279778d37365322f21aa5db53c0ca5b564022cbba748083ff1529f",
+      "elapsedMs": 4815,
+      "schemaValid": true,
+      "output": {
+        "semanticOutcome": "permission_to_follow_up",
+        "qualification": "unknown",
+        "qualificationReason": "The contact did not confirm a relevant workflow problem; they corrected the caller's assertion and requested a short outline instead.",
+        "criteria": {
+          "relevant_problem": {
+            "state": "unknown",
+            "evidence": null,
+            "confidence": 0
+          }
+        },
+        "painOrResearchFindings": [],
+        "objections": [],
+        "nextStep": "Caller to send a short outline of what they do, as requested by the contact.",
+        "followUpAt": null,
+        "summary": "The contact said, \"I didn't say that\" in response to the caller's backlog and budget assertion, then requested, \"Just send a short outline of what you do.\" The caller committed to sending it. No business problem was confirmed.",
+        "callerCommitments": [
+          "\"I'll send a short outline.\""
+        ],
+        "contactCommitments": [],
+        "transcriptComplete": true,
+        "confidence": 0.96
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-affected-rerun.json"
+    },
+    {
+      "id": "postcall-incomplete-dnc",
+      "agent": "post-call",
+      "fingerprint": "2233f55ffd279778d37365322f21aa5db53c0ca5b564022cbba748083ff1529f",
+      "elapsedMs": 3418,
+      "schemaValid": true,
+      "output": {
+        "semanticOutcome": "do_not_contact",
+        "qualification": "disqualified",
+        "qualificationReason": "The contact explicitly requested removal and no further calls; business qualification remains unassessed.",
+        "criteria": {
+          "relevant_problem": {
+            "state": "unknown",
+            "evidence": null,
+            "confidence": 0
+          }
+        },
+        "painOrResearchFindings": [],
+        "objections": [],
+        "nextStep": "No sales follow-up; honor the contact's request: \"Remove my number. Do not call me again.\"",
+        "followUpAt": null,
+        "summary": "The contact requested removal of their number and explicitly said not to be called again. The caller acknowledged the request. No business qualification evidence was obtained.",
+        "callerCommitments": [],
+        "contactCommitments": [],
+        "transcriptComplete": false,
+        "confidence": 0.98
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-affected-rerun.json"
+    },
+    {
+      "id": "review-edit-without-write",
+      "agent": "call-review",
+      "fingerprint": "b7c0e69ae418271468e46127c531395d2a57ebbe05c24f9053bacac1b6b00deb",
+      "elapsedMs": 2273,
+      "schemaValid": true,
+      "output": {
+        "message": "I\u2019ll update the draft next step from \u201cBook a demo\u201d to \u201csend the short outline.\u201d I won\u2019t write it to the Sheet yet.",
+        "action": "propose_fields",
+        "fields": {
+          "next_step": "send the short outline"
+        }
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-affected-rerun.json"
+    },
+    {
+      "id": "review-failed-write-calendar-ambiguity",
+      "agent": "call-review",
+      "fingerprint": "b7c0e69ae418271468e46127c531395d2a57ebbe05c24f9053bacac1b6b00deb",
+      "elapsedMs": 3031,
+      "schemaValid": true,
+      "output": {
+        "message": "The Sheet update did not complete; it is still pending_retry because of a rate-limit failure. The saved proposal is next_step: \u201cDiscuss outline.\u201d To retry it, say \u201cRetry the Sheet write.\u201d For the reminder, please provide the specific Wednesday date, time, duration, and timezone.",
+        "action": "none"
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-affected-rerun.json"
+    },
+    {
+      "id": "richter-industry-is-not-company",
+      "agent": "prospect-research",
+      "fingerprint": "6b2eafdb7f41b876d7bb9444a2100c925b6e9e2529a494caaaa3794e4234123f",
+      "elapsedMs": 5930,
+      "schemaValid": true,
+      "output": {
+        "company": [
+          {
+            "text": "Cedar Example says it manages residential properties in Austin.",
+            "sourceIds": [
+              "source_1"
+            ]
+          }
+        ],
+        "prospect": [],
+        "hypotheses": [
+          "Resident requests may involve unclear routing or handoffs between teams.",
+          "An operations workflow discovery may reveal whether handoffs are slowing response work."
+        ],
+        "unknowns": [
+          "Maya\u2019s identity and current role are not web-verified.",
+          "Current request-routing workflow is unknown.",
+          "Impact, authority, and pilot interest are unknown."
+        ],
+        "relevance": "Cedar Example\u2019s residential-property operations may involve resident-request handoffs; the call can test whether mapping that workflow would be useful.",
+        "opening": "Maya, I\u2019m calling because Cedar Example manages residential properties in Austin, and we map resident-request handoffs before discussing a pilot. Could I ask how requests are routed today?",
+        "questions": [
+          {
+            "id": "routing_workflow",
+            "prompt": "How are resident requests routed and handed off today?",
+            "purpose": "Test the workflow hypothesis",
+            "required": true
+          },
+          {
+            "id": "handoff_friction",
+            "prompt": "Where, if anywhere, do those handoffs become difficult to track or coordinate?",
+            "purpose": "Explore possible friction",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "We already have a process.",
+            "response": "That makes sense. Would it be useful to briefly check whether the handoffs are clear across teams?"
+          },
+          {
+            "objection": "Not interested in a pilot.",
+            "response": "Understood\u2014I\u2019m not proposing scope now. Would a short workflow discussion still be useful?"
+          }
+        ],
+        "nextStep": "If routing or handoffs are worth examining, agree on a brief workflow discovery conversation; otherwise close respectfully."
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-first.json"
+    },
+    {
+      "id": "richter-stale-identity",
+      "agent": "prospect-research",
+      "fingerprint": "6b2eafdb7f41b876d7bb9444a2100c925b6e9e2529a494caaaa3794e4234123f",
+      "elapsedMs": 10290,
+      "schemaValid": true,
+      "output": {
+        "company": [
+          {
+            "text": "Cedar Example's current team page lists a different operations leader and does not list Morgan Lee.",
+            "sourceIds": [
+              "source_2"
+            ]
+          }
+        ],
+        "prospect": [],
+        "hypotheses": [
+          "Resident-request handoffs may cross teams or systems before resolution.",
+          "Operations may benefit from mapping the workflow before considering a pilot."
+        ],
+        "unknowns": [
+          "Whether Morgan Lee is currently at Cedar Example",
+          "Whether Morgan owns resident-request operations",
+          "Current handoff process and pain points",
+          "Budget and decision authority"
+        ],
+        "relevance": "The account appears relevant to residential property-management operations, but the contact and role match are unresolved. Verify identity and workflow ownership first.",
+        "opening": "Hi, is this Morgan Lee at Cedar Example? I\u2019m calling about mapping resident-request handoffs before any pilot scope. I couldn\u2019t verify your current operations role\u2014would it be okay to check whether you own that workflow?",
+        "questions": [
+          {
+            "id": "verify_role",
+            "prompt": "Are you currently with Cedar Example, and do you own resident-request operations?",
+            "purpose": "Verify identity and workflow ownership",
+            "required": true
+          },
+          {
+            "id": "map_handoffs",
+            "prompt": "Where do resident requests most often change hands today?",
+            "purpose": "Test the workflow hypothesis",
+            "required": false
+          },
+          {
+            "id": "assess_value",
+            "prompt": "What would make mapping that workflow worth a discovery conversation?",
+            "purpose": "Test potential value",
+            "required": false
+          }
+        ],
+        "objections": [
+          {
+            "objection": "I\u2019m not the right person.",
+            "response": "Understood. Who owns resident-request handoffs, or should I close the loop here?"
+          },
+          {
+            "objection": "We\u2019re not considering a pilot.",
+            "response": "That\u2019s fair\u2014I\u2019m not proposing one now. I\u2019m only checking whether the workflow merits a conversation first."
+          }
+        ],
+        "nextStep": "If Morgan confirms the identity and owns the workflow, agree on a brief discovery conversation; otherwise route or close the record."
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-first.json"
+    },
+    {
+      "id": "gap-impact-without-numbers",
+      "agent": "live-coach",
+      "fingerprint": "6b59486b0b84793f2b5ad9346759ffb82c0761550f195f973d68e8d2a4e68dd2",
+      "elapsedMs": 3746,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "discovery",
+        "shouldShow": true,
+        "cueType": "question",
+        "cue": "When that re-entry happens, what does it affect downstream\u2014response time, staff capacity, or something else?",
+        "reason": "They confirmed a handoff issue but not its business impact; explore the consequence without assuming the cause or magnitude.",
+        "detectedObjection": null,
+        "qualificationUpdates": [
+          {
+            "criterion": "relevant_problem",
+            "state": "yes",
+            "evidence": "We re-enter requests between two systems.",
+            "confidence": 0.98
+          }
+        ],
+        "recommendedOutcome": null,
+        "confidence": 0.97,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-script-rerun.json"
+    },
+    {
+      "id": "objections-prospecting-existing-system",
+      "agent": "live-coach",
+      "fingerprint": "6b59486b0b84793f2b5ad9346759ffb82c0761550f195f973d68e8d2a4e68dd2",
+      "elapsedMs": 6450,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "objection",
+        "shouldShow": true,
+        "cueType": "question",
+        "cue": "The difference is our focus: mapping the handoffs in your request workflow before a pilot is proposed, rather than assuming the current setup needs replacing. Where, if anywhere, do handoffs get difficult?",
+        "say": "The difference is our focus: mapping the handoffs in your request workflow before a pilot is proposed, rather than assuming the current setup needs replacing. Where, if anywhere, do handoffs get difficult?",
+        "reason": "Answer the existing-solution question directly, then test whether a relevant handoff problem exists.",
+        "detectedObjection": "existing_solution",
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.97,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-script-rerun.json"
+    },
+    {
+      "id": "objections-microcommitment-value",
+      "agent": "live-coach",
+      "fingerprint": "6b59486b0b84793f2b5ad9346759ffb82c0761550f195f973d68e8d2a4e68dd2",
+      "elapsedMs": 4087,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "value_proposition",
+        "shouldShow": true,
+        "cueType": "cta",
+        "cue": "The purpose is to understand how resident requests move between teams, identify whether the handoffs need attention, and decide whether a deeper workflow mapping is worthwhile; would that be useful?",
+        "reason": "Answer the value question directly, without promising outcomes, then ask one relevance question.",
+        "detectedObjection": null,
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.96,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-script-rerun.json"
+    },
+    {
+      "id": "objections-buying-price-uncertainty",
+      "agent": "live-coach",
+      "fingerprint": "6b59486b0b84793f2b5ad9346759ffb82c0761550f195f973d68e8d2a4e68dd2",
+      "elapsedMs": 3992,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "objection",
+        "shouldShow": true,
+        "cueType": "clarify",
+        "cue": "I can\u2019t confirm a discount; I\u2019d need to check our approved terms before I can say. Is the concern the total investment, or that the workflow value isn\u2019t clear yet?",
+        "reason": "Answer the pricing request without inventing terms, then isolate whether the concern is cost or unclear value.",
+        "detectedObjection": "too_expensive",
+        "qualificationUpdates": [],
+        "recommendedOutcome": null,
+        "confidence": 0.99,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-script-rerun.json"
+    },
+    {
+      "id": "objections-firm-no",
+      "agent": "live-coach",
+      "fingerprint": "6b59486b0b84793f2b5ad9346759ffb82c0761550f195f973d68e8d2a4e68dd2",
+      "elapsedMs": 2703,
+      "schemaValid": true,
+      "output": {
+        "basedOnSequence": 3,
+        "stage": "closed",
+        "shouldShow": true,
+        "cueType": "warning",
+        "cue": "Acknowledge and end the call: \u201cUnderstood\u2014I\u2019m sorry for continuing after your earlier no. I\u2019ll end the conversation now. Take care.\u201d",
+        "reason": "The contact gave a repeated firm refusal and explicitly asked to end the conversation; do not continue or reinterpret it.",
+        "detectedObjection": "not_interested",
+        "qualificationUpdates": [],
+        "recommendedOutcome": "not_interested",
+        "confidence": 1,
+        "calendarProposal": null,
+        "calendarReminder": null
+      },
+      "parsingChangedOutput": false,
+      "sourceRun": "luna-script-rerun.json"
+    }
+  ]
+}

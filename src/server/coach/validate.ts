@@ -5,7 +5,7 @@ import type { LiveCoachOutput } from "./schema.js";
 import type { LeadSnapshot } from "../calls/ledger.js";
 import type { PublicUtterance } from "../transcript/utterances.js";
 
-const FIRST_OBJECTION_OK = new Set(["clarify", "listen", "qualify", "warning"]);
+const FIRST_OBJECTION_OK = new Set(["question", "clarify", "listen", "qualify", "warning"]);
 
 export type ValidationResult =
   | { ok: true; output: LiveCoachOutput }

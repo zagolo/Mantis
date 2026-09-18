@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import * as agentLoader from "../../src/server/agents/loader.js";
 import { migrate, openDatabase } from "../../src/server/db/index.js";
 import {
   getCachedResearch,
@@ -84,7 +85,10 @@ describe("research cache", () => {
 
 describe("preparation reuses cached research", () => {
   const apps: Awaited<ReturnType<typeof startTestApp>>["app"][] = [];
-  afterEach(async () => { await Promise.all(apps.splice(0).map(app => app.close())); });
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    await Promise.all(apps.splice(0).map(app => app.close()));
+  });
 
   it("searches once per prospect across campaigns and re-searches on force refresh", async () => {
     const llm = new FakeLlmClient();
@@ -127,5 +131,16 @@ describe("preparation reuses cached research", () => {
     const refreshed = await prepare(first.id, true);
     expect(researchCalls).toBe(2);
     expect(refreshed.id).not.toBe(briefA.id);
+    const managed = ctx.campaignStore.get(first.id)!;
+    const lead = (await ctx.adapter!.findLeadById("L-100"))!;
+    expect(ctx.preparation.cached(managed, lead, "operator@test.local")?.id).toBe(refreshed.id);
+    expect(ctx.preparation.matches(refreshed, managed, lead, "operator@test.local")).toBe(true);
+    vi.spyOn(agentLoader, "agentPromptFingerprint").mockReturnValue("updated-research-procedures");
+    expect(ctx.preparation.cached(managed, lead, "operator@test.local")).toBeNull();
+    expect(ctx.preparation.matches(refreshed, managed, lead, "operator@test.local")).toBe(false);
+    const revised = await prepare(first.id);
+    expect(revised.id).not.toBe(refreshed.id);
+    expect(revised.inputHash).not.toBe(refreshed.inputHash);
+    expect(researchCalls).toBe(2); // New procedures regenerate the brief, not unchanged web evidence.
   });
 });

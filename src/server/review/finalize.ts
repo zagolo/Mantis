@@ -218,7 +218,7 @@ export class ReviewFinalizer {
     const live = this.deps.coachEngine.getSnapshot(input.sessionId);
     const doNotContact =
       live?.recommendedOutcome === "do_not_contact" ||
-      input.utterances.some((row) => detectsDoNotContact(row.text));
+      input.utterances.some((row) => row.speaker === "contact" && detectsDoNotContact(row.text));
     const warnings: string[] = [];
     if (!input.transcriptComplete) {
       warnings.push("Transcript is incomplete. Treat extraction as low confidence.");

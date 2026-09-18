@@ -1,5 +1,5 @@
 id: cold-calling
-version: 2
+version: 3
 stages:
   - opener
   - hook
@@ -17,25 +17,26 @@ talk_ratio:
   warn_after_connected_seconds: 60
 
 principles:
-  - "Call path: context-first opener → Problem Proposition (triggering problem, one-sentence we-do-X, interest CTA) → objections → meeting. Most calls are won or lost in the first 60 seconds."
-  - "Never open with how's your day, did I catch you at a bad time, or is this Bob. Assume the name. Use a sit-up moment (peer, event, intel) in the first 5 seconds."
+  - "Call path: relevant opener → Problem Proposition (possible problem, approved solution, interest question) → responsive conversation → appropriate next step. Follow the contact's answers rather than forcing every stage."
+  - "Open with your identity and a concise, relevant reason for the call. Avoid generic how's-your-day or bad-time routines. Verify the contact's identity truthfully when uncertain; skip a performative name check when already known. Use only verified context, never fabricated familiarity."
   - "Prefer problem language over buzzwords or social-proof dumps. People act on a movie-scene problem in their words, not a category pitch."
-  - "Possible Value Proposition stays possible until they confirm it. Hint value, then ask questions. Do not present, demo, or ask for a meeting in sentence four."
-  - "Outside objective is a dual-calendar meeting or a clear next action they will do — not see-if-there's-interest and not a product dump."
-  - "First no is almost always a reflex at the interruption, not a product verdict. Do not argue, rebut, or overcome."
-  - "Miyagi / RBO: pause, agree with the specific objection, incentivize a real reason, sell the test drive, then ask and shut up. After two brush-offs, NEXT — come back another day."
+  - "Possible Value Proposition stays possible until they confirm it. Hint value, then ask a question. Offer a meeting when they see a useful reason for it; avoid a premature presentation."
+  - "Use an interest question to establish relevance, then seek a mutually agreed next step consistent with the campaign objective. A complex service call usually earns discovery or pilot scoping before commercial commitment."
+  - "Distinguish a factual objection, an ambiguous brush-off, and a firm refusal. An ambiguous brush-off permits at most one respectful clarification if they remain engaged. A firm refusal ends the pitch; acknowledge and close. Do not reinterpret a clear no as permission to persist."
+  - "Pause, acknowledge their specific words, and ask one useful question only when welcome. Offer an appropriate next step after relevance is established. A repeated brush-off ends the pitch. Do not turn a rejection into an assumed future callback."
   - "Ask one relevant question at a time. Prefer their words. Do not overqualify a lookalike before the meeting."
-  - "Talk less than 40% after the first minute. Prefer concise questions that make the contact describe the situation."
-  - "Gatekeeper: do not pitch or befriend the EA. Slide-by with context, treat them as a buyer for intel, never identity lies. After 1-2 shutdowns, try mobile/off-hours/another channel."
+  - "Treat talk-ratio alerts as context, not a universal target. Prefer concise questions and let the contact finish; never interrupt to satisfy a ratio."
+  - "Gatekeeper: identify yourself and the business reason honestly. Ask who owns the relevant responsibility and accept their routing guidance. No fake familiarity, implied prior relationship, or attempts to pressure them after a refusal."
   - "Treat clear rejection and disqualification as useful outcomes. Honor do-not-contact immediately."
   - "Never invent customer names, results, prices, integrations, guarantees, or unapproved claims."
-  - "Cues must be at most 160 characters. should_show false is valid."
+  - "Prefer one sentence under 160 characters when sufficient; the hard cue cap is 400 characters. shouldShow false is valid."
 
 objection_flow:
-  - agree_specific
-  - incentivize_or_clarify
-  - sell_the_test_drive
-  - ask_and_shut_up
+  - acknowledge_specific
+  - distinguish_objection_from_refusal
+  - clarify_once_if_welcome
+  - answer_with_approved_facts
+  - agree_next_step_or_close
 
 objections:
   - not_interested
@@ -59,37 +60,37 @@ cue_min_confidence: 0.5
 objection_guides:
   not_interested:
     first_cue: clarify
-    prompt: "Miyagi: agree it's a cold call. Multiple-choice why (timing, already covered, wrong person). Sell a 15-min test drive, not the product."
+    prompt: "Acknowledge. If ambiguous and they remain engaged, ask one optional clarifying question. A firm no or repeated brush-off means close respectfully, without another pitch."
   send_information:
     first_cue: clarify
-    prompt: "Brush-off. Disrupt: ask what specifically to send and why. Do not accept email as the win. Offer a short look so the note is useful."
+    prompt: "This may be a real request or a brush-off. If welcome, ask what would make the information useful, then confirm their requested channel and permission. A request for information is not a booked meeting."
   bad_timing:
     first_cue: clarify
-    prompt: "Situational: they win today. Ask when timing is better and book that, or a no-obligation look so they know what's out there."
+    prompt: "Respect the timing constraint. If they want a later conversation, ask for a specific time or business trigger. Do not turn an unwelcome call into a meeting pitch."
   busy_now:
     first_cue: clarify
-    prompt: "Anchor then disrupt: that's why you called briefly. Ask for a specific better time on their calendar. Do not say you'll call later vaguely."
+    prompt: "Acknowledge and stop the pitch. Ask once for a better time only if welcome; confirm the callback details they offer. Otherwise close."
   existing_solution:
     first_cue: clarify
-    prompt: "Agree it works. Trap: what still hurts or what better-than-satisfied would look like. Then peer proof from approved claims only. Never badmouth."
+    prompt: "Acknowledge their existing solution. If they welcome a question, ask whether any relevant gap remains; accept that none may exist. Use only approved proof and never disparage their choice."
   in_house_team:
     first_cue: clarify
     prompt: "Agree in-house can work. Ask what they still do by hand or miss. Do not pitch a rip-and-replace."
   no_budget:
     first_cue: clarify
-    prompt: "Let them win on budget today. Sell the test drive for later, not a discount. Do not lock pricing on this call."
+    prompt: "Respect the budget constraint. If engaged, clarify whether there is a future evaluation window or a genuine lack of fit. Offer a next step only if useful; do not invent discounts or force a meeting."
   too_expensive:
     first_cue: clarify
-    prompt: "Price before needs is a trap. Defer to their situation. If they insist, range only from approved claims."
+    prompt: "Answer pricing questions directly using approved current pricing only. If it is unavailable, say so. Ask about the comparison or constraint if welcome; do not invent a range or dodge a clear question."
   no_authority:
     first_cue: qualify
-    prompt: "Name the right title. You email with permission; do not ask a stranger to intro you. Ask who else is involved before closing."
+    prompt: "Do not assume authority from a title. Ask who owns the relevant decision and whether the contact wants to stay involved. Seek a name or routing advice without pressure."
   wrong_person:
     first_cue: qualify
     prompt: "Name the likely title. Ask for the name. You follow up; don't pitch this person."
   need_to_think:
     first_cue: clarify
-    prompt: "Agree. Ask what specifically they need to think through. Book a short look or a dated callback with homework on both sides."
+    prompt: "Acknowledge. If they remain engaged, ask what they need to evaluate. Agree on a next step only with their permission; a polite deferral is not a commitment."
   trust_or_risk:
     first_cue: clarify
     prompt: "Acknowledge the risk. Ask what would need to be true. Use only approved claims as proof. No invented case studies."
