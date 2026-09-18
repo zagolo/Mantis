@@ -1,0 +1,12 @@
+rules:
+  - id: software-factory.anti-slop.focused-test
+    message: Focused tests accidentally narrow the repository's qualification evidence.
+    severity: ERROR
+    languages: [javascript, typescript]
+    pattern-either:
+      - pattern: test.only(...)
+      - pattern: it.only(...)
+      - pattern: describe.only(...)
+      - pattern: suite.only(...)
+      - pattern: fdescribe(...)
+      - pattern: fit(...)
