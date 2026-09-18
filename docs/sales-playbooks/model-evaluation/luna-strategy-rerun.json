@@ -1,0 +1,224 @@
+{
+  "method": "Configured-model synthetic rehearsal through the real agent loader; no call, CRM, calendar or web-research actions. Acceptance checks are not sent to the model.",
+  "model": "gpt-5.6-luna",
+  "apiMode": "responses",
+  "fixtureHash": "0583fb5ec440b4ac9a971cbdf1b9e96796b0bfc69cb9ddbd48574b14f3b57e00",
+  "generatedAt": "2026-09-18T11:55:00.568Z",
+  "skills": [
+    {
+      "agent": "campaign-interview",
+      "skill": "mantis-campaign-intake",
+      "version": "1.0.0",
+      "procedureChars": 1804
+    },
+    {
+      "agent": "campaign-generation",
+      "skill": "mantis-campaign-strategy",
+      "version": "1.1.4",
+      "procedureChars": 4650
+    },
+    {
+      "agent": "prospect-research",
+      "skill": "prospect-research-playbook",
+      "version": "1.1.1",
+      "procedureChars": 4497
+    },
+    {
+      "agent": "live-coach",
+      "skill": "live-cold-call-coach",
+      "version": "1.1.3",
+      "procedureChars": 4613
+    },
+    {
+      "agent": "post-call",
+      "skill": "mantis-post-call-evidence",
+      "version": "1.0.2",
+      "procedureChars": 4252
+    },
+    {
+      "agent": "call-review",
+      "skill": "mantis-call-review",
+      "version": "1.1.0",
+      "procedureChars": 5135
+    }
+  ],
+  "cases": [
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "fingerprint": "f544c816a4a75580fce193dda2066ef4fc2d5139bcbbb4d5e1fd76f11cef3f24",
+      "elapsedMs": 7071,
+      "schemaValid": true,
+      "output": {
+        "name": "Maintenance Request Workflow Study",
+        "positioning": "A brief research conversation with residential property-management operations leaders about how a recent maintenance request moved between people. The goal is to learn about the workflow, not offer a product, and ask permission for a follow-up interview if useful.",
+        "opening": "Hi, I’m conducting a brief study with residential property-management operations leaders about how maintenance requests move between people. Could I ask about a recent request?",
+        "questions": [
+          {
+            "id": "recent_request",
+            "prompt": "Could you walk me through a recent maintenance request from start to finish?",
+            "purpose": "Understand the workflow",
+            "required": true
+          },
+          {
+            "id": "handoffs",
+            "prompt": "Who handled the request at each stage, and how was it passed along?",
+            "purpose": "Identify people and handoffs",
+            "required": false
+          },
+          {
+            "id": "friction_points",
+            "prompt": "Where, if anywhere, did the request become difficult to track or move forward?",
+            "purpose": "Explore workflow friction",
+            "required": false
+          },
+          {
+            "id": "follow_up_permission",
+            "prompt": "Would a follow-up interview about this workflow be useful if there are open questions?",
+            "purpose": "Test permission for follow-up",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "target_role",
+            "prompt": "The participant is a residential property-management operations leader involved in how maintenance requests move between people.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "recent_example_available",
+            "prompt": "The participant can discuss at least one recent maintenance request and its path between people.",
+            "required": true,
+            "onNo": "defer"
+          },
+          {
+            "id": "workflow_relevance",
+            "prompt": "The participant has direct knowledge of the people or process involved in handling maintenance requests.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "follow_up_permission",
+            "prompt": "The participant is open to considering a follow-up interview if additional discussion would be useful.",
+            "required": false,
+            "onNo": "unknown"
+          }
+        ],
+        "disqualifiers": [
+          "The person is not a residential property-management operations leader."
+        ],
+        "objections": [
+          {
+            "objection": "I’m busy.",
+            "response": "Understood. Is there a better time to ask about one recent maintenance request?"
+          },
+          {
+            "objection": "We don’t participate in studies.",
+            "response": "Understood. Thanks for letting me know."
+          },
+          {
+            "objection": "What is this for?",
+            "response": "It is research on how maintenance requests move between people, with no product offer."
+          }
+        ],
+        "nextStep": "Ask permission to follow up for a separate interview if the workflow discussion leaves useful questions.",
+        "successOutcomes": [
+          "permission_to_follow_up",
+          "callback_later",
+          "reference_received"
+        ]
+      },
+      "parsingChangedOutput": false
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "fingerprint": "f544c816a4a75580fce193dda2066ef4fc2d5139bcbbb4d5e1fd76f11cef3f24",
+      "elapsedMs": 11076,
+      "schemaValid": true,
+      "output": {
+        "name": "Resident-Request Handoff Discovery",
+        "positioning": "Residential property-management operations teams may find resident-request handoffs difficult to see across their workflow, which could make it harder to understand where requests move or stall. Flow Example maps those handoffs before pilot scope is proposed, creating a shared workflow view before deciding what a pilot should include.",
+        "opening": "Hi, I’m calling because resident-request handoffs can sometimes be difficult to see across property-management operations. We map them before a pilot is scoped—could I ask how you handle them today?",
+        "questions": [
+          {
+            "id": "current_handoff_process",
+            "prompt": "How do resident requests move between teams today?",
+            "purpose": "Understand the current workflow",
+            "required": true
+          },
+          {
+            "id": "handoff_visibility",
+            "prompt": "Where, if anywhere, are those handoffs difficult to see or explain?",
+            "purpose": "Surface possible workflow friction",
+            "required": false
+          },
+          {
+            "id": "business_impact",
+            "prompt": "When a handoff is unclear, what effect does that have on the workflow, if any?",
+            "purpose": "Explore potential impact",
+            "required": false
+          },
+          {
+            "id": "discovery_relevance",
+            "prompt": "Would mapping that workflow before discussing pilot scope be useful?",
+            "purpose": "Test relevance and interest",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "target_operations_team",
+            "prompt": "The contact is part of a residential property-management operations team or directly responsible for its resident-request workflows.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "resident_request_handoffs_relevant",
+            "prompt": "Resident-request handoffs are a relevant workflow area for the team.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "workflow_discovery_interest",
+            "prompt": "The contact is willing to discuss how resident-request handoffs work today.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "meeting_value",
+            "prompt": "A workflow discovery meeting could be useful before pilot scope is proposed.",
+            "required": false,
+            "onNo": "unknown"
+          }
+        ],
+        "disqualifiers": [
+          "The contact is not part of, and does not support, a residential property-management operations team.",
+          "The contact declines further outreach or asks not to be contacted."
+        ],
+        "objections": [
+          {
+            "objection": "We already have a process",
+            "response": "That makes sense. How do you currently make the handoffs visible before defining pilot scope?"
+          },
+          {
+            "objection": "Send me information",
+            "response": "Happy to. Which part of your resident-request handoffs would be most useful to address?"
+          },
+          {
+            "objection": "I’m too busy",
+            "response": "Understood. Would a later callback be more suitable for a brief workflow discussion?"
+          }
+        ],
+        "nextStep": "If relevant, agree on a workflow discovery meeting to map current resident-request handoffs before discussing pilot scope.",
+        "successOutcomes": [
+          "meeting_booked",
+          "permission_to_follow_up",
+          "callback_later"
+        ]
+      },
+      "parsingChangedOutput": false
+    }
+  ]
+}

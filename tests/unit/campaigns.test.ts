@@ -19,15 +19,16 @@ describe("Campaign and playbook YAML", () => {
   it("loads the cold-calling playbook including confidence and objection guides", () => {
     const playbook = loadPlaybook("./config/playbooks/cold-calling.yaml");
     expect(playbook.cue_min_confidence).toBe(0.5);
-    expect(playbook.version).toBe(2);
+    expect(playbook.version).toBe(3);
     expect(playbook.objection_guides?.existing_solution?.first_cue).toBe("clarify");
     expect(playbook.principles.some((line) => line.includes("Problem Proposition"))).toBe(true);
-    expect(playbook.objection_guides?.send_information?.prompt).toMatch(/Brush-off/);
+    expect(playbook.objection_guides?.send_information?.prompt).toMatch(/real request or a brush-off/);
     expect(playbook.objection_flow).toEqual([
-      "agree_specific",
-      "incentivize_or_clarify",
-      "sell_the_test_drive",
-      "ask_and_shut_up"
+      "acknowledge_specific",
+      "distinguish_objection_from_refusal",
+      "clarify_once_if_welcome",
+      "answer_with_approved_facts",
+      "agree_next_step_or_close"
     ]);
   });
 
@@ -37,6 +38,7 @@ describe("Campaign and playbook YAML", () => {
     const rules = campaignCoachingRules(sales!).join(" ");
     expect(rules).toContain("Problem Proposition");
     expect(rules).toContain("never rebut or pitch");
+    expect(rules).toContain("A firm refusal ends the pitch without another question");
   });
 
   it("rejects unknown campaign types", () => {

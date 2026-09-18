@@ -364,7 +364,7 @@ describe("Post-call CRM update", () => {
     await app.close();
   });
 
-  it("bootstraps a review chat turn without the LLM and writes the Sheet on approve", async () => {
+  it("keeps a freeform edit-and-write request as draft edits until an explicit write command", async () => {
     const llm = new FakeLlmClient();
     llm.enqueueJson(
       postCallOutput({
@@ -410,7 +410,7 @@ describe("Post-call CRM update", () => {
       action: "approve",
       fields: { next_step: "Tuesday" }
     });
-    const confirmed = await app.inject({
+    const edited = await app.inject({
       method: "POST",
       url: `/api/calls/${sessionId}/review/interview`,
       headers: { cookie },
@@ -421,11 +421,29 @@ describe("Post-call CRM update", () => {
         ]
       }
     });
+    expect(edited.statusCode, edited.body).toBe(200);
+    expect(edited.json().wrote).toBe(false);
+    expect(edited.json().leftReview).toBe(false);
+    expect(edited.json().proposal.status).toBe("pending_review");
+    expect(edited.json().proposal.nextStep).toBe("Tuesday");
+    expect(edited.json().text).toContain("draft only");
+    expect(edited.json().text).toContain("Write this update");
+    expect(edited.json().text).not.toContain("wrote the Sheet");
+    expect(store.writeCount).toBe(writesBefore);
+    const llmCallsAfterEdit = llm.calls.length;
+
+    const confirmed = await app.inject({
+      method: "POST",
+      url: `/api/calls/${sessionId}/review/interview`,
+      headers: { cookie },
+      payload: { messages: [{ role: "user", content: "Write this update" }] }
+    });
     expect(confirmed.statusCode, confirmed.body).toBe(200);
     expect(confirmed.json().wrote).toBe(true);
     expect(confirmed.json().leftReview).toBe(true);
     expect(confirmed.json().proposal.status).toBe("applied");
     expect(store.writeCount).toBe(writesBefore + 1);
+    expect(llm.calls.length).toBe(llmCallsAfterEdit);
     const rows = await store.getDataRows();
     const row = rows.find((item) => item.values[0] === "L-100");
     expect(row?.values[EXAMPLE_HEADERS.indexOf("Next Step")]).toBe("Tuesday");

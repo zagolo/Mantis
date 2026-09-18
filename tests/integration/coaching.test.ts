@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { applyTransportStatus, getSession } from "../../src/server/calls/ledger.js";
 import { listCoachingEvents } from "../../src/server/coach/store.js";
 import { listCoachMessages } from "../../src/server/coach/messages.js";
+import { listCalendarProposals } from "../../src/server/calendar/proposals.js";
 import { expectedTwilioSignature } from "../../src/server/twilio/signature.js";
 import {
   extractStreamToken,
@@ -206,5 +207,123 @@ describe("Live coaching", () => {
     expect(body.coachMessages.some((item) => item.role === "assistant" && /Thursday/i.test(item.text))).toBe(true);
     expect(llm.calls.length).toBe(1);
     await app.close();
+  });
+
+  it("keeps DNC terminal across pending model output, later contact speech, and operator chat", async () => {
+    const llm = new FakeLlmClient();
+    let finish!: (value: string) => void;
+    const pendingOutput = new Promise<string>((resolve) => { finish = resolve; });
+    const complete = vi.spyOn(llm, "completeJson").mockReturnValueOnce(pendingOutput);
+    const { app, cookie, ctx, sessionId, outbound } = await startCall(llm);
+    try {
+      const pendingChat = ctx.coachEngine.chat(sessionId, "Help me choose the next question.");
+      await vi.waitFor(() => expect(complete).toHaveBeenCalledTimes(1));
+      outbound?.emitFinal("Please stop calling me.");
+      await vi.waitFor(() => expect(ctx.coachEngine.getSnapshot(sessionId)?.recommendedOutcome).toBe("do_not_contact"));
+      const closed = ctx.coachEngine.getSnapshot(sessionId);
+
+      outbound?.emitFinal("Thank you, goodbye.");
+      const laterChat = await app.inject({
+        method: "POST",
+        url: `/api/calls/${sessionId}/coach/chat`,
+        headers: { cookie },
+        payload: { text: "Can we ask one more question?" }
+      });
+      expect(laterChat.statusCode).toBe(200);
+      expect(complete).toHaveBeenCalledTimes(1);
+
+      finish(JSON.stringify(coachOutput({
+        stage: "cta",
+        cue: "Ask for a meeting.",
+        calendarProposal: {
+          intent: "meeting",
+          title: "Late model draft",
+          start: "2026-10-01T10:00:00Z",
+          end: "2026-10-01T10:30:00Z",
+          timezone: "UTC"
+        }
+      })));
+      await pendingChat;
+
+      const snapshot = ctx.coachEngine.getSnapshot(sessionId);
+      expect(snapshot).toMatchObject({ stage: "closed", recommendedOutcome: "do_not_contact", cue: closed?.cue });
+      expect(listCoachingEvents(ctx.db, sessionId)).toHaveLength(1);
+      expect(listCalendarProposals(ctx.db, sessionId)).toHaveLength(0);
+      expect(listCoachMessages(ctx.db, sessionId).filter((message) => message.role === "assistant").map((message) => message.text))
+        .toEqual([closed!.cue!.text]);
+    } finally {
+      finish(JSON.stringify(coachOutput()));
+      await app.close();
+    }
+  });
+
+  it("does not dispatch a model request after DNC arrives during calendar availability", async () => {
+    const llm = new FakeLlmClient();
+    const { app, ctx, sessionId, outbound } = await startCall(llm);
+    let finishAvailability!: () => void;
+    const pendingAvailability = new Promise<[]>((resolve) => { finishAvailability = () => resolve([]); });
+    vi.spyOn(ctx.calendar, "status").mockReturnValue({ configured: true, connected: true, email: "operator@test.local" });
+    const availability = vi.spyOn(ctx.calendar, "getAvailability").mockReturnValueOnce(pendingAvailability);
+    try {
+      const pendingChat = ctx.coachEngine.chat(sessionId, "Help me plan the next step.");
+      await vi.waitFor(() => expect(availability).toHaveBeenCalledTimes(1));
+      outbound?.emitFinal("Do not contact me again.");
+      finishAvailability();
+      await pendingChat;
+      expect(llm.calls).toHaveLength(0);
+      expect(ctx.coachEngine.getSnapshot(sessionId)).toMatchObject({ stage: "closed", recommendedOutcome: "do_not_contact" });
+    } finally {
+      finishAvailability();
+      await app.close();
+    }
+  });
+
+  it("normalizes a model-detected DNC into a closing cue without a calendar draft", async () => {
+    const llm = new FakeLlmClient();
+    llm.enqueueJson(coachOutput({
+      stage: "objection",
+      cueType: "warning",
+      cue: "Ask one more question.",
+      detectedObjection: "do_not_contact",
+      calendarProposal: {
+        intent: "callback",
+        start: "2026-10-01T10:00:00Z",
+        end: "2026-10-01T10:15:00Z",
+        timezone: "UTC"
+      }
+    }));
+    const { app, ctx, sessionId, outbound } = await startCall(llm);
+    try {
+      outbound?.emitFinal("Lose my number.");
+      await vi.waitFor(() => expect(ctx.coachEngine.getSnapshot(sessionId)?.recommendedOutcome).toBe("do_not_contact"));
+      expect(ctx.coachEngine.getSnapshot(sessionId)).toMatchObject({ stage: "closed", cue: { cueType: "warning" } });
+      expect(ctx.coachEngine.getSnapshot(sessionId)?.cue?.text).toMatch(/end respectfully/);
+      expect(listCalendarProposals(ctx.db, sessionId)).toHaveLength(0);
+      await ctx.coachEngine.chat(sessionId, "Can I ask something else?");
+      expect(llm.calls).toHaveLength(1);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it.each(["stopped", "disconnected"] as const)("drops pending output when %s without changing the outcome to DNC", async (state) => {
+    const llm = new FakeLlmClient();
+    let finish!: (value: string) => void;
+    const pendingOutput = new Promise<string>((resolve) => { finish = resolve; });
+    const complete = vi.spyOn(llm, "completeJson").mockReturnValueOnce(pendingOutput);
+    const { app, ctx, sessionId } = await startCall(llm);
+    try {
+      const pendingChat = ctx.coachEngine.chat(sessionId, "Help me ask about the workflow.");
+      await vi.waitFor(() => expect(complete).toHaveBeenCalledTimes(1));
+      if (state === "stopped") ctx.coachEngine.stop(sessionId);
+      else applyTransportStatus(ctx.db, sessionId, "completed");
+      finish(JSON.stringify(coachOutput({ cue: "A late cue that should not appear." })));
+      await pendingChat;
+      expect(listCoachingEvents(ctx.db, sessionId)).toHaveLength(0);
+      expect(ctx.coachEngine.getSnapshot(sessionId)).toMatchObject({ cue: null, recommendedOutcome: "unknown" });
+    } finally {
+      finish(JSON.stringify(coachOutput()));
+      await app.close();
+    }
   });
 });

@@ -56,6 +56,14 @@ describe("evidenceInContext grounding", () => {
     expect(evidenceInContext(null, rows, snapshot)).toBe(false);
     expect(evidenceInContext("   ", rows, snapshot)).toBe(false);
   });
+
+  it("does not use a caller assertion or CRM identity as contact evidence", () => {
+    const rows = utterances(["you definitely have budget and need this now", "I did not say that"]);
+    rows[0]!.speaker = "caller";
+    expect(evidenceInContext('"you definitely have budget"', rows, snapshot)).toBe(false);
+    expect(evidenceInContext(snapshot.role, rows, snapshot)).toBe(false);
+    expect(evidenceInContext(snapshot.company, [], snapshot)).toBe(false);
+  });
 });
 
 describe("sanitizePostCallOutcome", () => {
@@ -109,6 +117,28 @@ describe("sanitizePostCallOutcome", () => {
     const salvaged = sanitizePostCallOutcome({ ...baseOutput(), followUpAt: "not-a-date" }, { campaign, utterances: rows, snapshot });
     expect(salvaged).not.toBeNull();
     expect(salvaged!.output.followUpAt).toBeNull();
+  });
+
+  it("downgrades caller and CRM-based criteria while preserving contact-supported evidence", () => {
+    const rows = utterances(["you have painful weekly regressions", "this costs us two days every week"]);
+    rows[0]!.speaker = "caller";
+    const raw = {
+      ...baseOutput(),
+      qualification: "qualified",
+      criteria: {
+        relevant_problem: { state: "yes", evidence: '"you have painful weekly regressions"', confidence: 0.9 },
+        meaningful_cost: { state: "yes", evidence: '"this costs us two days"', confidence: 0.9 },
+        influence: { state: "yes", evidence: snapshot.role, confidence: 0.9 },
+        timing: { state: "unknown", evidence: null, confidence: 0 }
+      }
+    };
+    expect(validatePostCallOutcome(raw, { campaign, utterances: rows, snapshot }).ok).toBe(false);
+    const salvaged = sanitizePostCallOutcome(raw, { campaign, utterances: rows, snapshot });
+    expect(salvaged?.output.criteria.relevant_problem?.state).toBe("unknown");
+    expect(salvaged?.output.criteria.influence?.state).toBe("unknown");
+    expect(salvaged?.output.criteria.meaningful_cost?.state).toBe("yes");
+    expect(salvaged?.output.qualification).toBe("unknown");
+    expect(salvaged?.downgraded).toEqual(["relevant_problem", "influence"]);
   });
 
   it("returns null for unsalvageable outcomes", () => {

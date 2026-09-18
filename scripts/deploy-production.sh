@@ -92,6 +92,7 @@ fi
 echo "==> Installing dependencies and building"
 # tsx is a devDependency; NODE_ENV=production would skip it and break `npm start`.
 env NODE_ENV=development npm ci
+npm run skills:check
 npm run build
 
 # Stop before switching releases if Twilio points at another deployment.

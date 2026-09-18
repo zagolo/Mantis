@@ -5,12 +5,13 @@ import { preparationSchema, prospectBriefSchema, type ProspectPreparation } from
 import { lastTouchFingerprint } from "../../shared/lastTouch.js";
 import type { PublicLead } from "../../shared/contracts.js";
 import type { ManagedCampaign } from "../campaigns/store.js";
-import { renderAgentSystem } from "../agents/loader.js";
+import { agentPromptFingerprint, renderAgentSystem } from "../agents/loader.js";
 import type { LlmClient } from "../llm/types.js";
 import type { ResearchClient, ResearchResult } from "./client.js";
 import { getCachedResearch, pruneStaleResearchCache, putCachedResearch } from "./cache.js";
 
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const BRIEF_SCHEMA = JSON.stringify(z.toJSONSchema(prospectBriefSchema));
 
 export function preparationInputHash(
   campaign: ManagedCampaign,
@@ -21,7 +22,10 @@ export function preparationInputHash(
     campaign: campaign.config.id, version: campaign.config.version,
     lead: lead.leadId, company: lead.company, name: lead.fullName, role: lead.role, enrichment: lead.enrichment,
     lastTouch: lastTouchFingerprint(lead.lastTouch),
-    operatorEmail: operatorEmail?.trim().toLowerCase() || ""
+    operatorEmail: operatorEmail?.trim().toLowerCase() || "",
+    // Regenerate the brief after procedure, instruction, selection, or schema changes.
+    // Raw web evidence has its own cache and can still be reused.
+    prompt: agentPromptFingerprint("prospect-research", BRIEF_SCHEMA)
   })).digest("hex");
 }
 
@@ -120,7 +124,7 @@ export class PreparationService {
       warnings.push("Web research is not configured. This brief uses CRM context only.");
     }
     const raw = await this.deps.llm.completeJson({
-      system: renderAgentSystem("prospect-research", JSON.stringify(z.toJSONSchema(prospectBriefSchema))),
+      system: renderAgentSystem("prospect-research", BRIEF_SCHEMA),
       user: JSON.stringify({
         offering: campaign.brief,
         strategy: campaign.strategy,

@@ -1,0 +1,29 @@
+# Attributed terms
+
+- **Anchor → Disrupt → Ask** — RBO framework in Blount's *Fanatical Prospecting*: steady the seller, remove the expected fight, ask. See ch03.
+- **Buying commitment objection** — Concern about an actual purchase decision; Blount's five-step method is **Relate → Isolate and clarify → Minimize → Ask → Fall back to an alternative**. It assumes a developed sales context, not mere cold-call interest. See ch03.
+- **CRM Challenge** — Keenan's check that opportunity notes contain enough specific context to distinguish this deal; no license to infer missing detail. See ch02.
+- **Current state** — Keenan's facts, problems, impact, root causes and emotional state; record the latter only when expressed. See ch02.
+- **Future state** — The buyer's desired outcome and what it enables; not a promise that the offer can achieve it. See ch02.
+- **Gap** — Future State − Current State in Keenan's method; compare like quantities, then consider change cost, risk and feasibility. See ch02.
+- **Golden Hours / Platinum Hours** — Blount's selling-interaction/supporting-preparation distinction, from prior analysis. See ch05.
+- **Interest-Based CTA** — Farrokh/Cegelski's test of interest before scheduling. See ch01, ch04.
+- **Ledge** — Blount's prepared acknowledgment or question that creates a pause before emotional reaction; not a device for hiding material facts. See ch03, ch05.
+- **Ledge → Disrupt → Ask** — *Objections* three-step prospecting turnaround, verified in the supplied book. See ch03.
+- **Micro-commitment objection** — Hesitation about a useful next action; Blount's method is **Ledge → Explain value → Ask**. See ch03, ch04.
+- **Mr. Miyagi Method** — Farrokh/Cegelski's Agree with the objection → Incentivize conversation → Sell the test drive. Mantis stops at refusal. See ch03.
+- **Offer − Ask = Value** — Keenan's qualitative check of buyer benefit against requested time/effort; not numerical ROI. See ch04.
+- **PAIS** — Blount's Pause, Acknowledge, Ignore, Save for red herrings. Mantis answers material questions or agrees deferral rather than silently ignoring them. See ch03.
+- **Possible Value Proposition (PVP)** — Sobczak's provisional reason the buyer might value the offer. See ch01.
+- **Primary / secondary objectives** — Sobczak's intended buyer action and proportionate alternative; neither overrides willingness. See ch04.
+- **Probing / process / provoking / validating** — Keenan's question purposes: specifics; how work happens; a consequence/alternative; check understanding. Select by missing information. See ch02.
+- **Problem Identification Chart (PIC)** — Keenan's preparation map of problem, impact and root cause, initially hypotheses about the target market. See ch02.
+- **Problem Proposition** — Farrokh/Cegelski's Triggering Problem → One-Sentence Solution → Interest-Based CTA. See ch01.
+- **Pump and pounce** — Blount's warning against responding to the first purchase objection before isolating and clarifying the real concerns. See ch03.
+- **Qualification evidence** — Mantis's explicit relevant contact statements for configured criteria; research and seller statements are insufficient. See ch02.
+- **RBO** — Blount's reflex response, brush-off or objection taxonomy; classification is tentative, not permission to dismiss a refusal. See ch03.
+- **Smart Questions** — Sobczak's questions connecting possible value to actual circumstances; from prior analysis. See ch02.
+- **Tailored Permission Opener** — Farrokh/Cegelski's truthful business context, interruption acknowledgment and short permission. See ch01.
+- **Technical / business problem** — Keenan distinguishes a process or technology failure from its business consequence. See ch02.
+- **Test drive** — Farrokh/Cegelski's useful meeting purpose before a purchase decision; no invented deliverable. See ch04.
+- **This-or-That Technique** — Blount's internal choice to act constructively rather than react defensively; not a false choice for the prospect. See ch05.

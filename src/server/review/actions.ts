@@ -45,7 +45,9 @@ export async function approveProposal(
   }
   const body = parseBody(row);
   const evidence = parseEvidence(row);
-  const fields = applyFieldEdits(body.fields, edits);
+  const approvedEdits = operatorEdits(body.kind, edits);
+  const fields = applyFieldEdits(body.fields, approvedEdits);
+  syncOutcomeFromFields(body, approvedEdits);
   if (fields.call_outcome === "do_not_contact") {
     fields.call_status = DNC_CALL_STATUS;
     body.outcome = { ...body.outcome, semanticOutcome: "do_not_contact" };
@@ -87,6 +89,10 @@ export async function approveProposal(
 }
 
 export async function skipNonConnect(ctx: AppContext, proposalId: string) {
+  const row = getProposalOrThrow(ctx.db, proposalId);
+  if (parseBody(row).kind !== "non_connect") {
+    throw new ReviewError("state", "Only non-connect proposals can be skipped");
+  }
   return approveProposal(ctx, proposalId, { call_status: SKIPPED_CALL_STATUS });
 }
 

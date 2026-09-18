@@ -1,0 +1,25 @@
+{
+  "method": "Actual validateLiveCoachOutput on saved synthetic Luna responses; fixture campaign keys normalized to runtime CampaignConfig, real cold-calling playbook, no network or call.",
+  "checks": [
+    {
+      "id": "gap-impact-without-numbers",
+      "accepted": true
+    },
+    {
+      "id": "objections-prospecting-existing-system",
+      "accepted": true
+    },
+    {
+      "id": "objections-microcommitment-value",
+      "accepted": true
+    },
+    {
+      "id": "objections-buying-price-uncertainty",
+      "accepted": true
+    },
+    {
+      "id": "objections-firm-no",
+      "accepted": true
+    }
+  ]
+}

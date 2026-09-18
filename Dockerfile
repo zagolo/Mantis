@@ -7,6 +7,7 @@ RUN npm ci
 
 COPY . .
 RUN npm rebuild better-sqlite3
+RUN npm run skills:check
 RUN npm run build
 
 RUN mkdir -p /app/data

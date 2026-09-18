@@ -9,7 +9,7 @@ export function campaignCoachingRules(campaign: CampaignConfig): string[] {
   if (campaign.type === "sales") {
     rules.push("Optimize for diagnosis, qualification, and an appropriate next step.");
     rules.push("Opener: context-first then Problem Proposition. Never how's-your-day or bad-time.");
-    rules.push("The first cue for an objection must agree specifically then clarify, never rebut or pitch.");
+    rules.push("For an ambiguous objection, acknowledge specifically and clarify once if welcome; never rebut or pitch. A firm refusal ends the pitch without another question.");
     rules.push("Outside objective is a dual-calendar meeting or a next action they will do, not a demo dump.");
     rules.push("Never label the lead qualified without evidence for every required criterion.");
   } else if (campaign.type === "research") {

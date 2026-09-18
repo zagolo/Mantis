@@ -39,6 +39,7 @@ import { createDtmfSender } from "./twilio/dtmf.js";
 import { inboundForwardNumber } from "./twilio/config.js";
 import type { CampaignConfig } from "../shared/schemas.js";
 import { activateCampaignSheet, backfillCampaignSheets, bindFileCampaignSheets } from "./sheets/bind.js";
+import { validateAgentSkills } from "./agents/loader.js";
 
 export type BuildAppOptions = {
   deepgramFactory?: DeepgramLiveFactory;
@@ -52,6 +53,9 @@ export type BuildAppOptions = {
 };
 
 export async function buildApp(env: Env = loadEnv(), options: BuildAppOptions = {}) {
+  // Fail before opening databases or starting a session if deployment omitted
+  // a selected skill. The same validation is available via skills:check.
+  const agentSkills = validateAgentSkills();
   const app = Fastify({
     logger:
       env.NODE_ENV === "test" || options.disableLogger
@@ -74,6 +78,8 @@ export async function buildApp(env: Env = loadEnv(), options: BuildAppOptions = 
             }
           }
   });
+
+  app.log.info({ agentSkills }, "Agent skill procedures validated");
 
   await app.register(cookie);
   await app.register(formbody);

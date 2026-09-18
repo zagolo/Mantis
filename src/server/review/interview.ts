@@ -107,8 +107,34 @@ export async function applyReviewInterviewAction(
   action: ReviewInterviewAction,
   fields: WriteFieldsInput | undefined,
   message: string,
-  calendarDraft?: z.infer<typeof reviewInterviewTurnSchema>["calendarProposal"]
+  calendarDraft?: z.infer<typeof reviewInterviewTurnSchema>["calendarProposal"],
+  source: "operator" | "model" = "model"
 ): Promise<ReviewInterviewResult> {
+  // A provider action is a suggestion, not authorization to change the Sheet.
+  // Only the server's exact-command route opts in; explicit write endpoints
+  // call the review actions directly. Draft edits and calendar proposals stay
+  // available for the operator to review before choosing a write action.
+  if (source === "model" && (action === "approve" || action === "retry_write" || action === "skip")) {
+    const requestedAction = action;
+    const pending = proposal.status === "pending_review" || proposal.status === "pending_retry";
+    action = requestedAction === "approve" && pending && Object.values(fields ?? {}).some((value) => value !== undefined)
+      ? "propose_fields"
+      : "none";
+    if (action === "none") fields = undefined;
+    if (!pending) {
+      message = `No new Sheet write was made. This proposal is ${proposal.status}.`;
+    } else if (requestedAction === "retry_write" && proposal.status === "pending_retry") {
+      message = 'The previous Sheet write failed; nothing was retried. Send "Retry write" to retry the saved update.';
+    } else if (requestedAction === "skip" && proposal.kind === "non_connect") {
+      message = 'No Sheet write was made. Send "Skip this contact" to mark this non-connect as Skipped.';
+    } else if (requestedAction === "skip") {
+      message = 'Connected conversations cannot be skipped. Review the proposal, then choose "Write this update" when ready.';
+    } else {
+      message = action === "propose_fields"
+        ? 'These edits affect the draft only. Review the proposed changes, then choose or send "Write this update" to submit them to the Sheet.'
+        : 'No Sheet write was made. Review the proposal, then choose or send "Write this update" to submit it.';
+    }
+  }
   let calendarProposal: PublicCalendarProposal | null = null;
   if (calendarDraft) {
     const draft = draftFromUnknown(calendarDraft, proposal.contactName || "Meeting");

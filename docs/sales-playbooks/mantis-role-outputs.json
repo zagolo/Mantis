@@ -1,0 +1,249 @@
+{
+  "cases": [
+    {
+      "id": "intake-vague-target",
+      "agent": "campaign-interview",
+      "output": {
+        "message": "Which customer type should we focus on first? What specific workflow does Omni Example automate, and what problem does that solve?",
+        "ready": false,
+        "brief": null
+      }
+    },
+    {
+      "id": "intake-update-without-proof",
+      "agent": "campaign-interview",
+      "output": {
+        "message": "The brief is ready with facilities operations teams as the target customer and all other details unchanged.",
+        "ready": true,
+        "brief": {
+          "offeringName": "Flow Example",
+          "offeringDescription": "Maps request handoffs before agreeing to a workflow pilot.",
+          "targetCustomer": "Facilities operations teams",
+          "objective": "Agree to a discovery conversation",
+          "type": "sales",
+          "website": "",
+          "approvedFacts": [],
+          "sheetCampaignValue": ""
+        }
+      }
+    },
+    {
+      "id": "strategy-research-not-sales",
+      "agent": "campaign-generation",
+      "output": {
+        "name": "Workflow Study: Maintenance-Request Handoffs",
+        "positioning": "A research conversation with residential property-management operations leaders about the handoffs in a recent maintenance request. Learn the workflow and any friction the contact identifies, then seek permission for a follow-up interview if useful. The study has no product offer.",
+        "opening": "I'm studying maintenance-request handoffs in residential property management. Could you walk me through a recent request?",
+        "questions": [
+          {
+            "id": "recent_request",
+            "prompt": "How did a recent maintenance request move from the first report to the people handling it?",
+            "purpose": "Learn the actual workflow from a concrete example.",
+            "required": true
+          },
+          {
+            "id": "handoff_experience",
+            "prompt": "What worked well in those handoffs, and was any part difficult?",
+            "purpose": "Identify strengths or friction without assuming a problem.",
+            "required": false
+          },
+          {
+            "id": "follow_up_permission",
+            "prompt": "Would a follow-up interview about this workflow be useful, and may I contact you to arrange it?",
+            "purpose": "Ask for explicit permission if further learning is useful.",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "research_role_fit",
+            "prompt": "The contact leads residential property-management operations.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "workflow_knowledge",
+            "prompt": "The contact can describe a recent maintenance-request handoff from their own experience.",
+            "required": false,
+            "onNo": "unknown"
+          },
+          {
+            "id": "further_research_permission",
+            "prompt": "The contact explicitly permits a follow-up interview about the workflow.",
+            "required": false,
+            "onNo": "unknown"
+          }
+        ],
+        "disqualifiers": [
+          "The contact confirms they do not lead residential property-management operations."
+        ],
+        "objections": [
+          {
+            "objection": "Is this a sales call?",
+            "response": "No. This is a study of maintenance-request handoffs, with no product offer."
+          },
+          {
+            "objection": "I don't have time.",
+            "response": "Understood. Would a later time work for you, or would you prefer no follow-up?"
+          },
+          {
+            "objection": "Not interested.",
+            "response": "Understood. Thanks for letting me know; I'll leave it there."
+          }
+        ],
+        "nextStep": "If useful to the contact, ask permission for a follow-up interview about their maintenance-request workflow.",
+        "successOutcomes": [
+          "permission_to_follow_up"
+        ]
+      }
+    },
+    {
+      "id": "strategy-no-proof-no-metrics",
+      "agent": "campaign-generation",
+      "output": {
+        "name": "Flow Example: Resident-Request Discovery",
+        "positioning": "Flow Example maps resident-request handoffs for residential property-management operations teams before pilot scope is proposed. Explore whether the team's current handoffs create a problem they want to examine and whether a workflow discovery conversation would be useful.",
+        "opening": "We map resident-request handoffs before proposing a pilot. Do requests ever get stuck between people on your operations team?",
+        "questions": [
+          {
+            "id": "request_workflow",
+            "prompt": "How does a resident request move from receipt to the person responsible for resolving it?",
+            "purpose": "Understand the current handoffs before suggesting a next step.",
+            "required": true
+          },
+          {
+            "id": "possible_handoff_issue",
+            "prompt": "Where, if anywhere, does that handoff become difficult?",
+            "purpose": "Let the contact establish whether a relevant problem exists.",
+            "required": false
+          },
+          {
+            "id": "handoff_impact",
+            "prompt": "If a handoff is difficult, what effect does it have on the team or residents?",
+            "purpose": "Explore any impact in the contact's own terms.",
+            "required": false
+          },
+          {
+            "id": "discovery_participants",
+            "prompt": "Who would join a conversation to map the workflow, if that would be useful?",
+            "purpose": "Identify the relevant people after establishing interest.",
+            "required": false
+          }
+        ],
+        "criteria": [
+          {
+            "id": "operations_target_fit",
+            "prompt": "The contact's team handles operations for residential property management.",
+            "required": true,
+            "onNo": "disqualified"
+          },
+          {
+            "id": "confirmed_handoff_problem",
+            "prompt": "The contact confirms a resident-request handoff problem they want to examine.",
+            "required": true,
+            "onNo": "unknown"
+          },
+          {
+            "id": "current_discussion_timing",
+            "prompt": "The team has time to discuss its resident-request workflow now.",
+            "required": false,
+            "onNo": "defer"
+          }
+        ],
+        "disqualifiers": [
+          "The contact confirms their team does not handle residential property-management operations."
+        ],
+        "objections": [
+          {
+            "objection": "Send information.",
+            "response": "Happy to send a short outline. Is there a handoff you would like it to focus on?"
+          },
+          {
+            "objection": "We already have a system.",
+            "response": "Understood. Does it cover the handoffs well, or is there a part you still want to examine?"
+          },
+          {
+            "objection": "Not interested.",
+            "response": "Understood. I'll leave it there. Thank you for your time."
+          }
+        ],
+        "nextStep": "If a relevant issue and interest emerge, agree to a workflow discovery meeting and who should attend.",
+        "successOutcomes": [
+          "meeting_booked",
+          "permission_to_follow_up"
+        ]
+      }
+    },
+    {
+      "id": "postcall-seller-assertion",
+      "agent": "post-call",
+      "output": {
+        "semanticOutcome": "permission_to_follow_up",
+        "qualification": "unknown",
+        "qualificationReason": "The required relevant_problem criterion lacks contact evidence. The contact said, \"I didn't say that.\" The caller's assertion and live qualified label do not establish qualification.",
+        "criteria": {
+          "relevant_problem": {
+            "state": "unknown",
+            "evidence": null,
+            "confidence": 0
+          }
+        },
+        "painOrResearchFindings": [],
+        "objections": [],
+        "nextStep": "Caller to send a short outline of what they do, as requested by the contact.",
+        "followUpAt": null,
+        "summary": "The contact rejected the caller's assertion about backlog and budget: \"I didn't say that.\" They requested \"Just send a short outline of what you do.\" The caller agreed to send it. No relevant workflow problem, budget or meeting was confirmed.",
+        "callerCommitments": [
+          "\"I'll send a short outline.\""
+        ],
+        "contactCommitments": [],
+        "transcriptComplete": true,
+        "confidence": 0.95
+      }
+    },
+    {
+      "id": "postcall-incomplete-dnc",
+      "agent": "post-call",
+      "output": {
+        "semanticOutcome": "do_not_contact",
+        "qualification": "disqualified",
+        "qualificationReason": "The contact said, \"Remove my number. Do not call me again.\" Disqualified records the application's DNC suppression convention, not a failed business criterion. The transcript is incomplete.",
+        "criteria": {
+          "relevant_problem": {
+            "state": "unknown",
+            "evidence": null,
+            "confidence": 0
+          }
+        },
+        "painOrResearchFindings": [],
+        "objections": [],
+        "nextStep": "No sales follow-up; the contact requested removal of their number and no further calls.",
+        "followUpAt": null,
+        "summary": "The contact explicitly requested DNC: \"Remove my number. Do not call me again.\" The caller replied, \"Understood.\" The transcript is incomplete; no business qualification facts are established. The DNC request is supported, but no completed removal or CRM write is evidenced.",
+        "callerCommitments": [],
+        "contactCommitments": [],
+        "transcriptComplete": false,
+        "confidence": 0.9
+      }
+    },
+    {
+      "id": "review-edit-without-write",
+      "agent": "call-review",
+      "output": {
+        "message": "Next step: “Book a demo” → “Send the short outline.” I'll update the proposal and leave the Sheet write pending.",
+        "action": "propose_fields",
+        "fields": {
+          "next_step": "Send the short outline"
+        }
+      }
+    },
+    {
+      "id": "review-failed-write-calendar-ambiguity",
+      "agent": "call-review",
+      "output": {
+        "message": "The Sheet update has not succeeded; the last attempt failed with a rate limit. What exact Wednesday date, start time, duration and timezone should I use for the reminder?",
+        "action": "none"
+      }
+    }
+  ]
+}
