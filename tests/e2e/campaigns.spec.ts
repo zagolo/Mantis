@@ -28,17 +28,6 @@ async function sendCampaignChat(page: Page, text: string) {
   await page.getByRole("button", { name: "Send", exact: true }).click();
 }
 
-async function openPrep(page: Page) {
-  const brief = page.getByLabel("AI prospect brief");
-  if (!(await brief.isVisible())) {
-    const prep = page.getByText("Prep", { exact: true });
-    if (await prep.count()) {
-      await prep.first().click();
-    }
-  }
-  await expect(brief).toBeVisible();
-}
-
 async function openFirstLead(page: Page) {
   await expect(page.getByRole("table", { name: "Leads" })).toContainText("Alex Rivera");
   await page.getByRole("link", { name: /Open Alex Rivera/ }).first().click();
@@ -63,7 +52,6 @@ test("create different offerings, match leads by sheet tag, view cited preparati
     await openCampaignChat(page);
     await sendCampaignChat(page, offeringMessage("Invoice assistant", "lamina-sales"));
     await openFirstLead(page);
-    await openPrep(page);
     await expect(page.getByLabel("AI prospect brief")).toContainText("invoice follow-up");
     await expect(page.getByLabel("AI prospect brief").getByRole("link", { name: "[1]", exact: true })).toHaveAttribute("href", "https://example.com/company");
     await expect(page.getByRole("button", { name: "Call", exact: true })).toBeEnabled();
@@ -80,13 +68,11 @@ test("create different offerings, match leads by sheet tag, view cited preparati
     server.llm.enqueueJson(securityBrief);
     await sendCampaignChat(page, offeringMessage("Security training", "lamina-sales"));
     await openFirstLead(page);
-    await openPrep(page);
     await expect(page.getByLabel("AI prospect brief")).toContainText("recognize phishing");
     await page.getByRole("link", { name: "Mantis" }).click();
     await page.getByLabel("Campaign", { exact: true }).click();
     await page.getByRole("option", { name: "Invoice collections", exact: true }).click();
     await openFirstLead(page);
-    await openPrep(page);
     await expect(page.getByLabel("AI prospect brief")).toContainText("invoice follow-up");
     await expect(page.getByLabel("AI prospect brief")).not.toContainText("recognize phishing");
 
@@ -104,7 +90,6 @@ test("create different offerings, match leads by sheet tag, view cited preparati
     server.llm.enqueueJson(regenerated);
     await sendCampaignChat(page, "Change the desired outcome to: Learn about overdue collections and suggest a workflow review");
     await openFirstLead(page);
-    await openPrep(page);
     await expect(page.getByLabel("AI prospect brief")).toContainText("collecting overdue invoices");
     await expect(page.getByText(/Strategy v2/)).toBeVisible();
     await page.setViewportSize({ width: 390, height: 844 });
@@ -113,7 +98,7 @@ test("create different offerings, match leads by sheet tag, view cited preparati
 
     await page.getByRole("button", { name: "Call", exact: true }).click();
     await expect(page.getByLabel("Call state connecting")).toBeVisible();
-    await page.getByText("Prep", { exact: true }).click();
+    await expect(page.getByText("Prep", { exact: true })).toBeVisible();
     await expect(page.getByLabel("AI prospect brief")).toContainText("collecting overdue invoices");
   } finally { await server.close(); }
 });

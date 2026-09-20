@@ -66,7 +66,7 @@ test("login through approve loads the next lead", async ({ page, server }) => {
   await expect(page.getByRole("table", { name: "Leads" })).toContainText("Alex Rivera");
   const next = upNext(page);
   await expect(next).toBeVisible();
-  await expect(next.getByRole("button", { name: "Call" })).toBeVisible();
+  await expect(next.getByRole("button", { name: "Call" })).toHaveCount(0);
   await expect(next.getByRole("button", { name: "Skip" })).toBeVisible();
   await expect(next.getByLabel("Last call")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Alex Rivera" })).toHaveCount(0);
@@ -116,7 +116,7 @@ test("login through approve loads the next lead", async ({ page, server }) => {
   await expect(page).toHaveURL(/\/leads$/);
   await expect(page.getByRole("table", { name: "Leads" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Jordan Chen" })).toHaveCount(0);
-  await expect(upNext(page).getByRole("button", { name: "Call" })).toBeVisible();
+  await expect(upNext(page).getByRole("button", { name: "Call" })).toHaveCount(0);
   await expect(upNext(page).getByLabel("Last call")).toContainText("2nd dial");
   await expect(upNext(page).getByLabel("Last call")).toContainText("no-answer");
 });
@@ -139,6 +139,8 @@ test("contact hangup opens review in this tab", async ({ page, server }) => {
 
 test("optional dial pad calls a custom number without review", async ({ page, server }) => {
   await login(page, server.baseURL);
+  await chooseCampaign(page, "Lamina founder sales");
+  await openLead(page, "Alex Rivera");
   await expect(page.getByLabel("Twilio device registered")).toBeVisible();
   await page.getByRole("button", { name: "Dial a number" }).click();
   await expect(page.getByRole("dialog", { name: "Dial a number" })).toBeVisible();
@@ -167,7 +169,7 @@ test("open a specific lead from the table, search and navigate", async ({ page, 
   await expect(page.getByRole("table", { name: "Leads" })).toBeVisible();
   await expect(page.getByRole("link", { name: /Open Alex Rivera/ }).first()).toBeVisible();
   await expect(page.getByRole("table", { name: "Leads" })).toContainText("Alex Rivera");
-  await expect(upNext(page).getByRole("button", { name: "Call" })).toBeVisible();
+  await expect(upNext(page).getByRole("button", { name: "Call" })).toHaveCount(0);
   await expect(upNext(page).getByLabel("Last call")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Alex Rivera" })).toHaveCount(0);
 
