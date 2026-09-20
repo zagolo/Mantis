@@ -1,4 +1,4 @@
-import { useRef, useState, type RefObject } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Alert, Button } from "@heroui/react";
 import { useSession } from "../state/session";
@@ -20,13 +20,11 @@ export function LeadsPage() {
   const [dialableOnly, setDialableOnly] = useState(true);
   const [sortKey, setSortKey] = useState<LeadSortKey>("queue");
   const [sortDir, setSortDir] = useState<1 | -1>(1);
-  const callButtonRef = useRef<HTMLButtonElement>(null);
-
   const nextLead = data.leads.find((item) => item.dialable) ?? null;
   const {
-    campaign, call, setCall, callError, starting, disabledReason, sheetBlocking,
-    preparation, opening, firstQuestion, preparing, onCall, onSkip, onRefresh, openReview
-  } = useLeadCall(nextLead);
+    campaign, call, setCall, callError,
+    preparation, opening, firstQuestion, onSkip, onRefresh, openReview
+  } = useLeadCall(nextLead, { prepareOnMount: false });
 
   const sheetUnconfigured = data.sheet.status === "error" || data.sheet.status === "unconfigured";
   const queueStamp = data.leads.map((lead) => lead.leadId).join(",");
@@ -137,13 +135,7 @@ export function LeadsPage() {
             onRefresh={onRefresh}
             refreshDisabled={pending || campaignBusy}
             nextLeadId={nextLead?.leadId ?? null}
-            onCall={() => void onCall()}
             onSkip={() => void onSkip()}
-            callDisabled={Boolean(disabledReason) || pending || starting || preparing || sheetBlocking}
-            callPending={starting}
-            preparing={preparing}
-            disabledReason={disabledReason}
-            callButtonRef={callButtonRef}
           />
         </div>
       )}
@@ -212,13 +204,7 @@ function LeadsQueue({
   onRefresh,
   refreshDisabled,
   nextLeadId,
-  onCall,
-  onSkip,
-  callDisabled,
-  callPending,
-  preparing,
-  disabledReason,
-  callButtonRef
+  onSkip
 }: {
   query: string;
   setQuery: (value: string) => void;
@@ -237,13 +223,7 @@ function LeadsQueue({
   onRefresh?: () => void;
   refreshDisabled?: boolean;
   nextLeadId: string | null;
-  onCall: () => void;
   onSkip: () => void;
-  callDisabled: boolean;
-  callPending: boolean;
-  preparing: boolean;
-  disabledReason: string | null;
-  callButtonRef: RefObject<HTMLButtonElement | null>;
 }) {
   return (
     <section aria-label={QUEUE_COPY.section} className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
@@ -309,13 +289,7 @@ function LeadsQueue({
       <LeadsTable
         leads={visible}
         nextLeadId={nextLeadId}
-        onCall={onCall}
         onSkip={onSkip}
-        callDisabled={callDisabled}
-        callPending={callPending}
-        preparing={preparing}
-        disabledReason={disabledReason}
-        callButtonRef={callButtonRef}
         hasMore={hasMore}
         loadingMore={loadingMore}
         onLoadMore={onLoadMore}

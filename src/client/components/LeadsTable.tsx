@@ -41,39 +41,12 @@ function LoadSentinel({
   return <div ref={nodeRef} aria-hidden className="h-px w-full" />;
 }
 
-function UpNextActions({
-  onCall,
-  onSkip,
-  callDisabled,
-  callPending,
-  preparing,
-  disabledReason,
-  callButtonRef
-}: {
-  onCall: () => void;
-  onSkip: () => void;
-  callDisabled: boolean;
-  callPending: boolean;
-  preparing: boolean;
-  disabledReason: string | null;
-  callButtonRef?: RefObject<HTMLButtonElement | null>;
-}) {
-  const hint = disabledReason ?? (preparing ? QUEUE_COPY.preparing : null);
+function UpNextActions({ onSkip }: { onSkip: () => void }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Button
-        ref={callButtonRef}
-        className="min-h-11 min-w-24 rounded-lg!"
-        isDisabled={callDisabled}
-        isPending={callPending}
-        onPress={onCall}
-      >
-        {callPending ? "Calling…" : "Call"}
-      </Button>
-      <Button variant="outline" className="min-h-11 rounded-lg!" isDisabled={callPending} onPress={onSkip}>
+      <Button variant="outline" className="min-h-11 rounded-lg!" onPress={onSkip}>
         Skip
       </Button>
-      {hint ? <p className="basis-full text-sm text-muted">{hint}</p> : null}
     </div>
   );
 }
@@ -85,13 +58,7 @@ export function LeadsTable({
   loadingMore = false,
   onLoadMore,
   nextLeadId = null,
-  onCall,
-  onSkip,
-  callDisabled = false,
-  callPending = false,
-  preparing = false,
-  disabledReason = null,
-  callButtonRef
+  onSkip
 }: {
   leads: PublicLead[];
   empty?: ReactNode;
@@ -99,13 +66,7 @@ export function LeadsTable({
   loadingMore?: boolean;
   onLoadMore?: () => void;
   nextLeadId?: string | null;
-  onCall?: () => void;
   onSkip?: () => void;
-  callDisabled?: boolean;
-  callPending?: boolean;
-  preparing?: boolean;
-  disabledReason?: string | null;
-  callButtonRef?: RefObject<HTMLButtonElement | null>;
 }) {
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
@@ -118,7 +79,7 @@ export function LeadsTable({
   ) : null;
 
   function isNext(lead: PublicLead): boolean {
-    return Boolean(nextLeadId && lead.leadId === nextLeadId && onCall && onSkip);
+    return Boolean(nextLeadId && lead.leadId === nextLeadId && onSkip);
   }
 
   return (
@@ -126,7 +87,7 @@ export function LeadsTable({
       <ul className="space-y-3 lg:hidden" aria-label="Leads">
         {leads.map((lead) => {
           const next = isNext(lead);
-          if (next && onCall && onSkip) {
+          if (next && onSkip) {
             return (
               <li key={lead.leadId}>
                 <article
@@ -155,14 +116,7 @@ export function LeadsTable({
                   </p>
                   {lead.lastTouch ? <div className="mt-2"><LastTouchLine touch={lead.lastTouch} /></div> : null}
                   <div className="mt-4">
-                    <UpNextActions
-                      onCall={onCall}
-                      onSkip={onSkip}
-                      callDisabled={callDisabled}
-                      callPending={callPending}
-                      preparing={preparing}
-                      disabledReason={disabledReason}
-                    />
+                    <UpNextActions onSkip={onSkip} />
                   </div>
                 </article>
               </li>
@@ -252,17 +206,7 @@ export function LeadsTable({
                     {[lead.callStatus, lead.crmStatus].filter(Boolean).join(" · ") || "—"}
                   </td>
                   <td className="px-4 py-2.5">
-                    {next && onCall && onSkip ? (
-                      <UpNextActions
-                        onCall={onCall}
-                        onSkip={onSkip}
-                        callDisabled={callDisabled}
-                        callPending={callPending}
-                        preparing={preparing}
-                        disabledReason={disabledReason}
-                        callButtonRef={callButtonRef}
-                      />
-                    ) : null}
+                    {next && onSkip ? <UpNextActions onSkip={onSkip} /> : null}
                   </td>
                 </tr>
               );
