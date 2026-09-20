@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { ProspectPreparation } from "../../shared/campaigns";
 import type { PublicLead } from "../../shared/contracts";
@@ -27,6 +27,7 @@ export function useLeadCall(lead: PublicLead | null) {
     loading: boolean;
   } | null>(null);
   const [prepRefresh, setPrepRefresh] = useState<{ key: string; attempt: number } | null>(null);
+  const consumedRefresh = useRef<{ key: string; attempt: number } | null>(null);
 
   const campaign = useMemo(
     () => data.campaigns.find((item) => item.id === data.selectedCampaignId) ?? data.campaigns[0],
@@ -52,6 +53,9 @@ export function useLeadCall(lead: PublicLead | null) {
   const prepError = prepState?.key === prepKey ? prepState.error : null;
   const preparing = Boolean(prepKey && (prepState?.key !== prepKey || prepState.loading));
   const refreshAttempt = prepRefresh?.key === prepKey ? prepRefresh.attempt : 0;
+  const forceRefresh = refreshAttempt > (
+    consumedRefresh.current?.key === prepKey ? consumedRefresh.current.attempt : 0
+  );
 
   const disabledReason = !campaign
     ? "Create a campaign first"
@@ -81,7 +85,10 @@ export function useLeadCall(lead: PublicLead | null) {
       error: null,
       loading: true
     }));
-    void prepareLead(campaign.id, lead.leadId, refreshAttempt > 0, controller.signal)
+    if (forceRefresh) {
+      consumedRefresh.current = { key: prepKey, attempt: refreshAttempt };
+    }
+    void prepareLead(campaign.id, lead.leadId, forceRefresh, controller.signal)
       .then((result) => {
         if (!controller.signal.aborted) {
           setPrepState({ key: prepKey, result, error: null, loading: false });
@@ -98,7 +105,7 @@ export function useLeadCall(lead: PublicLead | null) {
         }
       });
     return () => controller.abort();
-  }, [prepKey, refreshAttempt, callActive, campaign, lead]);
+  }, [prepKey, refreshAttempt, callActive, campaign?.id, lead?.leadId]);
 
   async function onCall() {
     if (!lead || !data.selectedCampaignId || disabledReason) return;

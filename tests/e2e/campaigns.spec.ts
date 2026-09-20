@@ -48,12 +48,19 @@ test("create different offerings, match leads by sheet tag, view cited preparati
 
     server.llm.enqueueJson(interviewTurn({ ...offering("Invoice assistant"), sheetCampaignValue: "lamina-sales" }));
     server.llm.enqueueJson(strategy("Invoice collections"));
-    server.llm.enqueueJson(prospectBrief());
+    const initialBrief = prospectBrief();
+    initialBrief.opening = "Alex, how does Northwind QA handle invoice follow-up?";
+    server.llm.enqueueJson(initialBrief);
     await openCampaignChat(page);
     await sendCampaignChat(page, offeringMessage("Invoice assistant", "lamina-sales"));
     await openFirstLead(page);
     await expect(page.getByLabel("AI prospect brief")).toContainText("invoice follow-up");
     await expect(page.getByLabel("AI prospect brief").getByRole("link", { name: "[1]", exact: true })).toHaveAttribute("href", "https://example.com/company");
+    const regeneratedInitial = prospectBrief();
+    regeneratedInitial.opening = "Alex, what makes invoice follow-up difficult today?";
+    server.llm.enqueueJson(regeneratedInitial);
+    await page.getByRole("button", { name: "Regenerate brief", exact: true }).click();
+    await expect(page.getByLabel("AI prospect brief")).toContainText("what makes invoice follow-up difficult today");
     await expect(page.getByRole("button", { name: "Call", exact: true })).toBeEnabled();
     await page.screenshot({ path: "test-results/ai-campaigns-desktop.png", fullPage: true });
 
