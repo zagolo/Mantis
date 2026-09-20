@@ -13,8 +13,12 @@ import { connectTwilioCall, hangUpTwilioCall } from "../twilio/device";
 import { callReviewPath } from "./openCallReview";
 import { useSession } from "./session";
 
-export function useLeadCall(lead: PublicLead | null) {
+export function useLeadCall(
+  lead: PublicLead | null,
+  options: { prepareOnMount?: boolean } = {}
+) {
   const navigate = useNavigate();
+  const prepareOnMount = options.prepareOnMount ?? true;
   const location = useLocation();
   const { data, pending, deviceStatus, runQueue, handleSkipLead, setReview, setLiveCall } = useSession();
   const [call, setCall] = useState<CallSessionView | null>(null);
@@ -37,7 +41,7 @@ export function useLeadCall(lead: PublicLead | null) {
   const sheetBlocking = data.sheet.status === "error" || data.sheet.status === "unconfigured";
 
   const prepKey =
-    campaign?.brief && lead
+    prepareOnMount && campaign?.brief && lead
       ? JSON.stringify([
           campaign.id,
           campaign.version,
