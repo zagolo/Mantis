@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { ProspectPreparation } from "../../shared/campaigns";
 import type { PublicLead } from "../../shared/contracts";
@@ -26,8 +26,8 @@ export function useLeadCall(lead: PublicLead | null) {
     error: string | null;
     loading: boolean;
   } | null>(null);
-  const [prepRefresh, setPrepRefresh] = useState<{ key: string; attempt: number } | null>(null);
-  const consumedRefresh = useRef<{ key: string; attempt: number } | null>(null);
+  const preparationRequest = useRef<{ token: number; controller: AbortController } | null>(null);
+  const preparationToken = useRef(0);
 
   const campaign = useMemo(
     () => data.campaigns.find((item) => item.id === data.selectedCampaignId) ?? data.campaigns[0],
@@ -52,10 +52,6 @@ export function useLeadCall(lead: PublicLead | null) {
   const preparation = prepState?.key === prepKey ? prepState.result : null;
   const prepError = prepState?.key === prepKey ? prepState.error : null;
   const preparing = Boolean(prepKey && (prepState?.key !== prepKey || prepState.loading));
-  const refreshAttempt = prepRefresh?.key === prepKey ? prepRefresh.attempt : 0;
-  const forceRefresh = refreshAttempt > (
-    consumedRefresh.current?.key === prepKey ? consumedRefresh.current.attempt : 0
-  );
 
   const disabledReason = !campaign
     ? "Create a campaign first"
@@ -76,26 +72,27 @@ export function useLeadCall(lead: PublicLead | null) {
     return () => setLiveCall(null);
   }, [call, setLiveCall]);
 
-  useEffect(() => {
+  const startPreparation = useCallback((force: boolean) => {
     if (!prepKey || !campaign || !lead || callActive) return undefined;
+    preparationRequest.current?.controller.abort();
     const controller = new AbortController();
+    const token = preparationToken.current + 1;
+    preparationToken.current = token;
+    preparationRequest.current = { token, controller };
     setPrepState((previous) => ({
       key: prepKey,
       result: previous?.key === prepKey ? previous.result : null,
       error: null,
       loading: true
     }));
-    if (forceRefresh) {
-      consumedRefresh.current = { key: prepKey, attempt: refreshAttempt };
-    }
-    void prepareLead(campaign.id, lead.leadId, forceRefresh, controller.signal)
+    void prepareLead(campaign.id, lead.leadId, force, controller.signal)
       .then((result) => {
-        if (!controller.signal.aborted) {
+        if (!controller.signal.aborted && preparationRequest.current?.token === token) {
           setPrepState({ key: prepKey, result, error: null, loading: false });
         }
       })
       .catch((err) => {
-        if (!controller.signal.aborted) {
+        if (!controller.signal.aborted && preparationRequest.current?.token === token) {
           setPrepState({
             key: prepKey,
             result: null,
@@ -104,8 +101,15 @@ export function useLeadCall(lead: PublicLead | null) {
           });
         }
       });
-    return () => controller.abort();
-  }, [prepKey, refreshAttempt, callActive, campaign?.id, lead?.leadId]);
+    return () => {
+      controller.abort();
+      if (preparationRequest.current?.token === token) {
+        preparationRequest.current = null;
+      }
+    };
+  }, [callActive, campaign?.id, lead?.leadId, prepKey]);
+
+  useEffect(() => startPreparation(false), [startPreparation]);
 
   async function onCall() {
     if (!lead || !data.selectedCampaignId || disabledReason) return;
@@ -194,6 +198,6 @@ export function useLeadCall(lead: PublicLead | null) {
     onSkip,
     onRefresh,
     openReview,
-    regeneratePrep: () => setPrepRefresh({ key: prepKey, attempt: refreshAttempt + 1 })
+    regeneratePrep: () => void startPreparation(true)
   };
 }
