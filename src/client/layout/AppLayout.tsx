@@ -34,6 +34,7 @@ export function AppLayout() {
   const location = useLocation();
   const twilioConfigured = data.twilio.status === "ok";
   const onReview = location.pathname.includes("/calls/") && location.pathname.endsWith("/review");
+  const onHome = location.pathname === "/leads";
   const hideCampaignChrome = Boolean(liveCall) || onReview;
   const hasCampaigns = data.campaigns.length > 0;
   const alertCount = notificationCount(data.pendingProposal, data.sheet.diagnostics);
@@ -190,7 +191,7 @@ export function AppLayout() {
                 {data.twilio.callerId}
               </p>
             ) : null}
-            {hideCampaignChrome ? null : (
+            {hideCampaignChrome || onHome ? null : (
               <button
                 type="button"
                 aria-label={NAV_COPY.dial}
