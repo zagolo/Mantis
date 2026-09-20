@@ -22,12 +22,13 @@ export function LeadDetailPage() {
   const lead = decodedId
     ? (data.leads.find((item) => item.leadId === decodedId) ?? (data.lead?.leadId === decodedId ? data.lead : null))
     : data.lead;
+  const leadReady = Boolean(decodedId && lead?.leadId === decodedId && data.lead?.leadId === decodedId);
   usePageTitle(PAGE_TITLES.lead(lead?.fullName));
 
   const {
     campaign, call, setCall, callError, starting, pending, disabledReason, sheetBlocking,
     preparation, preparing, prepError, opening, firstQuestion, onCall, onRefresh, openReview, regeneratePrep
-  } = useLeadCall(lead ?? null);
+  } = useLeadCall(lead ?? null, leadReady);
 
   useEffect(() => {
     if (!decodedId || !data.selectedCampaignId) return;

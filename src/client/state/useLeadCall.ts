@@ -13,7 +13,7 @@ import { connectTwilioCall, hangUpTwilioCall } from "../twilio/device";
 import { callReviewPath } from "./openCallReview";
 import { useSession } from "./session";
 
-export function useLeadCall(lead: PublicLead | null) {
+export function useLeadCall(lead: PublicLead | null, ready = true) {
   const navigate = useNavigate();
   const location = useLocation();
   const { data, pending, deviceStatus, runQueue, handleSkipLead, setReview, setLiveCall } = useSession();
@@ -51,15 +51,17 @@ export function useLeadCall(lead: PublicLead | null) {
       : "";
   const preparation = prepState?.key === prepKey ? prepState.result : null;
   const prepError = prepState?.key === prepKey ? prepState.error : null;
-  const preparing = Boolean(prepKey && (prepState?.key !== prepKey || prepState.loading));
+  const preparing = Boolean(prepKey && (!ready || prepState?.key !== prepKey || prepState.loading));
 
-  const disabledReason = !campaign
-    ? "Create a campaign first"
-    : campaign.brief && preparing
-      ? null
-      : campaign.brief && !preparation
-        ? "Generate a call brief before calling"
-        : callDisabledReason({
+  const disabledReason = !ready
+    ? "Loading lead"
+    : !campaign
+      ? "Create a campaign first"
+      : campaign.brief && preparing
+        ? null
+        : campaign.brief && !preparation
+          ? "Generate a call brief before calling"
+          : callDisabledReason({
             twilioConfigured,
             deviceStatus,
             lead: lead ?? null,
@@ -73,7 +75,7 @@ export function useLeadCall(lead: PublicLead | null) {
   }, [call, setLiveCall]);
 
   const startPreparation = useCallback((force: boolean) => {
-    if (!prepKey || !campaign || !lead || callActive) return undefined;
+    if (!ready || !prepKey || !campaign || !lead || callActive) return undefined;
     preparationRequest.current?.controller.abort();
     const controller = new AbortController();
     const token = preparationToken.current + 1;
@@ -107,12 +109,12 @@ export function useLeadCall(lead: PublicLead | null) {
         preparationRequest.current = null;
       }
     };
-  }, [callActive, campaign?.id, lead?.leadId, prepKey]);
+  }, [callActive, campaign?.id, lead?.leadId, prepKey, ready]);
 
   useEffect(() => startPreparation(false), [startPreparation]);
 
   async function onCall() {
-    if (!lead || !data.selectedCampaignId || disabledReason) return;
+    if (!ready || !lead || !data.selectedCampaignId || disabledReason) return;
     setStarting(true);
     setCallError(null);
     try {
@@ -198,6 +200,8 @@ export function useLeadCall(lead: PublicLead | null) {
     onSkip,
     onRefresh,
     openReview,
-    regeneratePrep: () => void startPreparation(true)
+    regeneratePrep: () => {
+      if (ready) void startPreparation(true);
+    }
   };
 }
