@@ -86,6 +86,9 @@ export function ContactCardSkeleton({
   );
 }
 
+const BRIEF_CARD_CLASS = "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm";
+const BRIEF_LOADING_CLASS = `brief-card-pulse ${BRIEF_CARD_CLASS}`;
+
 export function BriefLoading({
   error,
   action
@@ -96,7 +99,7 @@ export function BriefLoading({
   const failed = Boolean(error);
   return (
     <section
-      className={`${failed ? "" : "brief-card-pulse "}flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm`}
+      className={failed ? BRIEF_CARD_CLASS : BRIEF_LOADING_CLASS}
       role={failed ? "alert" : "status"}
       aria-label="AI prospect brief"
       aria-busy={failed ? undefined : "true"}
@@ -115,7 +118,7 @@ export function BriefLoading({
 export function BriefCardSkeleton() {
   return (
     <section
-      className="brief-card-pulse flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm"
+      className={BRIEF_LOADING_CLASS}
       aria-hidden="true"
       data-brief-state="loading"
     />
