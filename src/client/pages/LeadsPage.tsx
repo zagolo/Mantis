@@ -1,34 +1,37 @@
-import { useRef, useState, type RefObject } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Alert, Button } from "@heroui/react";
 import { useSession } from "../state/session";
 import { EmptyState } from "../components/EmptyState";
 import { LeadsTable, type LeadSortKey } from "../components/LeadsTable";
 import type { PublicLead } from "../../shared/contracts";
-import { CallingPanel } from "../components/CallingPanel";
 import { AI_DISCONNECTED_COPY, EMPTY_COPY, PAGE_TITLES, QUEUE_COPY } from "../copy";
-import { useLeadCall } from "../state/useLeadCall";
+import { refreshLeads } from "../state/api";
 import { usePaginatedLeads } from "../state/usePaginatedLeads";
 import { usePageTitle } from "../usePageTitle";
 import { clampLeadsLimit } from "../../shared/leadsQueue";
 
 export function LeadsPage() {
-  const { data, pending, campaignBusy, setEditor } = useSession();
+  const { data, pending, campaignBusy, setEditor, runQueue, handleSkipLead } = useSession();
   usePageTitle(PAGE_TITLES.home);
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
   const [dialableOnly, setDialableOnly] = useState(true);
   const [sortKey, setSortKey] = useState<LeadSortKey>("queue");
   const [sortDir, setSortDir] = useState<1 | -1>(1);
-  const callButtonRef = useRef<HTMLButtonElement>(null);
-
   const nextLead = data.leads.find((item) => item.dialable) ?? null;
-  const {
-    campaign, call, setCall, callError, starting, disabledReason, sheetBlocking,
-    preparation, opening, firstQuestion, preparing, onCall, onSkip, onRefresh, openReview
-  } = useLeadCall(nextLead);
+  const campaign = data.campaigns.find((item) => item.id === data.selectedCampaignId) ?? data.campaigns[0];
+  const sheetBlocking = data.sheet.status === "error" || data.sheet.status === "unconfigured";
 
-  const sheetUnconfigured = data.sheet.status === "error" || data.sheet.status === "unconfigured";
+  function onRefresh() {
+    void runQueue(() => refreshLeads(data.selectedCampaignId));
+  }
+
+  function onSkip() {
+    if (nextLead) void handleSkipLead(nextLead.leadId);
+  }
+
+  const sheetUnconfigured = sheetBlocking;
   const queueStamp = data.leads.map((lead) => lead.leadId).join(",");
   const page = usePaginatedLeads({
     campaignId: data.selectedCampaignId,
@@ -57,20 +60,6 @@ export function LeadsPage() {
       setSortKey(key);
       setSortDir(1);
     }
-  }
-
-  if (call) {
-    return (
-      <CallingPanel
-        session={call}
-        recordingNotice={data.recordingNotice}
-        preparation={preparation}
-        opening={opening}
-        firstQuestion={firstQuestion}
-        onSession={setCall}
-        onTerminal={() => void openReview(call.id)}
-      />
-    );
   }
 
   return (
@@ -117,7 +106,6 @@ export function LeadsPage() {
             aiMessage={data.ai.message}
             researchStatus={data.research.status}
             researchMessage={data.research.message}
-            callError={callError}
           />
           <LeadsQueue
             query={query}
@@ -137,13 +125,8 @@ export function LeadsPage() {
             onRefresh={onRefresh}
             refreshDisabled={pending || campaignBusy}
             nextLeadId={nextLead?.leadId ?? null}
-            onCall={() => void onCall()}
-            onSkip={() => void onSkip()}
-            callDisabled={Boolean(disabledReason) || pending || starting || preparing || sheetBlocking}
-            callPending={starting}
-            preparing={preparing}
-            disabledReason={disabledReason}
-            callButtonRef={callButtonRef}
+            onSkip={onSkip}
+            skipDisabled={pending || sheetBlocking}
           />
         </div>
       )}
@@ -156,13 +139,11 @@ function QueueAlerts({
   aiMessage,
   researchStatus,
   researchMessage,
-  callError
 }: {
   aiStatus: string;
   aiMessage: string;
   researchStatus: string;
   researchMessage: string;
-  callError: string | null;
 }) {
   return (
     <>
@@ -179,14 +160,6 @@ function QueueAlerts({
           <Alert.Indicator />
           <Alert.Content>
             <Alert.Title>{researchMessage}</Alert.Title>
-          </Alert.Content>
-        </Alert>
-      ) : null}
-      {callError ? (
-        <Alert status="danger" role="alert">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>{callError}</Alert.Title>
           </Alert.Content>
         </Alert>
       ) : null}
@@ -212,13 +185,8 @@ function LeadsQueue({
   onRefresh,
   refreshDisabled,
   nextLeadId,
-  onCall,
   onSkip,
-  callDisabled,
-  callPending,
-  preparing,
-  disabledReason,
-  callButtonRef
+  skipDisabled
 }: {
   query: string;
   setQuery: (value: string) => void;
@@ -237,13 +205,8 @@ function LeadsQueue({
   onRefresh?: () => void;
   refreshDisabled?: boolean;
   nextLeadId: string | null;
-  onCall: () => void;
   onSkip: () => void;
-  callDisabled: boolean;
-  callPending: boolean;
-  preparing: boolean;
-  disabledReason: string | null;
-  callButtonRef: RefObject<HTMLButtonElement | null>;
+  skipDisabled: boolean;
 }) {
   return (
     <section aria-label={QUEUE_COPY.section} className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
@@ -309,13 +272,8 @@ function LeadsQueue({
       <LeadsTable
         leads={visible}
         nextLeadId={nextLeadId}
-        onCall={onCall}
         onSkip={onSkip}
-        callDisabled={callDisabled}
-        callPending={callPending}
-        preparing={preparing}
-        disabledReason={disabledReason}
-        callButtonRef={callButtonRef}
+        skipDisabled={skipDisabled}
         hasMore={hasMore}
         loadingMore={loadingMore}
         onLoadMore={onLoadMore}
