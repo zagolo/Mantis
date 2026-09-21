@@ -142,7 +142,7 @@ export function LeadDetailPage() {
           <div className="flex min-h-0 min-w-0 flex-1 flex-col lg:h-full lg:overflow-hidden">
             {campaign?.brief ? (
               preparing || !preparation ? (
-                <BriefLoading error={prepError} />
+                <BriefLoading error={prepError} action={prepError ? regenerateAction : undefined} />
               ) : (
                 <ProspectBrief
                   preparation={preparation}

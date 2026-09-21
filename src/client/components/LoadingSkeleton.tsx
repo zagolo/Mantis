@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { SPLIT, SPLIT_PANE, SPLIT_RAIL } from "../layout/shell";
 import { AuthWash } from "./AuthShell";
 import { ThemeToggle } from "./ThemeToggle";
@@ -85,19 +86,27 @@ export function ContactCardSkeleton({
   );
 }
 
-export function BriefLoading({ error }: { error?: string | null } = {}) {
+export function BriefLoading({
+  error,
+  action
+}: {
+  error?: string | null;
+  action?: ReactNode;
+} = {}) {
+  const failed = Boolean(error);
   return (
     <section
-      className="brief-card-pulse flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm"
-      role="status"
+      className={`${failed ? "" : "brief-card-pulse "}flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm`}
+      role={failed ? "alert" : "status"}
       aria-label="AI prospect brief"
-      aria-busy="true"
-      data-brief-state="loading"
+      aria-busy={failed ? undefined : "true"}
+      data-brief-state={failed ? "error" : "loading"}
     >
-      {error ? (
-        <p role="alert" className="shrink-0 px-5 pt-5 text-sm font-medium text-danger sm:px-8 sm:pt-8">
-          {error}
-        </p>
+      {failed ? (
+        <div className="shrink-0 px-5 py-5 sm:px-8 sm:py-8">
+          <p className="text-sm font-medium text-danger">{error}</p>
+          {action ? <div className="mt-4 flex flex-wrap items-center gap-2">{action}</div> : null}
+        </div>
       ) : null}
     </section>
   );
