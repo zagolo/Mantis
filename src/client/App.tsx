@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import type { BootstrapResponse } from "../shared/contracts";
 import { fetchBootstrap, fetchSession } from "./state/api";
 import { SessionProvider } from "./state/session";
@@ -32,12 +32,12 @@ export function App() {
 
 function AuthGate() {
   const location = useLocation();
-  const [auth, setAuth] = useState<"checking" | "guest" | "ready">("checking");
+  const [auth, setAuth] = useState<"checking" | "loading" | "guest" | "ready">("checking");
   const [bootstrap, setBootstrap] = useState<BootstrapResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const enterApp = useCallback(async () => {
-    setAuth("checking");
+    setAuth("loading");
     setError(null);
     try {
       const data = await fetchBootstrap();
@@ -77,7 +77,7 @@ function AuthGate() {
     return <BootstrapError onRetry={() => void checkSession()} />;
   }
 
-  if (auth === "checking") {
+  if (auth === "checking" || auth === "loading") {
     if (isAuthPath(location.pathname)) {
       return (
         <div className="flex min-h-dvh flex-col">
@@ -97,15 +97,19 @@ function AuthGate() {
               </span>
               {PRODUCT_NAME}
             </p>
-            <div className="flex min-w-0 max-w-[min(36rem,calc(100%-8rem))] flex-1 items-center gap-2 sm:gap-3" aria-hidden="true">
-              <div className="h-8 min-w-0 flex-1 rounded-lg bg-surface-secondary" />
-              <div className="hidden h-3.5 w-24 shrink-0 rounded-full bg-surface-secondary sm:block" />
-            </div>
-            <div className="ml-auto flex shrink-0 items-center justify-end gap-2 sm:gap-4" aria-hidden="true">
-              <div className="h-3.5 w-20 rounded-full bg-surface-secondary" />
-              <div className="hidden h-3.5 w-[5.5rem] rounded-full bg-surface-secondary sm:block" />
-              <div className="h-3.5 w-16 rounded-full bg-surface-secondary" />
-            </div>
+            {auth === "loading" ? (
+              <nav className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 text-xs sm:gap-5 sm:text-sm" aria-label="Workspace">
+                <Link to="/leads" className="hover:text-accent">Queue</Link>
+                <Link to="/analytics" className="hover:text-accent">Analytics</Link>
+                <Link to="/notifications" className="hover:text-accent">Notifications</Link>
+                <Link to="/settings" className="hover:text-accent">Settings</Link>
+              </nav>
+            ) : (
+              <div className="ml-auto flex items-center gap-2" aria-hidden="true">
+                <div className="h-3.5 w-20 rounded-full bg-surface-secondary" />
+                <div className="hidden h-3.5 w-16 rounded-full bg-surface-secondary sm:block" />
+              </div>
+            )}
           </div>
         </header>
         <main className={`${SHELL} flex min-h-0 flex-1 flex-col py-4 sm:py-5 lg:overflow-hidden lg:pb-5`}>

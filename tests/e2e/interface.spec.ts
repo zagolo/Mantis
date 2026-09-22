@@ -43,6 +43,83 @@ test("dark from first paint with legacy preferences; routes remain usable at 360
   await expect(page.locator("html")).not.toHaveClass(/\blight\b/);
 });
 
+test("initial reads explain the wait in the affected region without hiding navigation", async ({ page, server }) => {
+  await signIn(page, server.baseURL);
+  let releaseBoot!: () => void;
+  const heldBoot = new Promise<void>((resolve) => { releaseBoot = resolve; });
+  await page.route("**/api/bootstrap", async (route) => {
+    await heldBoot;
+    await route.continue().catch(() => undefined);
+  });
+  try {
+    await page.goto(`${server.baseURL}/analytics`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Loading analytics…", { exact: true })).toBeVisible();
+    await expect(page.getByText("Mantis", { exact: true })).toBeVisible();
+    await page.setViewportSize({ width: 360, height: 800 });
+    await expect(page.getByRole("navigation", { name: "Workspace" })).toBeVisible();
+    await page.getByRole("link", { name: "Settings" }).click();
+    await expect(page.getByText("Loading settings…", { exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Workspace" }).getByRole("link")).toHaveCount(4);
+    await page.getByRole("link", { name: "Analytics" }).click();
+    await expect(page.getByText("Loading analytics…", { exact: true })).toBeVisible();
+  } finally {
+    releaseBoot();
+  }
+  await expect(page.getByRole("heading", { name: "Analytics" })).toBeVisible();
+
+  let releaseSummary!: () => void;
+  const heldSummary = new Promise<void>((resolve) => { releaseSummary = resolve; });
+  await page.route("**/api/summary?*", async (route) => {
+    await heldSummary;
+    await route.continue().catch(() => undefined);
+  });
+  try {
+    await page.goto(`${server.baseURL}/analytics`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Loading analytics…", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Analytics" })).toBeVisible();
+  } finally {
+    releaseSummary();
+  }
+  await expect(page.getByText("Loading analytics…", { exact: true })).toHaveCount(0);
+});
+
+test("queue and review initial waits show labeled placeholders then settle honestly", async ({ page, server }) => {
+  await signIn(page, server.baseURL);
+  await page.getByLabel("Campaign", { exact: true }).click();
+  await page.getByRole("option", { name: "Lamina founder sales", exact: true }).click();
+  let releaseQueue!: () => void;
+  const heldQueue = new Promise<void>((resolve) => { releaseQueue = resolve; });
+  await page.route("**/api/leads?*", async (route) => {
+    await heldQueue;
+    await route.continue().catch(() => undefined);
+  });
+  try {
+    await page.goto(`${server.baseURL}/leads`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Loading contacts for this campaign…", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Mantis" })).toBeVisible();
+    await expect(page.getByRole("table", { name: "Leads" })).toHaveCount(0);
+  } finally {
+    releaseQueue();
+  }
+  await expect(page.getByRole("table", { name: "Leads" })).toContainText("Alex Rivera");
+
+  let releaseReview!: () => void;
+  const heldReview = new Promise<void>((resolve) => { releaseReview = resolve; });
+  await page.route("**/api/calls/missing-session/proposal", async (route) => {
+    await heldReview;
+    await route.fulfill({ status: 503, body: "Unavailable" }).catch(() => undefined);
+  });
+  try {
+    await page.goto(`${server.baseURL}/calls/missing-session/review`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByText("Loading review…", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Mantis" })).toBeVisible();
+    await expect(page.getByText("Review could not load", { exact: false })).toHaveCount(0);
+  } finally {
+    releaseReview();
+  }
+  await expect(page.getByRole("button", { name: "Retry loading review" })).toBeVisible();
+});
+
 test("session check failure keeps protected content private and retry recovers", async ({ page, server }) => {
   let unavailable = true;
   await page.route("**/api/session", (route) => unavailable

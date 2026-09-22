@@ -110,10 +110,10 @@ export function BriefLoading({
           {action ? <div className="mt-4 flex flex-wrap items-center gap-2">{action}</div> : null}
         </div>
       ) : (
-        <div className="flex h-full min-h-[12rem] flex-col gap-5 px-5 py-6 sm:px-8" aria-hidden="true">
-          <p className="text-sm font-semibold text-muted">Preparing the prospect brief</p>
-          <div className="h-16 rounded-lg bg-accent-soft" />
-          <div className="space-y-3"><Pulse className="h-3 w-4/5" /><Pulse className="h-3 w-2/3" /></div>
+        <div className="flex h-full min-h-[12rem] flex-col gap-5 px-5 py-6 sm:px-8">
+          <p className="text-sm font-semibold text-muted">Preparing the prospect brief…</p>
+          <div aria-hidden="true" className="h-16 rounded-lg bg-accent-soft" />
+          <div aria-hidden="true" className="space-y-3"><Pulse className="h-3 w-4/5" /><Pulse className="h-3 w-2/3" /></div>
         </div>
       )}
     </section>
@@ -128,7 +128,7 @@ export function BriefCardSkeleton() {
       aria-label="Preparing the prospect brief"
       data-brief-state="loading"
     >
-      <div className="px-5 py-6 sm:px-8"><p className="text-sm font-semibold text-muted">Preparing the prospect brief</p><div className="mt-6 h-20 rounded-lg bg-accent-soft" /></div>
+      <div className="px-5 py-6 sm:px-8"><p className="text-sm font-semibold text-muted">Preparing the prospect brief…</p><div aria-hidden="true" className="mt-6 h-20 rounded-lg bg-accent-soft" /></div>
     </section>
   );
 }
@@ -181,6 +181,7 @@ export function QueueTableSkeleton() {
 export function HomeBootSkeleton() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5 lg:overflow-hidden" role="status" aria-label="Loading leads…">
+      <p className="text-sm text-muted">Loading leads…</p>
       <QueueTableSkeleton />
     </div>
   );
@@ -189,6 +190,7 @@ export function HomeBootSkeleton() {
 export function LeadDetailSkeleton() {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 sm:gap-5 lg:overflow-hidden" role="status" aria-label="Loading lead…">
+      <p className="text-sm text-muted">Loading lead…</p>
       <div className={SPLIT}>
         <div className={SPLIT_RAIL}>
           <ContactCardSkeleton />
@@ -209,6 +211,7 @@ export function AnalyticsStatsSkeleton({ labeled = true }: { labeled?: boolean }
       aria-label={labeled ? "Loading analytics…" : undefined}
       aria-hidden={labeled ? undefined : true}
     >
+      {labeled ? <p className="mb-5 text-sm text-muted">Loading analytics…</p> : null}
       <div className="grid grid-cols-3 gap-6 lg:gap-10" aria-hidden="true">
         {[1, 2, 3].map((index) => (
           <div key={index} className="min-w-0">
@@ -239,6 +242,7 @@ export function AnalyticsStatsSkeleton({ labeled = true }: { labeled?: boolean }
 export function AnalyticsSkeleton() {
   return (
     <div role="status" aria-label="Loading analytics…">
+      <p className="mb-4 text-sm text-muted">Loading analytics…</p>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
         <div className="min-w-0">
           <Pulse ground className="h-6 w-28" />
@@ -263,6 +267,7 @@ export function AnalyticsSkeleton() {
 export function NotificationsSkeleton() {
   return (
     <div role="status" aria-label="Loading notifications…">
+      <p className="mb-4 text-sm text-muted">Loading notifications…</p>
       <Pulse ground className="h-6 w-36" />
       <div className="mt-8 grid items-start gap-10 lg:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] lg:gap-14" aria-hidden="true">
         <section className="min-w-0">
@@ -298,6 +303,7 @@ export function NotificationsSkeleton() {
 export function SettingsSkeleton() {
   return (
     <div className="mx-auto w-full max-w-xl" role="status" aria-label="Loading settings…">
+      <p className="mb-4 text-sm text-muted">Loading settings…</p>
       <Pulse ground className="h-6 w-24" />
       <div className="mt-10 flex flex-col gap-12" aria-hidden="true">
         {[1, 2, 3].map((section) => (
@@ -318,6 +324,7 @@ export function SettingsSkeleton() {
 export function ReviewSkeleton() {
   return (
     <section className="review-chat flex min-h-0 flex-1 flex-col" role="status" aria-label="Loading review…">
+      <p className="px-5 pt-4 text-sm text-muted">Loading review…</p>
       <div className="flex min-h-0 flex-1 flex-col" aria-hidden="true">
         <div className={`${REVIEW_COLUMN} flex min-h-0 flex-1 flex-col gap-6 py-5`}>
           <Pulse ground className="h-3.5 w-72 max-w-full" />
@@ -355,6 +362,7 @@ export function LoginSkeleton({ fields = 2 }: { fields?: 2 | 3 }) {
       <div className="absolute right-[max(1rem,env(safe-area-inset-right))] top-5 z-30">
       </div>
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12" role="status" aria-label={label}>
+        <p className="mb-4 text-sm text-muted">{label}</p>
         <div className="flex items-center gap-2">
           <Pulse ground className="size-6 rounded-lg" />
           <Pulse ground className="h-4 w-16" />
