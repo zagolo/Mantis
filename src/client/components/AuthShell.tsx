@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { PRODUCT_NAME } from "../copy";
-import { ThemeToggle } from "./ThemeToggle";
 
 export function AuthWash() {
   return (
@@ -28,7 +27,6 @@ export function AuthShell({
       <div className="relative z-20 h-[3px] bg-accent" />
       <AuthWash />
       <div className="absolute right-[max(1rem,env(safe-area-inset-right))] top-5 z-30">
-        <ThemeToggle />
       </div>
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12">
         <p className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">

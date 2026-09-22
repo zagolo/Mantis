@@ -13,9 +13,7 @@ export const NAV_COPY = {
   calendar: "Calendar",
   newCampaign: "New campaign",
   dial: "Dial a number",
-  signOut: "Sign out",
-  themeToDark: "Switch to dark theme",
-  themeToLight: "Switch to light theme"
+  signOut: "Sign out"
 } as const;
 
 export function pageTitle(...parts: Array<string | null | undefined>): string {
@@ -119,8 +117,8 @@ export const EMPTY_COPY = {
       "Tell the assistant what you sell, who it is for, and what a good call looks like. It interviews you and writes the strategy you call from."
   },
   queue: {
-    title: "No one is ready to call",
-    description: "No eligible contacts in the connected Sheet, or their phone numbers cannot be dialed."
+    title: "No contacts in this queue",
+    description: "The connected Sheet has no eligible contacts yet. Refresh after adding contacts, or check the Sheet connection."
   },
   search: {
     title: "No matching leads",
@@ -195,12 +193,6 @@ export const SETTINGS_COPY = {
     heading: "Account",
     signOut: "Sign out",
     hint: "Signing out ends this browser session. Sheet, campaigns, and Calendar stay as they are for the next sign-in."
-  },
-  appearance: {
-    heading: "Appearance",
-    hint: "Light and dark stay in this browser. Mint stays the accent either way.",
-    light: "Light",
-    dark: "Dark"
   },
   sheet: {
     heading: "Sheet",

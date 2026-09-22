@@ -4,6 +4,7 @@ import { Alert, Button } from "@heroui/react";
 import { useSession } from "../state/session";
 import { EmptyState } from "../components/EmptyState";
 import { LeadsTable, type LeadSortKey } from "../components/LeadsTable";
+import { QueueTableSkeleton } from "../components/LoadingSkeleton";
 import type { PublicLead } from "../../shared/contracts";
 import { AI_DISCONNECTED_COPY, EMPTY_COPY, PAGE_TITLES, QUEUE_COPY } from "../copy";
 import { refreshLeads } from "../state/api";
@@ -12,7 +13,7 @@ import { usePageTitle } from "../usePageTitle";
 import { clampLeadsLimit } from "../../shared/leadsQueue";
 
 export function LeadsPage() {
-  const { data, pending, campaignBusy, setEditor, runQueue, handleSkipLead } = useSession();
+  const { data, queueRevision, pending, campaignBusy, setEditor, runQueue, handleSkipLead } = useSession();
   usePageTitle(PAGE_TITLES.home);
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState("");
@@ -32,7 +33,7 @@ export function LeadsPage() {
   }
 
   const sheetUnconfigured = sheetBlocking;
-  const queueStamp = data.leads.map((lead) => lead.leadId).join(",");
+  const queueStamp = `${data.selectedCampaignId}:${queueRevision}`;
   const page = usePaginatedLeads({
     campaignId: data.selectedCampaignId,
     query,
@@ -45,7 +46,7 @@ export function LeadsPage() {
   });
   const visible = page.rows;
   const undialableCount = page.undialableCount;
-  const tableEmpty = !page.loading && visible.length === 0
+  const tableEmpty = !page.initialLoading && !page.error && !page.loading && visible.length === 0
     ? query.trim()
       ? EMPTY_COPY.search
       : dialableOnly
@@ -80,23 +81,24 @@ export function LeadsPage() {
             title={EMPTY_COPY.sheet.title}
             description={data.sheet.message || EMPTY_COPY.sheet.description}
             action={
-              <Button variant="outline" className="rounded-lg!" onPress={onRefresh}>
-                Refresh
+              <Button className="rounded-lg!" onPress={() => setEditor(campaign.brief ? "edit" : "new")}>
+                Open Sheet connection
               </Button>
             }
           />
         </div>
-      ) : data.leads.length === 0 && page.queueSize === 0 ? (
+      ) : page.queueSize === 0 && !page.initialLoading && !page.error && !page.loading && !query.trim() ? (
         <div className="pt-6">
           <EmptyState
             icon="leads"
             title={EMPTY_COPY.queue.title}
             description={EMPTY_COPY.queue.description}
-            action={
-              <Button variant="outline" className="rounded-lg!" onPress={onRefresh}>
-                Refresh
+            action={<div className="flex flex-wrap items-center gap-3">
+              <Button variant="outline" className="rounded-lg!" isDisabled={pending || campaignBusy} onPress={onRefresh}>
+                {pending ? "Refreshing contacts…" : "Refresh contacts"}
               </Button>
-            }
+              <Button variant="outline" className="rounded-lg!" onPress={() => setEditor("edit")}>Check Sheet connection</Button>
+            </div>}
           />
         </div>
       ) : (
@@ -107,6 +109,12 @@ export function LeadsPage() {
             researchStatus={data.research.status}
             researchMessage={data.research.message}
           />
+          {page.error || page.moreError ? (
+            <Alert status="danger" role="alert"><Alert.Indicator /><Alert.Content>
+              <Alert.Title>{page.error ?? page.moreError}</Alert.Title>
+              <Button size="sm" variant="outline" onPress={page.moreError ? page.retryMore : page.retry}>Retry loading contacts</Button>
+            </Alert.Content></Alert>
+          ) : null}
           <LeadsQueue
             query={query}
             setQuery={setQuery}
@@ -121,7 +129,9 @@ export function LeadsPage() {
             tableEmpty={tableEmpty}
             hasMore={page.hasMore}
             loadingMore={page.loadingMore}
-            onLoadMore={page.loadMore}
+            updating={page.loading}
+            initialLoading={page.initialLoading}
+            onLoadMore={page.moreError ? undefined : page.loadMore}
             onRefresh={onRefresh}
             refreshDisabled={pending || campaignBusy}
             nextLeadId={nextLead?.leadId ?? null}
@@ -181,6 +191,8 @@ function LeadsQueue({
   tableEmpty,
   hasMore,
   loadingMore,
+  updating,
+  initialLoading,
   onLoadMore,
   onRefresh,
   refreshDisabled,
@@ -201,7 +213,9 @@ function LeadsQueue({
   tableEmpty: { title: string; description: string } | null;
   hasMore: boolean;
   loadingMore: boolean;
-  onLoadMore: () => void;
+  updating: boolean;
+  initialLoading: boolean;
+  onLoadMore?: () => void;
   onRefresh?: () => void;
   refreshDisabled?: boolean;
   nextLeadId: string | null;
@@ -261,15 +275,21 @@ function LeadsQueue({
               disabled={refreshDisabled}
               onClick={onRefresh}
             >
-              Refresh
+              {refreshDisabled ? "Refreshing…" : "Refresh"}
             </button>
           ) : null}
         </div>
       </div>
+      {updating && visible.length > 0 ? <p role="status" className="px-2 text-sm text-muted">Updating contacts…</p> : null}
       <p className="sr-only" aria-live="polite">
         {visible.length} of {leadsCount}
       </p>
-      <LeadsTable
+      {initialLoading ? (
+        <div role="status" aria-label="Loading contacts for this campaign">
+          <p className="mb-3 text-sm text-muted">Loading contacts for this campaign…</p>
+          <QueueTableSkeleton />
+        </div>
+      ) : <LeadsTable
         leads={visible}
         nextLeadId={nextLeadId}
         onSkip={onSkip}
@@ -293,12 +313,16 @@ function LeadsQueue({
                   <Button variant="outline" size="sm" onPress={() => setDialableOnly(false)}>
                     Show contacts that need a phone fix
                   </Button>
+                ) : !dialableOnly ? (
+                  <Button variant="outline" size="sm" onPress={onRefresh} isDisabled={refreshDisabled}>
+                    {refreshDisabled ? "Refreshing…" : "Refresh contacts"}
+                  </Button>
                 ) : null
               }
             />
           ) : null
         }
-      />
+      />}
     </section>
   );
 }

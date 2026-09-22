@@ -30,7 +30,6 @@ export function CustomDialer({
 
   useEffect(() => {
     if (!open) return undefined;
-    setDigits("");
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const focus = window.requestAnimationFrame(() => inputRef.current?.focus());

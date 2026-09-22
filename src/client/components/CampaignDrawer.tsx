@@ -12,6 +12,7 @@ export function CampaignDrawer({
   onClose,
   onSaved,
   onBusy,
+  busy,
   onSheetBound,
   aiMessage
 }: {
@@ -21,6 +22,7 @@ export function CampaignDrawer({
   onClose: () => void;
   onSaved: (campaign: PublicCampaign) => Promise<void>;
   onBusy: (busy: boolean) => void;
+  busy: boolean;
   onSheetBound?: () => Promise<void>;
   aiMessage?: string;
 }) {
@@ -47,13 +49,13 @@ export function CampaignDrawer({
   }, [open, mode, campaign?.id]);
 
   return (
-    <Modal.Backdrop isOpen={open} onOpenChange={(next) => { if (!next) onClose(); }}>
+    <Modal.Backdrop isOpen={open} onOpenChange={(next) => { if (!next && !busy) onClose(); }}>
       <Modal.Container size="lg">
           <Modal.Dialog
             className={`flex flex-col rounded-lg ${needsSheet ? "h-auto max-h-[min(80dvh,40rem)]" : "h-[min(92dvh,760px)] sm:h-[min(86dvh,760px)]"}`}
             aria-label={mode === "edit" ? "Edit offering" : needsSheet ? EMPTY_COPY.sheetConnect.title : "Create a campaign"}
           >
-          <Modal.CloseTrigger aria-label="Close" />
+          <Modal.CloseTrigger aria-label="Close" isDisabled={busy} />
           <Modal.Header className="pr-8">
             <Modal.Heading>
               {mode === "edit"

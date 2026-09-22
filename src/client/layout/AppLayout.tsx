@@ -12,7 +12,6 @@ import { CustomDialer } from "../components/CustomDialer";
 import { ReadinessChip } from "../components/ReadinessChip";
 import { NAV_COPY, PRODUCT_NAME, notificationsNavLabel } from "../copy";
 import { Icon } from "../components/Icon";
-import { ThemeToggle } from "../components/ThemeToggle";
 import { notificationCount } from "../notifications";
 import { SHELL, isWorkspacePath } from "./shell";
 import "./header.css";
@@ -119,7 +118,7 @@ export function AppLayout() {
         throw connectError;
       }
     } catch (err) {
-      setDialError(err instanceof Error ? err.message : "Could not start call");
+      setDialError("Call start was not confirmed. Check call history before intentionally trying again.");
     } finally {
       setDialStarting(false);
     }
@@ -223,7 +222,6 @@ export function AppLayout() {
             >
               <Icon name="chart" className="text-current" size={20} />
             </Link>
-            <ThemeToggle />
             <Link
               to="/settings"
               aria-label={NAV_COPY.settings}
@@ -327,13 +325,16 @@ export function AppLayout() {
           campaign={selectedCampaign}
           sheet={data.sheet}
           onBusy={setCampaignBusy}
+          busy={campaignBusy}
           aiMessage={data.ai.status !== "ok" ? data.ai.message : undefined}
-          onClose={() => setEditor(null)}
+          onClose={() => { if (!campaignBusy) setEditor(null); }}
           onSaved={async () => {
-            await refresh();
+            if (!(await refresh())) throw new Error("Campaign saved, but workspace was not updated. Check the campaign list before retrying.");
             setEditor(null);
           }}
-          onSheetBound={refresh}
+          onSheetBound={async () => {
+            if (!(await refresh())) throw new Error("Workspace not updated after Sheet connection");
+          }}
         />
       )}
     </div>

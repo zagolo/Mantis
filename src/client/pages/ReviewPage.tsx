@@ -37,9 +37,11 @@ export function ReviewPage() {
   const { setReview, afterWrite, pending, error, refresh } = useSession();
   const [proposal, setProposal] = useState<PublicProposal | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<{ sessionId: string; message: string } | null>(null);
+  const [retry, setRetry] = useState(0);
+  const currentProposal = proposal?.sessionId === sessionId ? proposal : null;
   const navigate = useNavigate();
-  usePageTitle(PAGE_TITLES.review(proposal?.contactName));
+  usePageTitle(PAGE_TITLES.review(currentProposal?.contactName));
 
   useEffect(() => {
     if (!sessionId) {
@@ -57,7 +59,7 @@ export function ReviewPage() {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setFetchError(err instanceof Error ? err.message : "Proposal is not ready");
+        setFetchError({ sessionId, message: "Review could not load. No Sheet changes were authorized." });
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -66,7 +68,7 @@ export function ReviewPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, retry]);
 
   if (!sessionId) {
     return (
@@ -87,7 +89,7 @@ export function ReviewPage() {
     );
   }
 
-  if (loading) {
+  if (loading && !currentProposal) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <ReviewSkeleton />
@@ -95,19 +97,16 @@ export function ReviewPage() {
     );
   }
 
-  if (fetchError || !proposal) {
+  if (fetchError?.sessionId === sessionId || !currentProposal) {
     return (
       <div>
         <div className="mt-8">
           <EmptyState
             icon="review"
             title={EMPTY_COPY.reviewMissing.title}
-            description={fetchError ?? EMPTY_COPY.reviewMissing.description}
-            action={
-              <Link to="/leads" className="text-sm font-medium underline underline-offset-2">
-                Back to ready
-              </Link>
-            }
+            description={fetchError?.sessionId === sessionId ? fetchError.message : EMPTY_COPY.reviewMissing.description}
+            action={<><button type="button" className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-foreground" onClick={() => setRetry((value) => value + 1)}>Retry loading review</button>
+              <Link to="/leads" className="text-sm font-medium underline underline-offset-2">Back to queue</Link></>}
           />
         </div>
       </div>
@@ -117,8 +116,10 @@ export function ReviewPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex min-h-0 flex-1 flex-col">
+        {loading ? <p role="status" className="text-sm text-muted">Updating review…</p> : null}
         <ReviewChat
-          proposal={proposal}
+          key={sessionId}
+          proposal={currentProposal}
           pending={pending}
           error={error}
           onProposal={(next) => {

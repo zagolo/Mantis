@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Call } from "@twilio/voice-sdk";
 import type { BootstrapResponse, PublicProposal } from "../../shared/contracts";
 import {
@@ -28,10 +28,11 @@ export type IncomingCall = { call: Call; sessionId: string; from: string };
 
 type SessionContextValue = {
   data: BootstrapResponse;
+  queueRevision: number;
   pending: boolean;
   error: string | null;
   setError: (message: string | null) => void;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<boolean>;
   runQueue: (action: () => Promise<LeadQueueResponse>) => Promise<LeadQueueResponse | null>;
   handleSelectCampaign: (campaignId: string) => Promise<void>;
   handleSkipLead: (leadId: string) => Promise<LeadQueueResponse | null>;
@@ -73,6 +74,9 @@ function mergeQueue(data: BootstrapResponse, result: LeadQueueResponse): Bootstr
 
 export function SessionProvider({ initial, children }: { initial: BootstrapResponse; children: ReactNode }) {
   const [data, setData] = useState<BootstrapResponse>(initial);
+  const activeCampaign = useRef(initial.selectedCampaignId);
+  const campaignRequest = useRef(0);
+  const [queueRevision, setQueueRevision] = useState(0);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>("offline");
@@ -86,39 +90,54 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
   const twilioConfigured = data.twilio.status === "ok";
 
   const refresh = useCallback(async () => {
+    const request = ++campaignRequest.current;
     setPending(true);
     setError(null);
     try {
       const bootstrap = await fetchBootstrap();
+      if (request !== campaignRequest.current) return false;
+      activeCampaign.current = bootstrap.selectedCampaignId;
       setData(bootstrap);
+      setQueueRevision((value) => value + 1);
       setReview((current) => current ?? bootstrap.pendingProposal);
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed");
+      if (request === campaignRequest.current) setError("Workspace was not updated. Previous information remains available. Check the connection and retry.");
+      return false;
     } finally {
-      setPending(false);
+      if (request === campaignRequest.current) setPending(false);
     }
   }, []);
 
   const runQueue = useCallback(async (action: () => Promise<LeadQueueResponse>) => {
+    const campaignId = activeCampaign.current;
+    const request = ++campaignRequest.current;
     setPending(true);
     setError(null);
     try {
       const result = await action();
+      if (request !== campaignRequest.current || campaignId !== activeCampaign.current) return null;
       setData((current) => mergeQueue(current, result));
+      setQueueRevision((value) => value + 1);
       return result;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed");
+      if (request === campaignRequest.current && campaignId === activeCampaign.current) {
+        setError("Queue action was not confirmed. Check the queue before intentionally retrying.");
+      }
       return null;
     } finally {
-      setPending(false);
+      if (request === campaignRequest.current) setPending(false);
     }
   }, []);
 
   const handleSelectCampaign = useCallback(async (campaignId: string) => {
+    const request = ++campaignRequest.current;
+    activeCampaign.current = campaignId;
     setPending(true);
     setError(null);
     try {
       const result = await selectCampaign(campaignId);
+      if (request !== campaignRequest.current) return;
       setData((current) => ({
         ...current,
         selectedCampaignId: result.selectedCampaignId,
@@ -127,11 +146,14 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
         sheet: result.sheet
       }));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed");
+      if (request === campaignRequest.current) {
+        activeCampaign.current = data.selectedCampaignId;
+        setError("Campaign switch was not confirmed. Previous campaign remains selected; check it before retrying.");
+      }
     } finally {
-      setPending(false);
+      if (request === campaignRequest.current) setPending(false);
     }
-  }, []);
+  }, [data.selectedCampaignId]);
 
   const handleSkipLead = useCallback(async (leadId: string) => {
     const campaignId = data.selectedCampaignId;
@@ -191,7 +213,7 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
       acceptTwilioIncomingCall(ringing);
       return await fetchCallSession(sessionId);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not answer call");
+      setError("Answer was not confirmed. Check the incoming call state before trying again.");
       return null;
     } finally {
       setPending(false);
@@ -214,9 +236,20 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
   }) => {
     if (result.proposal.status === "applied" || result.proposal.status === "discarded") {
       setReview(null);
-      const bootstrap = await fetchBootstrap();
-      setData(bootstrap);
-      return bootstrap;
+      const request = ++campaignRequest.current;
+      try {
+        const bootstrap = await fetchBootstrap();
+        if (request !== campaignRequest.current) return null;
+        activeCampaign.current = bootstrap.selectedCampaignId;
+        setData(bootstrap);
+        setQueueRevision((value) => value + 1);
+        return bootstrap;
+      } catch {
+        if (request === campaignRequest.current) {
+          setError("Sheet change confirmed, but workspace was not updated. Refresh the workspace to check the latest queue.");
+        }
+        return null;
+      }
     }
     setReview(result.proposal);
     setData((current) => ({
@@ -235,7 +268,7 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
     try {
       await afterWrite(await approveProposal(id, fields));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Approve failed");
+      setError("Sheet write was not confirmed. Check the review and Sheet before intentionally retrying.");
     } finally {
       setPending(false);
     }
@@ -243,6 +276,7 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
 
   const value = useMemo<SessionContextValue>(() => ({
     data,
+    queueRevision,
     pending,
     error,
     setError,
@@ -268,7 +302,7 @@ export function SessionProvider({ initial, children }: { initial: BootstrapRespo
     liveCall,
     setLiveCall
   }), [
-    data, pending, error, refresh, runQueue, handleSelectCampaign, handleSkipLead,
+    data, queueRevision, pending, error, refresh, runQueue, handleSelectCampaign, handleSkipLead,
     deviceStatus, deviceDetail, incoming, answerIncoming, declineIncoming, clearIncoming,
     review, afterWrite, approveReview, campaignBusy, editor, liveCall
   ]);

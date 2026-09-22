@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { SPLIT, SPLIT_PANE, SPLIT_RAIL } from "../layout/shell";
 import { AuthWash } from "./AuthShell";
-import { ThemeToggle } from "./ThemeToggle";
 import { REVIEW_COLUMN, REVIEW_COMPOSER } from "./reviewChatLayout";
 
 export function PageSpinner({
@@ -29,7 +28,7 @@ export function PageSpinner({
 function Pulse({ className, ground = false }: { className: string; ground?: boolean }) {
   return (
     <div
-      className={`animate-pulse rounded-full ${ground ? "bg-border" : "bg-surface-secondary"} ${className}`}
+      className={`rounded-full ${ground ? "bg-border" : "bg-surface-secondary"} ${className}`}
     />
   );
 }
@@ -87,7 +86,7 @@ export function ContactCardSkeleton({
 }
 
 const BRIEF_CARD_CLASS = "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm";
-const BRIEF_LOADING_CLASS = `brief-card-pulse ${BRIEF_CARD_CLASS}`;
+const BRIEF_LOADING_CLASS = BRIEF_CARD_CLASS;
 
 export function BriefLoading({
   error,
@@ -110,7 +109,13 @@ export function BriefLoading({
           <p className="text-sm font-medium text-danger">{error}</p>
           {action ? <div className="mt-4 flex flex-wrap items-center gap-2">{action}</div> : null}
         </div>
-      ) : null}
+      ) : (
+        <div className="flex h-full min-h-[12rem] flex-col gap-5 px-5 py-6 sm:px-8" aria-hidden="true">
+          <p className="text-sm font-semibold text-muted">Preparing the prospect brief</p>
+          <div className="h-16 rounded-lg bg-accent-soft" />
+          <div className="space-y-3"><Pulse className="h-3 w-4/5" /><Pulse className="h-3 w-2/3" /></div>
+        </div>
+      )}
     </section>
   );
 }
@@ -119,9 +124,12 @@ export function BriefCardSkeleton() {
   return (
     <section
       className={BRIEF_LOADING_CLASS}
-      aria-hidden="true"
+      role="status"
+      aria-label="Preparing the prospect brief"
       data-brief-state="loading"
-    />
+    >
+      <div className="px-5 py-6 sm:px-8"><p className="text-sm font-semibold text-muted">Preparing the prospect brief</p><div className="mt-6 h-20 rounded-lg bg-accent-soft" /></div>
+    </section>
   );
 }
 
@@ -345,7 +353,6 @@ export function LoginSkeleton({ fields = 2 }: { fields?: 2 | 3 }) {
       <div className="relative z-20 h-[3px] bg-accent" />
       <AuthWash />
       <div className="absolute right-[max(1rem,env(safe-area-inset-right))] top-5 z-30">
-        <ThemeToggle />
       </div>
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12" role="status" aria-label={label}>
         <div className="flex items-center gap-2">

@@ -24,8 +24,8 @@ describe("route boot skeletons", () => {
 
   it("uses destination labels without breadcrumb chrome", () => {
     expect(html("/leads/L-100")).toContain("Loading lead…");
-    expect(html("/leads/L-100")).toContain("brief-card-pulse");
-    expect(html("/leads/L-100")).not.toContain("brief-working");
+    expect(html("/leads/L-100")).toContain("Preparing the prospect brief");
+
     expect(html("/analytics")).toContain("Loading analytics…");
     expect(html("/settings")).toContain("Loading settings…");
     expect(html("/notifications")).toContain("Loading notifications…");
@@ -34,7 +34,7 @@ describe("route boot skeletons", () => {
     expect(html("/calls/s1/review")).toContain("max-w-5xl");
     expect(html("/login")).toContain("Loading sign in…");
     expect(html("/login")).toContain("auth-wash");
-    expect(html("/login")).toContain("Switch to dark theme");
+
     expect(html("/signup")).toContain("Loading create account…");
     expect(html("/signup")).toContain("auth-wash");
     expect(html("/calls/s1/review")).not.toContain("Breadcrumb");

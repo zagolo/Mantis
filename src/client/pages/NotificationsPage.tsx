@@ -56,11 +56,9 @@ export function NotificationsPage() {
                           {item.contactName.trim() || item.leadId}
                         </h3>
                         <p className="mt-1 text-sm leading-relaxed text-muted">
-                          {item.lastError
-                            ? item.lastError
-                            : failed
-                              ? "Sheet write failed. Open review to retry."
-                              : "CRM write waiting."}
+                          {failed
+                            ? "Sheet write not confirmed. Open review to inspect before intentionally retrying."
+                            : "CRM write waiting."}
                         </p>
                         <Link
                           to={reviewHref(item.sessionId)}

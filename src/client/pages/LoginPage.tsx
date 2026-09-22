@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { AUTH_FIELD_CLASS, AuthShell } from "../components/AuthShell";
@@ -16,17 +16,21 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setPending(true);
     setError(null);
     try {
       await login(email, password);
       onLoggedIn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : AUTH_COPY.signInTitle);
+      setError("Sign-in was not confirmed. Check your email and password, then try again.");
     } finally {
+      submitting.current = false;
       setPending(false);
     }
   }
@@ -53,6 +57,8 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
             type="email"
             autoComplete="username"
             required
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "login-error" : undefined}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             className={AUTH_FIELD_CLASS}
@@ -67,13 +73,15 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
             autoComplete="current-password"
             required
             minLength={8}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? "login-error" : undefined}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className={AUTH_FIELD_CLASS}
           />
         </label>
         {error ? (
-          <p role="alert" className="text-sm font-medium text-danger">
+          <p id="login-error" role="alert" className="text-sm font-medium text-danger">
             {error}
           </p>
         ) : null}

@@ -17,7 +17,6 @@ import { bootSkeleton, LoginSkeleton } from "./components/LoadingSkeleton";
 import { EMPTY_COPY, PAGE_TITLES, PRODUCT_NAME } from "./copy";
 import { SHELL } from "./layout/shell";
 import { usePageTitle } from "./usePageTitle";
-import { ThemeToggle } from "./components/ThemeToggle";
 
 function isAuthPath(pathname: string): boolean {
   return pathname.startsWith("/login") || pathname.startsWith("/signup");
@@ -57,30 +56,25 @@ function AuthGate() {
     }
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    void fetchSession()
-      .then((session) => {
-        if (cancelled) return;
-        if (!session.authenticated) {
-          setAuth("guest");
-          return;
-        }
-        return enterApp();
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load");
-          setAuth("guest");
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
+  const checkSession = useCallback(async () => {
+    setAuth("checking");
+    setError(null);
+    try {
+      const session = await fetchSession();
+      if (session.authenticated) await enterApp();
+      else setAuth("guest");
+    } catch {
+      setError("Could not check your session. Check the connection and retry.");
+      setAuth("guest");
+    }
   }, [enterApp]);
 
+  useEffect(() => {
+    void checkSession();
+  }, [checkSession]);
+
   if (error && auth !== "ready") {
-    return <BootstrapError error={error} />;
+    return <BootstrapError onRetry={() => void checkSession()} />;
   }
 
   if (auth === "checking") {
@@ -104,13 +98,13 @@ function AuthGate() {
               {PRODUCT_NAME}
             </p>
             <div className="flex min-w-0 max-w-[min(36rem,calc(100%-8rem))] flex-1 items-center gap-2 sm:gap-3" aria-hidden="true">
-              <div className="h-8 min-w-0 flex-1 animate-pulse rounded-lg bg-surface-secondary" />
-              <div className="hidden h-3.5 w-24 shrink-0 animate-pulse rounded-full bg-surface-secondary sm:block" />
+              <div className="h-8 min-w-0 flex-1 rounded-lg bg-surface-secondary" />
+              <div className="hidden h-3.5 w-24 shrink-0 rounded-full bg-surface-secondary sm:block" />
             </div>
             <div className="ml-auto flex shrink-0 items-center justify-end gap-2 sm:gap-4" aria-hidden="true">
-              <div className="h-3.5 w-20 animate-pulse rounded-full bg-surface-secondary" />
-              <div className="hidden h-3.5 w-[5.5rem] animate-pulse rounded-full bg-surface-secondary sm:block" />
-              <div className="h-3.5 w-16 animate-pulse rounded-full bg-surface-secondary" />
+              <div className="h-3.5 w-20 rounded-full bg-surface-secondary" />
+              <div className="hidden h-3.5 w-[5.5rem] rounded-full bg-surface-secondary sm:block" />
+              <div className="h-3.5 w-16 rounded-full bg-surface-secondary" />
             </div>
           </div>
         </header>
@@ -153,16 +147,13 @@ function AuthGate() {
   );
 }
 
-function BootstrapError({ error }: { error: string }) {
+function BootstrapError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-50 bg-background">
         <div className="h-[3px] bg-accent" />
         <div className={`${SHELL} flex h-14 items-center`}>
           <p className="text-[15px] font-semibold tracking-tight">{PRODUCT_NAME}</p>
-          <div className="ml-auto">
-            <ThemeToggle />
-          </div>
         </div>
       </header>
       <main className={`${SHELL} flex min-h-[calc(100vh-3.75rem)] items-center py-8`}>
@@ -170,7 +161,8 @@ function BootstrapError({ error }: { error: string }) {
           icon="error"
           role="alert"
           title={EMPTY_COPY.bootstrap.title}
-          description={error || EMPTY_COPY.bootstrap.description}
+          description="Workspace could not load. No changes were made. Check the connection and retry."
+          action={<button type="button" className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-foreground" onClick={onRetry}>Retry loading workspace</button>}
         />
       </main>
     </div>

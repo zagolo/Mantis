@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/react";
 import type { CalendarConnectionStatus, PublicCalendarProposal } from "../../shared/contracts";
 import {
@@ -48,6 +48,8 @@ export function CalendarEventCard({
   const [meet, setMeet] = useState(proposal.meet);
   const [notes, setNotes] = useState(proposal.notes);
   const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState<"approve" | "dismiss" | null>(null);
+  const busyRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -76,28 +78,38 @@ export function CalendarEventCard({
   }
 
   async function onApprove() {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
+    setBusyAction("approve");
     setError(null);
     try {
       const next = await approveCalendarProposal(proposal.id, patch());
       onProposal(next);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not send the invite");
+      setError("Calendar approval was not confirmed. Check Calendar before intentionally trying again.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
+      setBusyAction(null);
     }
   }
 
   async function onDismiss() {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
+    setBusyAction("dismiss");
     setError(null);
     try {
       const next = await dismissCalendarProposal(proposal.id);
       onProposal(next);
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not dismiss");
+    } catch {
+      setError("Dismissal was not confirmed. Check the draft status before trying again.");
     } finally {
+      busyRef.current = false;
       setBusy(false);
+      setBusyAction(null);
     }
   }
 
@@ -171,7 +183,7 @@ export function CalendarEventCard({
 
       {proposal.status === "failed" ? (
         <p className="mt-3 text-sm text-danger" role="alert">
-          Send failed{proposal.lastError ? `: ${proposal.lastError}` : "."} Approve again to retry.
+          Calendar did not confirm this invitation. Check Calendar before intentionally approving again.
         </p>
       ) : null}
 
@@ -193,7 +205,7 @@ export function CalendarEventCard({
             )
           ) : (
             <Button className="min-h-11 rounded-lg!" isDisabled={busy} onPress={() => void onApprove()}>
-              Approve
+              {busyAction === "approve" ? "Sending invitation…" : "Approve and send"}
             </Button>
           )}
           <button
@@ -202,7 +214,7 @@ export function CalendarEventCard({
             disabled={busy}
             onClick={() => void onDismiss()}
           >
-            Dismiss
+            {busyAction === "dismiss" ? "Dismissing…" : "Dismiss"}
           </button>
         </div>
       ) : null}

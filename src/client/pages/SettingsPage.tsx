@@ -8,7 +8,6 @@ import { disconnectCalendar, fetchHealthReady, logout } from "../state/api";
 import type { DeviceStatus } from "../state/calls";
 import { useSession } from "../state/session";
 import { usePageTitle } from "../usePageTitle";
-import { ThemePair } from "../components/ThemeToggle";
 
 export function SettingsPage() {
   usePageTitle(PAGE_TITLES.settings);
@@ -18,6 +17,7 @@ export function SettingsPage() {
   const [disconnecting, setDisconnecting] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [deepgram, setDeepgram] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     const flag = searchParams.get("calendar");
@@ -48,9 +48,14 @@ export function SettingsPage() {
   async function onDisconnect() {
     if (!window.confirm(SETTINGS_COPY.calendar.disconnectConfirm)) return;
     setDisconnecting(true);
+    setActionError(null);
     try {
       await disconnectCalendar();
-      await refresh();
+      if (!(await refresh())) {
+        setActionError("Calendar disconnect was confirmed, but status could not be updated. Refresh this page to check the connection.");
+      }
+    } catch {
+      setActionError("Calendar disconnect was not confirmed. Check connection status before trying again.");
     } finally {
       setDisconnecting(false);
     }
@@ -58,9 +63,12 @@ export function SettingsPage() {
 
   async function onSignOut() {
     setSigningOut(true);
+    setActionError(null);
     try {
       await logout();
       window.location.assign("/login");
+    } catch {
+      setActionError("Sign-out was not confirmed. Check your session before retrying.");
     } finally {
       setSigningOut(false);
     }
@@ -80,6 +88,7 @@ export function SettingsPage() {
       research={data.research}
       deepgram={deepgram}
       flash={flash}
+      actionError={actionError}
       disconnecting={disconnecting}
       signingOut={signingOut}
       operatorEmail={data.operator?.email ?? ""}
@@ -104,6 +113,7 @@ export function SettingsView({
   research,
   deepgram,
   flash,
+  actionError,
   disconnecting,
   signingOut,
   operatorEmail,
@@ -124,6 +134,7 @@ export function SettingsView({
   research: ProviderStatus;
   deepgram: string | null;
   flash: string | null;
+  actionError?: string | null;
   disconnecting?: boolean;
   signingOut?: boolean;
   operatorEmail: string;
@@ -140,7 +151,8 @@ export function SettingsView({
     <div className={`flex min-h-0 flex-1 flex-col ${SCROLL}`}>
       <div className="mx-auto w-full max-w-xl">
         <h1 className="text-lg font-semibold tracking-tight">{NAV_COPY.settings}</h1>
-        {flash ? <p className="mt-2 text-sm text-muted">{flash}</p> : null}
+        {flash ? <p role="status" className="mt-2 text-sm text-muted">{flash}</p> : null}
+        {actionError ? <p role="alert" className="mt-2 text-sm text-danger">{actionError}</p> : null}
 
         <div className="mt-10 flex flex-col gap-12">
           <section aria-labelledby="settings-account">
@@ -156,17 +168,9 @@ export function SettingsView({
                 isDisabled={signingOut}
                 onPress={onSignOut}
               >
-                {SETTINGS_COPY.account.signOut}
+                {signingOut ? "Signing out…" : SETTINGS_COPY.account.signOut}
               </Button>
             </div>
-          </section>
-
-          <section aria-labelledby="settings-appearance">
-            <h2 id="settings-appearance" className="text-sm font-medium text-muted">
-              {SETTINGS_COPY.appearance.heading}
-            </h2>
-            <p className="mt-3 max-w-[36em] text-sm leading-relaxed text-muted">{SETTINGS_COPY.appearance.hint}</p>
-            <ThemePair />
           </section>
 
           <section aria-labelledby="settings-calendar">

@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PublicLead } from "../../shared/contracts";
-import {
-  LEADS_PAGE_SIZE,
-  cursorForLeadsQuery,
-  leadsListQueryKey,
-  type LeadSortKey
-} from "../../shared/leadsQueue";
+import { LEADS_PAGE_SIZE, leadsListQueryKey, type LeadSortKey } from "../../shared/leadsQueue";
 import { fetchLeads } from "./api";
+
+type Page = {
+  key: string;
+  rows: PublicLead[];
+  nextCursor: string | null;
+  total: number;
+  queueSize: number;
+  undialableCount: number;
+};
 
 export function usePaginatedLeads(input: {
   campaignId: string | null;
@@ -24,136 +28,101 @@ export function usePaginatedLeads(input: {
     const timer = window.setTimeout(() => setDebouncedQuery(input.query), 150);
     return () => window.clearTimeout(timer);
   }, [input.query]);
-
-  const queryKey = leadsListQueryKey({
-    campaignId: input.campaignId,
-    q: debouncedQuery,
-    dialableOnly: input.dialableOnly,
-    sort: input.sortKey,
-    dir: input.sortDir
+  const key = leadsListQueryKey({
+    campaignId: input.campaignId, q: debouncedQuery, dialableOnly: input.dialableOnly,
+    sort: input.sortKey, dir: input.sortDir
   });
-
-  const [rows, setRows] = useState<PublicLead[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
-  const [queueSize, setQueueSize] = useState(0);
-  const [undialableCount, setUndialableCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const displayKey = leadsListQueryKey({
+    campaignId: input.campaignId, q: input.query, dialableOnly: input.dialableOnly,
+    sort: input.sortKey, dir: input.sortDir
+  });
+  const [page, setPage] = useState<Page | null>(null);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const queryKeyRef = useRef(queryKey);
-  const cursorRef = useRef<string | null>(null);
-  const loadingMoreRef = useRef(false);
+  const [error, setError] = useState<{ key: string; message: string } | null>(null);
+  const [moreError, setMoreError] = useState<{ key: string; message: string } | null>(null);
+  const [retry, setRetry] = useState(0);
+  const generation = useRef(0);
+  const moreBusy = useRef(false);
+  const pageRef = useRef(page);
+  pageRef.current = page;
+  const currentKey = useRef(displayKey);
+  currentKey.current = displayKey;
+  const currentStamp = useRef(input.queueStamp);
+  currentStamp.current = input.queueStamp;
+  const pageForContext = input.enabled && page?.key === displayKey ? page : null;
 
   useEffect(() => {
-    const nextCursorForKey = cursorForLeadsQuery(queryKeyRef.current, queryKey, cursorRef.current);
-    queryKeyRef.current = queryKey;
-    if (nextCursorForKey === null) {
-      cursorRef.current = null;
-      setNextCursor(null);
-    }
-  }, [queryKey]);
-
-  useEffect(() => {
+    const token = ++generation.current;
+    moreBusy.current = false;
+    setLoadingMore(false);
     if (!input.enabled) {
-      setRows([]);
-      setNextCursor(null);
-      cursorRef.current = null;
-      setTotal(0);
-      setQueueSize(0);
-      setUndialableCount(0);
+      setLoading(false);
+      setError(null);
+      setMoreError(null);
       return;
     }
-    const ac = new AbortController();
+    const controller = new AbortController();
     setLoading(true);
+    setError(null);
+    setMoreError(null);
     void fetchLeads({
-      campaignId: input.campaignId,
-      q: debouncedQuery,
-      dialableOnly: input.dialableOnly,
-      sort: input.sortKey,
-      dir: input.sortDir,
-      cursor: null,
-      limit,
-      signal: ac.signal
-    })
-      .then((result) => {
-        setRows(result.leads);
-        setNextCursor(result.nextCursor);
-        cursorRef.current = result.nextCursor;
-        setTotal(result.total);
-        setQueueSize(result.queueSize);
-        setUndialableCount(result.undialableCount);
-      })
-      .catch(() => {
-        /* Abort or a failed page leaves current rows; avoid a stuck spinner. */
-      })
-      .finally(() => {
-        if (!ac.signal.aborted) setLoading(false);
-      });
-    return () => ac.abort();
-  }, [
-    input.enabled,
-    input.campaignId,
-    input.dialableOnly,
-    input.sortKey,
-    input.sortDir,
-    input.queueStamp,
-    debouncedQuery,
-    limit
-  ]);
+      campaignId: input.campaignId, q: debouncedQuery, dialableOnly: input.dialableOnly,
+      sort: input.sortKey, dir: input.sortDir, cursor: null, limit, signal: controller.signal
+    }).then((result) => {
+      if (controller.signal.aborted || token !== generation.current || key !== currentKey.current) return;
+      setPage({ key, rows: result.leads, nextCursor: result.nextCursor,
+        total: result.total, queueSize: result.queueSize, undialableCount: result.undialableCount });
+    }).catch(() => {
+      if (!controller.signal.aborted && token === generation.current && key === currentKey.current) {
+        setError({ key, message: pageRef.current?.key === key ? "Queue not updated. Previous contacts are still shown." : "Could not load contacts for this selection." });
+      }
+    }).finally(() => {
+      if (!controller.signal.aborted && token === generation.current) setLoading(false);
+    });
+    return () => { controller.abort(); generation.current++; };
+  }, [input.enabled, input.campaignId, input.dialableOnly, input.sortKey, input.sortDir, input.queueStamp, debouncedQuery, limit, key, retry]);
 
   const loadMore = useCallback(() => {
-    if (!input.enabled || !cursorRef.current || loadingMoreRef.current) return;
-    const cursor = cursorRef.current;
-    const keyAtStart = queryKeyRef.current;
-    loadingMoreRef.current = true;
+    const current = pageRef.current;
+    if (!input.enabled || !current || current.key !== currentKey.current || !current.nextCursor || moreBusy.current) return;
+    const token = generation.current;
+    const stamp = currentStamp.current;
+    const cursor = current.nextCursor;
+    moreBusy.current = true;
     setLoadingMore(true);
-    void fetchLeads({
-      campaignId: input.campaignId,
-      q: debouncedQuery,
-      dialableOnly: input.dialableOnly,
-      sort: input.sortKey,
-      dir: input.sortDir,
-      cursor,
-      limit
-    })
-      .then((result) => {
-        if (queryKeyRef.current !== keyAtStart) return;
-        setRows((current) => {
-          const seen = new Set(current.map((lead) => lead.leadId));
-          return [...current, ...result.leads.filter((lead) => !seen.has(lead.leadId))];
-        });
-        setNextCursor(result.nextCursor);
-        cursorRef.current = result.nextCursor;
-        setTotal(result.total);
-        setQueueSize(result.queueSize);
-        setUndialableCount(result.undialableCount);
-      })
-      .catch(() => {
-        /* Keep existing rows; sentinel can retry after loadingMore clears. */
-      })
-      .finally(() => {
-        loadingMoreRef.current = false;
-        setLoadingMore(false);
+    setMoreError(null);
+    void fetchLeads({ campaignId: input.campaignId, q: debouncedQuery,
+      dialableOnly: input.dialableOnly, sort: input.sortKey, dir: input.sortDir, cursor, limit
+    }).then((result) => {
+      if (token !== generation.current || current.key !== currentKey.current || stamp !== currentStamp.current) return;
+      setPage((previous) => {
+        if (!previous || previous.key !== current.key || previous.nextCursor !== cursor) return previous;
+        const seen = new Set(previous.rows.map((lead) => lead.leadId));
+        return { key: current.key, rows: [...previous.rows, ...result.leads.filter((lead) => !seen.has(lead.leadId))],
+          nextCursor: result.nextCursor, total: result.total, queueSize: result.queueSize,
+          undialableCount: result.undialableCount };
       });
-  }, [
-    input.enabled,
-    input.campaignId,
-    input.dialableOnly,
-    input.sortKey,
-    input.sortDir,
-    debouncedQuery,
-    limit
-  ]);
+    }).catch(() => {
+      if (token === generation.current && current.key === currentKey.current && stamp === currentStamp.current) {
+        setMoreError({ key: current.key, message: "More contacts were not loaded. Previous contacts are still shown." });
+      }
+    }).finally(() => {
+      if (token === generation.current && stamp === currentStamp.current) {
+        moreBusy.current = false;
+        setLoadingMore(false);
+      }
+    });
+  }, [input.enabled, input.campaignId, input.dialableOnly, input.sortKey, input.sortDir, debouncedQuery, limit]);
 
+  const contextError = error?.key === displayKey ? error.message : null;
   return {
-    rows,
-    nextCursor,
-    hasMore: Boolean(nextCursor),
-    total,
-    queueSize,
-    undialableCount,
-    loading,
-    loadingMore,
-    loadMore
+    rows: pageForContext?.rows ?? [], nextCursor: pageForContext?.nextCursor ?? null,
+    hasMore: Boolean(pageForContext?.nextCursor), total: pageForContext?.total ?? 0,
+    queueSize: pageForContext?.queueSize ?? 0, undialableCount: pageForContext?.undialableCount ?? 0,
+    loading: loading || (input.enabled && displayKey !== key), initialLoading: !pageForContext && input.enabled && !contextError,
+    loadingMore, error: contextError, moreError: moreError?.key === displayKey ? moreError.message : null,
+    loadMore, retry: () => setRetry((value) => value + 1),
+    retryMore: () => { setMoreError(null); loadMore(); }
   };
 }

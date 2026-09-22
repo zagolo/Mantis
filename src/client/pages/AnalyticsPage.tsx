@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Button } from "@heroui/react";
 import { useSearchParams } from "react-router-dom";
 import { CampaignSelect } from "../components/CampaignSelect";
 import { DailySummaryPanel } from "../components/DailySummaryPanel";
@@ -46,8 +47,11 @@ export function AnalyticsPage() {
   const today = utcDayStamp();
   const date = isDayStamp(searchParams.get("date")) ? searchParams.get("date")! : today;
   const campaignId = searchParams.get("campaignId") ?? "";
-  const [summary, setSummary] = useState<DailySummary | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [stored, setStored] = useState<{ key: string; summary: DailySummary } | null>(null);
+  const key = `${date}:${campaignId}`;
+  const summary = stored?.key === key ? stored.summary : null;
+  const [retry, setRetry] = useState(0);
+  const [error, setError] = useState<{ key: string; message: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   const selectedName = useMemo(
@@ -62,12 +66,11 @@ export function AnalyticsPage() {
     void fetchSummary({ date, campaignId: campaignId || null })
       .then((result) => {
         if (cancelled) return;
-        setSummary(result);
+        setStored({ key, summary: result });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setSummary(null);
-        setError(err instanceof Error ? err.message : "Could not load summary");
+        setError({ key, message: summary ? "Analytics not updated. Previous results are still shown." : "Could not load analytics for this selection." });
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -75,7 +78,7 @@ export function AnalyticsPage() {
     return () => {
       cancelled = true;
     };
-  }, [campaignId, date]);
+  }, [campaignId, date, retry]);
 
   function setFilter(next: { date?: string; campaignId?: string }) {
     const params = new URLSearchParams(searchParams);
@@ -146,18 +149,18 @@ export function AnalyticsPage() {
       </div>
 
       <div className="mt-8">
-        {error ? (
-          <p role="alert" className="text-sm font-medium text-danger">
-            {error}
-          </p>
-        ) : loading ? (
-          <AnalyticsStatsSkeleton />
-        ) : summary ? (
+        {error?.key === key ? (
+          <div role="alert" className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-danger p-4 text-sm text-danger">
+            {error.message} <Button size="sm" variant="outline" onPress={() => setRetry((value) => value + 1)}>Retry analytics</Button>
+          </div>
+        ) : null}
+        {loading && summary ? <p role="status" className="mb-3 text-sm text-muted">Updating analytics…</p> : null}
+        {summary ? (
           <DailySummaryPanel
             summary={summary}
             emptyCopy={summary.attempts === 0 ? emptyCopy : undefined}
           />
-        ) : null}
+        ) : error?.key !== key ? <AnalyticsStatsSkeleton /> : null}
       </div>
     </div>
   );
