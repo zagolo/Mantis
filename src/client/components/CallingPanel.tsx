@@ -10,7 +10,6 @@ import { callEventsUrl, cancelCallSession, fetchCallSession, sendCallDigits, sen
 import { hangUpTwilioCall, sendTwilioDigits, setTwilioMuted } from "../twilio/device";
 import { formatUtteranceText, humanizeId, isWarningCue } from "../copy";
 import { SCROLL, SCROLLBAR, SHELL } from "../layout/shell";
-import { ThemeToggle } from "./ThemeToggle";
 
 type CallingPanelProps = {
   session: CallSessionView;
@@ -249,7 +248,7 @@ export function CallingPanel({
       aria-label="Live call"
     >
       <div className="h-[3px] shrink-0 bg-accent" />
-      <header className="sticky top-0 z-20 shrink-0 bg-background">
+      <header className="sticky top-0 z-40 shrink-0 border-b border-border bg-background">
         <div className={`${SHELL} flex min-h-14 flex-wrap items-center gap-3 py-3`}>
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-lg font-semibold tracking-tight">{session.contactName || "Contact"}</h2>
@@ -262,7 +261,6 @@ export function CallingPanel({
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
             <Button
               variant={muted ? "primary" : "outline"}
               className="min-h-11 rounded-lg!"

@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import type { RefObject } from "react";
 import { Alert, Button, Card } from "@heroui/react";
 import type { PublicCampaign, PublicLead } from "../../shared/contracts";
 import { Icon, QuoteMark } from "./Icon";
@@ -36,11 +36,6 @@ export function ReadyContactCard({
   onRefresh: () => void;
   callButtonRef?: RefObject<HTMLButtonElement | null>;
 }) {
-  useEffect(() => {
-    if (sheetBlocking || disabledReason || starting || preparing) return;
-    callButtonRef?.current?.focus({ preventScroll: true });
-  }, [callButtonRef, disabledReason, preparing, sheetBlocking, starting, lead.leadId]);
-
   const extraIssues = lead.issues.filter((issue) => issue !== "Phone is not dialable");
   const briefLocked = preparing && !opening;
 
@@ -86,14 +81,14 @@ export function ReadyContactCard({
               <p className="mt-3 text-sm leading-relaxed break-words text-accent-soft-foreground">{opening}</p>
             ) : (
               <div className={`mt-3 space-y-3 ${briefLocked ? "min-h-0 flex-1 overflow-hidden" : ""}`} aria-hidden="true">
-                <div className="h-3 w-full animate-pulse rounded-full bg-accent/15" />
-                <div className="h-3 w-5/6 animate-pulse rounded-full bg-accent/15" />
-                <div className="h-3 w-2/3 animate-pulse rounded-full bg-accent/15" />
+                <div className="h-3 w-full rounded-full bg-accent/15" />
+                <div className="h-3 w-5/6 rounded-full bg-accent/15" />
+                <div className="h-3 w-2/3 rounded-full bg-accent/15" />
                 {briefLocked ? (
                   <>
-                    <div className="h-3 w-11/12 animate-pulse rounded-full bg-accent/15" />
-                    <div className="h-3 w-3/4 animate-pulse rounded-full bg-accent/15" />
-                    <div className="h-3 w-4/5 animate-pulse rounded-full bg-accent/15" />
+                    <div className="h-3 w-11/12 rounded-full bg-accent/15" />
+                    <div className="h-3 w-3/4 rounded-full bg-accent/15" />
+                    <div className="h-3 w-4/5 rounded-full bg-accent/15" />
                   </>
                 ) : null}
               </div>
@@ -105,8 +100,8 @@ export function ReadyContactCard({
             <p className="max-w-[32em] text-sm leading-relaxed break-words">{firstQuestion}</p>
           ) : preparing ? (
             <div className="space-y-2" aria-hidden="true">
-              <div className="h-3 w-full animate-pulse rounded-full bg-surface-secondary" />
-              <div className="h-3 w-4/5 animate-pulse rounded-full bg-surface-secondary" />
+              <div className="h-3 w-full rounded-full bg-surface-secondary" />
+              <div className="h-3 w-4/5 rounded-full bg-surface-secondary" />
             </div>
           ) : null}
         </div>

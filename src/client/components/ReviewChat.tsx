@@ -48,16 +48,21 @@ export function ReviewChat({
   const { data } = useSession();
   const calendar = data.calendar ?? { configured: false, connected: false, email: null };
   const [calendarProposals, setCalendarProposals] = useState<PublicCalendarProposal[]>([]);
+  const [calendarError, setCalendarError] = useState(false);
+  const [calendarRetry, setCalendarRetry] = useState(0);
   const setCalendarProposalsRef = useRef(setCalendarProposals);
   setCalendarProposalsRef.current = setCalendarProposals;
 
   useEffect(() => {
+    let cancelled = false;
+    setCalendarError(false);
     void fetchCalendarProposals(proposal.sessionId).then((items) => {
-      setCalendarProposals(items);
+      if (!cancelled) setCalendarProposals(items);
     }).catch(() => {
-      // Review still works without Calendar history.
+      if (!cancelled) setCalendarError(true);
     });
-  }, [proposal.sessionId]);
+    return () => { cancelled = true; };
+  }, [proposal.sessionId, calendarRetry]);
 
   const adapter = useMemo<ChatModelAdapter>(() => ({
     async run({ messages, abortSignal }) {
@@ -84,7 +89,7 @@ export function ReviewChat({
         }
         return { content: [{ type: "text", text: result.text }] };
       } catch (caught) {
-        const text = caught instanceof Error ? caught.message : "Review chat failed. Try again.";
+        const text = "Review action was not confirmed. Your conversation is still here; check the proposed changes before intentionally retrying.";
         setChatError(text);
         return { content: [{ type: "text", text }] };
       }
@@ -105,7 +110,7 @@ export function ReviewChat({
       <section className="review-chat flex min-h-0 flex-1 flex-col" aria-label="Call review">
         <h1 className="sr-only">{who}</h1>
 
-        {dnc || proposal.warnings.length > 0 || failedWrite || error || chatError ? (
+        {dnc || proposal.warnings.length > 0 || failedWrite || error || chatError || calendarError ? (
           <div className={`${REVIEW_COLUMN} mt-3 flex shrink-0 flex-col gap-3`}>
             {dnc ? (
               <Alert status="danger" role="alert">
@@ -131,9 +136,16 @@ export function ReviewChat({
               <Alert status="danger" role="alert">
                 <Alert.Indicator />
                 <Alert.Content>
-                  <Alert.Title>Sheet write failed and is waiting for retry. {proposal.lastError}</Alert.Title>
+                  <Alert.Title>Sheet write was not confirmed and is waiting for an intentional retry. Check the Sheet for changes before retrying.</Alert.Title>
                 </Alert.Content>
               </Alert>
+            ) : null}
+
+            {calendarError ? (
+              <div role="alert" className="rounded-lg border border-danger p-3 text-sm text-foreground">
+                Calendar drafts could not load. Review remains available; no invitation was sent.
+                <button type="button" className="ml-3 font-semibold text-accent underline" onClick={() => setCalendarRetry((value) => value + 1)}>Retry calendar drafts</button>
+              </div>
             ) : null}
 
             {error || chatError ? (

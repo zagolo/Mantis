@@ -43,15 +43,9 @@ export async function logout(): Promise<void> {
 }
 
 export async function fetchSession(): Promise<SessionResponse> {
-  try {
-    const response = await fetch("/api/session", { credentials: "include" });
-    if (!response.ok) {
-      return { authenticated: false, email: null };
-    }
-    return (await response.json()) as SessionResponse;
-  } catch {
-    return { authenticated: false, email: null };
-  }
+  const response = await fetch("/api/session", { credentials: "include" });
+  if (!response.ok) throw new Error("Session could not be checked");
+  return (await response.json()) as SessionResponse;
 }
 
 export async function fetchBootstrap(): Promise<BootstrapResponse> {

@@ -13,17 +13,8 @@ const test = base.extend<{ server: E2eServer }>({
 test("create account, land in the app, then sign out", async ({ page, server }) => {
   await page.goto(server.baseURL);
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
-  const themeRoot = page.locator("html");
-  const initialTheme = await themeRoot.getAttribute("data-theme");
-  if (initialTheme === "dark") {
-    await page.getByRole("button", { name: "Switch to light theme" }).click();
-    await expect(themeRoot).toHaveAttribute("data-theme", "light");
-  } else {
-    await page.getByRole("button", { name: "Switch to dark theme" }).click();
-    await expect(themeRoot).toHaveAttribute("data-theme", "dark");
-    await page.getByRole("button", { name: "Switch to light theme" }).click();
-    await expect(themeRoot).toHaveAttribute("data-theme", "light");
-  }
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: /switch to (light|dark) theme/i })).toHaveCount(0);
   await page.getByRole("link", { name: "Create one" }).click();
   await expect(page.getByRole("heading", { name: "Create account" })).toBeVisible();
   await page.getByLabel("Email").fill("new-operator@test.local");

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Alert, Button } from "@heroui/react";
 import type { SheetInfo } from "../../shared/contracts";
 import { DEFAULT_SHEET_TITLE, EMPTY_COPY } from "../copy";
@@ -31,19 +31,28 @@ export function SheetConnect({
   const [shareEmail, setShareEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
   const sampleAvailable = sheet.backend === "memory";
   const googleReady = sheet.manageable;
   const target = { requestId, campaignId };
 
   async function run(action: () => Promise<SheetInfo>) {
+    if (submitting.current) return;
+    submitting.current = true;
     setPending(true);
     onBusy(true);
     setError(null);
+    let confirmed = false;
     try {
-      await onBound(await action());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not connect the Sheet.");
+      const result = await action();
+      confirmed = true;
+      await onBound(result);
+    } catch {
+      setError(confirmed
+        ? "Sheet connection was confirmed, but the workspace did not update. Check the connection before retrying."
+        : "Sheet connection was not confirmed. Check the Sheet before intentionally retrying.");
     } finally {
+      submitting.current = false;
       setPending(false);
       onBusy(false);
     }

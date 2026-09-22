@@ -52,6 +52,7 @@ export function CampaignChat({
         .filter((message) => message.content.length > 0);
       onBusyRef.current(true);
       setError(null);
+      let saved = false;
       try {
         const result = await interviewCampaign({
           messages: payload,
@@ -60,11 +61,14 @@ export function CampaignChat({
           signal: abortSignal
         });
         if (result.campaign) {
+          saved = true;
           await onSavedRef.current(result.campaign);
         }
         return { content: [{ type: "text", text: result.text }] };
       } catch (error) {
-        const text = error instanceof Error ? error.message : "Campaign generation failed. Try again.";
+        const text = saved
+          ? "Campaign was saved, but the workspace did not update. Check the campaign list before retrying."
+          : "AI generation failed or was not confirmed. Keep your draft and check campaigns before intentionally retrying.";
         setError(text);
         return { content: [{ type: "text", text }] };
       } finally {

@@ -50,11 +50,13 @@ export function ProspectBrief({
   preparation,
   action,
   error,
+  updating = false,
   compact = false
 }: {
   preparation: ProspectPreparation;
   action?: ReactNode;
   error?: string | null;
+  updating?: boolean;
   compact?: boolean;
 }) {
   const { brief, research } = preparation;
@@ -68,6 +70,7 @@ export function ProspectBrief({
         </p>
         {action}
       </div>
+      {updating ? <p role="status" className="mt-3 text-sm text-muted">Updating brief… Previous preparation remains available.</p> : null}
       {error ? <p role="alert" className="mt-3 text-sm font-medium text-danger">{error}</p> : null}
       {research.warnings.map((warning, index) => (
         <p key={index} role="status" className="mt-3 rounded-lg bg-warning-soft px-3 py-2 text-sm text-warning-soft-foreground">

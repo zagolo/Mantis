@@ -92,8 +92,7 @@ describe("Settings page", () => {
     expect(markup).toContain(SETTINGS_COPY.providers.ai);
     expect(markup).toContain("op@example.com");
     expect(markup).toContain(SETTINGS_COPY.account.signOut);
-    expect(markup).toContain(SETTINGS_COPY.appearance.heading);
-    expect(markup).toContain(SETTINGS_COPY.appearance.light);
-    expect(markup).toContain(SETTINGS_COPY.appearance.dark);
+    expect(markup).not.toContain("Appearance");
+    expect(markup).not.toContain("Light");
   });
 });

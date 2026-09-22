@@ -52,8 +52,7 @@ describe("caller-facing copy", () => {
     expect(NAV_COPY.signOut).toBe("Sign out");
     expect(QUEUE_COPY.upNext).toBe("Up next");
     expect(QUEUE_COPY.section).toBe("Call queue");
-    expect(NAV_COPY.themeToDark).toBe("Switch to dark theme");
-    expect(NAV_COPY.themeToLight).toBe("Switch to light theme");
+    expect(Object.keys(NAV_COPY).some((key) => key.toLowerCase().includes("theme"))).toBe(false);
     expect(NAV_COPY.calendar).toBe("Calendar");
     expect(NAV_COPY.campaign).toBe("Campaign");
     expect(NAV_COPY.editOffering).toBe("Edit offering");
@@ -78,7 +77,7 @@ describe("caller-facing copy", () => {
 
   it("keeps empty-state copy operator-facing", () => {
     expect(EMPTY_COPY.campaign.title).toBe("Create a campaign");
-    expect(EMPTY_COPY.queue.title).toBe("No one is ready to call");
+    expect(EMPTY_COPY.queue.title).toBe("No contacts in this queue");
     expect(EMPTY_COPY.notifications.title).toBe("Nothing waiting");
   });
 

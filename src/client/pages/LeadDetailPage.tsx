@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { useSession } from "../state/session";
@@ -15,7 +15,9 @@ import { SPLIT, SPLIT_RAIL } from "../layout/shell";
 
 export function LeadDetailPage() {
   const { leadId } = useParams();
-  const { data, setError, runQueue } = useSession();
+  const { data, runQueue } = useSession();
+  const [selectError, setSelectError] = useState<string | null>(null);
+  const [selectionRetry, setSelectionRetry] = useState(0);
   const callButtonRef = useRef<HTMLButtonElement>(null);
 
   const decodedId = leadId ? decodeURIComponent(leadId) : null;
@@ -33,24 +35,18 @@ export function LeadDetailPage() {
   useEffect(() => {
     if (!decodedId || !data.selectedCampaignId) return;
     if (data.lead?.leadId === decodedId) return;
-    if (!data.leads.some((item) => item.leadId === decodedId)) {
-      setError(`Lead ${decodedId} is not eligible for this campaign`);
-      return;
-    }
+    if (!data.leads.some((item) => item.leadId === decodedId)) return;
     let cancelled = false;
-    void selectLead(decodedId, data.selectedCampaignId)
-      .then((result) => {
-        if (cancelled) return;
-        void runQueue(async () => result);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not select lead");
-      });
+    const selectionKey = `${data.selectedCampaignId}:${decodedId}`;
+    setSelectError(null);
+    void runQueue(() => selectLead(decodedId, data.selectedCampaignId)).then((result) => {
+      if (!cancelled && !result) setSelectError(selectionKey);
+    });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [decodedId, data.selectedCampaignId]);
+  }, [decodedId, data.selectedCampaignId, selectionRetry]);
 
   const hasBriefPane = Boolean(campaign?.brief);
   const regenerateAction = (
@@ -103,6 +99,20 @@ export function LeadDetailPage() {
     );
   }
 
+  if (selectError === `${data.selectedCampaignId}:${decodedId}`) {
+    return <EmptyState icon="error" role="alert" title="Contact not loaded"
+      description="The contact selection was not confirmed. No call has started."
+      action={<><Button onPress={() => setSelectionRetry((value) => value + 1)}>Retry opening contact</Button>
+        <Link to="/leads">Back to queue</Link></>} />;
+  }
+
+  if (!leadReady && selectError !== `${data.selectedCampaignId}:${decodedId}`) {
+    return <div className="flex min-h-0 flex-1 flex-col" role="status" aria-label="Opening contact">
+      <p className="mb-3 text-sm text-muted">Opening {lead.fullName}…</p>
+      <BriefLoading />
+    </div>;
+  }
+
   if (call) {
     return (
       <CallingPanel
@@ -141,12 +151,13 @@ export function LeadDetailPage() {
         {hasBriefPane ? (
           <div className="flex min-h-0 min-w-0 flex-1 flex-col lg:h-full lg:overflow-hidden">
             {campaign?.brief ? (
-              preparing || !preparation ? (
+              !preparation ? (
                 <BriefLoading error={prepError} action={prepError ? regenerateAction : undefined} />
               ) : (
                 <ProspectBrief
                   preparation={preparation}
                   error={prepError}
+                  updating={preparing}
                   action={regenerateAction}
                 />
               )

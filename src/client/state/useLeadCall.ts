@@ -20,6 +20,7 @@ export function useLeadCall(lead: PublicLead | null, ready = true) {
   const [call, setCall] = useState<CallSessionView | null>(null);
   const [callError, setCallError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const callStarting = useRef(false);
   const [prepState, setPrepState] = useState<{
     key: string;
     result: ProspectPreparation | null;
@@ -95,12 +96,14 @@ export function useLeadCall(lead: PublicLead | null, ready = true) {
       })
       .catch((err) => {
         if (!controller.signal.aborted && preparationRequest.current?.token === token) {
-          setPrepState({
+          setPrepState((previous) => ({
             key: prepKey,
-            result: null,
-            error: err instanceof Error ? err.message : "Preparation failed",
+            result: previous?.key === prepKey ? previous.result : null,
+            error: previous?.key === prepKey && previous.result
+              ? "Brief not updated. Previous preparation is still shown. Retry intentionally."
+              : "Preparation failed. Retry to generate a brief.",
             loading: false
-          });
+          }));
         }
       });
     return () => {
@@ -114,7 +117,8 @@ export function useLeadCall(lead: PublicLead | null, ready = true) {
   useEffect(() => startPreparation(false), [startPreparation]);
 
   async function onCall() {
-    if (!ready || !lead || !data.selectedCampaignId || disabledReason) return;
+    if (!ready || !lead || !data.selectedCampaignId || disabledReason || callStarting.current) return;
+    callStarting.current = true;
     setStarting(true);
     setCallError(null);
     try {
@@ -123,7 +127,7 @@ export function useLeadCall(lead: PublicLead | null, ready = true) {
       try {
         await connectTwilioCall(session.id);
       } catch (connectError) {
-        setCallError(connectError instanceof Error ? connectError.message : "Could not connect voice");
+        setCallError("Call connection was not confirmed. Check call history before intentionally trying again.");
         navigate(callReviewPath(session.id));
         await cancelCallSession(session.id);
         try {
@@ -136,8 +140,9 @@ export function useLeadCall(lead: PublicLead | null, ready = true) {
         throw connectError;
       }
     } catch (err) {
-      setCallError(err instanceof Error ? err.message : "Could not start call");
+      setCallError("Call start was not confirmed. Check call history before intentionally trying again.");
     } finally {
+      callStarting.current = false;
       setStarting(false);
     }
   }
@@ -149,7 +154,7 @@ export function useLeadCall(lead: PublicLead | null, ready = true) {
       const proposal = await finalizeCall(sessionId);
       setReview(proposal);
     } catch (err) {
-      setCallError(err instanceof Error ? err.message : "Could not prepare review");
+      setCallError("Call ended, but review could not be prepared. Open the review again to check its status.");
     } finally {
       setCall(null);
     }

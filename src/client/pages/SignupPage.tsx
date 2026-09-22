@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@heroui/react";
 import { AUTH_FIELD_CLASS, AuthShell } from "../components/AuthShell";
@@ -17,21 +17,27 @@ export function SignupPage({ onLoggedIn }: SignupPageProps) {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const submitting = useRef(false);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (submitting.current) return;
     if (password !== confirm) {
       setError(AUTH_COPY.mismatch);
       return;
     }
+    submitting.current = true;
     setPending(true);
     setError(null);
     try {
       await signup(email, password);
       onLoggedIn();
     } catch (err) {
-      setError(err instanceof Error ? err.message : AUTH_COPY.signUpTitle);
+      setError(err instanceof Error && /already|exists/i.test(err.message)
+        ? "This email already has an account. Sign in instead."
+        : "Account creation was not confirmed. Check your details and try again.");
     } finally {
+      submitting.current = false;
       setPending(false);
     }
   }
@@ -92,13 +98,15 @@ export function SignupPage({ onLoggedIn }: SignupPageProps) {
             autoComplete="new-password"
             required
             minLength={8}
+            aria-invalid={error === AUTH_COPY.mismatch}
+            aria-describedby={error === AUTH_COPY.mismatch ? "signup-error" : undefined}
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}
             className={AUTH_FIELD_CLASS}
           />
         </label>
         {error ? (
-          <p role="alert" className="text-sm font-medium text-danger">
+          <p id="signup-error" role="alert" className="text-sm font-medium text-danger">
             {error}
           </p>
         ) : null}

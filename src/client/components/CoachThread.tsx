@@ -23,6 +23,8 @@ export function CoachThread({
   onProposal: (id: string, next: PublicCoachMessage["calendarProposal"]) => void;
 }) {
   const [draft, setDraft] = useState("");
+  const [error, setError] = useState(false);
+  const sending = useRef(false);
   const listRef = useRef<HTMLDivElement>(null);
   const lastAssistantId = [...messages].reverse().find((item) => item.role === "assistant")?.id;
 
@@ -34,9 +36,17 @@ export function CoachThread({
 
   async function submit() {
     const text = draft.trim();
-    if (!text || pending || !connected) return;
-    setDraft("");
-    await onSend(text);
+    if (!text || pending || sending.current || !connected) return;
+    sending.current = true;
+    setError(false);
+    try {
+      await onSend(text);
+      setDraft((current) => current.trim() === text ? "" : current);
+    } catch {
+      setError(true);
+    } finally {
+      sending.current = false;
+    }
   }
 
   return (
@@ -86,6 +96,7 @@ export function CoachThread({
           );
         })}
       </div>
+      {error ? <p role="alert" className="text-sm text-danger">Coach message was not confirmed. Your draft is preserved; check the connection before retrying.</p> : null}
       <form
         className={`mt-3 ${REVIEW_COMPOSER}`}
         onSubmit={(event) => {
@@ -107,8 +118,8 @@ export function CoachThread({
             }
           }}
         />
-        <Button type="submit" className="min-h-10 shrink-0 rounded-lg!" isDisabled={!connected || pending || !draft.trim()}>
-          Send
+        <Button type="submit" className="min-h-10 shrink-0 rounded-lg!" isDisabled={!connected || pending || !draft.trim()} isPending={pending}>
+          {pending ? "Sending…" : "Send"}
         </Button>
       </form>
     </div>
