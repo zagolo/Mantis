@@ -3,10 +3,15 @@ import { startE2eServer, type E2eServer } from "./server.js";
 import { signIn } from "./auth.js";
 
 const test = base.extend<{ server: E2eServer }>({
-  server: async ({}, use) => {
+  server: async ({ page }, use) => {
     const server = await startE2eServer();
-    await use(server);
-    await server.close();
+    try {
+      await use(server);
+    } finally {
+      // Stop browser requests before Fastify waits for its connections to drain.
+      if (!page.isClosed()) await page.close();
+      await server.close();
+    }
   }
 });
 
