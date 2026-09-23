@@ -91,12 +91,14 @@ fi
 
 echo "==> Installing dependencies and building"
 # tsx is a devDependency; NODE_ENV=production would skip it and break `npm start`.
-env NODE_ENV=development npm ci
+env NODE_ENV=development npm ci --prefer-offline
 npm run skills:check
-npm run build
+env NODE_ENV=production VITE_E2E=false npm run build
 
 # Stop before switching releases if Twilio points at another deployment.
+echo "==> Checking live Twilio configuration (build completed)"
 TWILIO_ENV_FILE="$SHARED/.env" node scripts/check-twilio.mjs
+echo "==> Checking live AI authentication and generation (build completed)"
 AI_ENV_FILE="$SHARED/.env" npx tsx scripts/check-ai.ts
 
 RELEASE="$RELEASES/$(date -u +%Y%m%d%H%M%S)"
