@@ -98,8 +98,12 @@ export class Mantis {
       .withEnvVariable("CI", "true")
       .withEnvVariable("NODE_ENV", "development")
       .withExec(["npm", "ci", "--include=dev"])
+      .withExec(["npm", "run", "skills:check"])
       .withExec(["npm", "run", "typecheck"])
       .withExec(["npm", "test"])
+      // Dependency installation needs dev tools; the delivered bundle needs production semantics.
+      .withEnvVariable("NODE_ENV", "production")
+      .withEnvVariable("VITE_E2E", "false")
       .withExec(["npm", "run", "build"])
       .withExec(["npx", "--no-install", "playwright", "install", "--with-deps", "chromium"])
       .withExec(["npm", "run", "test:e2e"])

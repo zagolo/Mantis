@@ -198,6 +198,8 @@ npm run test:e2e
 
 Pushes to `main` run `.github/workflows/deploy.yml`. GitHub Actions SSHs into the VM, resets `/opt/sales-engine/control` to `origin/main`, builds a timestamped release under `/opt/sales-engine/releases/`, points `/opt/sales-engine/current` at it, restarts `sales-engine`, and checks `/health/live` plus `/health/ready`. It does **not** restart `sales-engine-tunnel`. Secrets stay in `/opt/sales-engine/shared/.env`; SQLite and `sheets.yaml` stay in `/opt/sales-engine/shared/data`. Production binds `HOST=127.0.0.1` so nginx (basic auth + Twilio `/twilio/` and Calendar OAuth `/api/google/calendar/callback` bypass) is the public entry. Unit file and nginx templates live in `infra/`; deploys do not rewrite `/etc`.
 
+Factory qualification runs `skills:check` and builds with `NODE_ENV=production` and `VITE_E2E=false`, matching deployment. Development dependencies remain installed for build/test tools. Vite clears the selected output directory; the separate fake-provider E2E build stays in `dist/e2e-client`. Qualification also tests the AI preflight's successful response, authentication rejection and invalid-result exit behavior against a local substitute. Actual production Twilio and AI authentication are live preflights before release activation, not deterministic qualification claims. A Vite chunk-size warning alone does not fail deployment: identify the first failing command after the build-success line before changing bundling or credentials.
+
 One-time VM setup (SSH in as `azureuser`). Safer if the VM checkout is still behind GitHub or has local commits:
 
 ```bash
