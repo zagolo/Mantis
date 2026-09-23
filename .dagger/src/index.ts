@@ -75,6 +75,14 @@ export class Mantis {
     const nativeResult = await dag
       .container()
       .from(nodeImage)
+      .withWorkdir("/app")
+      .withEnvVariable("CI", "true")
+      .withEnvVariable("NODE_ENV", "development")
+      .withMountedCache("/root/.npm", dag.cacheVolume("mantis-npm"))
+      .withFile("package.json", source.file("package.json"))
+      .withFile("package-lock.json", source.file("package-lock.json"))
+      .withExec(["npm", "ci", "--include=dev", "--prefer-offline"])
+      .withExec(["npx", "--no-install", "playwright", "install", "--with-deps", "chromium"])
       .withDirectory("/app", source, {
         exclude: [
           ".git",
@@ -94,10 +102,6 @@ export class Mantis {
           "playwright-report",
         ],
       })
-      .withWorkdir("/app")
-      .withEnvVariable("CI", "true")
-      .withEnvVariable("NODE_ENV", "development")
-      .withExec(["npm", "ci", "--include=dev"])
       .withExec(["npm", "run", "skills:check"])
       .withExec(["npm", "run", "typecheck"])
       .withExec(["npm", "test"])
@@ -105,7 +109,6 @@ export class Mantis {
       .withEnvVariable("NODE_ENV", "production")
       .withEnvVariable("VITE_E2E", "false")
       .withExec(["npm", "run", "build"])
-      .withExec(["npx", "--no-install", "playwright", "install", "--with-deps", "chromium"])
       .withExec(["npm", "run", "test:e2e"])
       .withExec([
         "node",
