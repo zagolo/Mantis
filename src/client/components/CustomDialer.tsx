@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Modal } from "@heroui/react";
+import { Button, Input, Modal } from "@heroui/react";
 import { NAV_COPY } from "../copy";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "0", "back"] as const;
@@ -71,7 +71,7 @@ export function CustomDialer({
             <label className="sr-only" htmlFor="custom-dial-number">
               Phone number
             </label>
-            <input
+            <Input
               ref={inputRef}
               id="custom-dial-number"
               inputMode="tel"

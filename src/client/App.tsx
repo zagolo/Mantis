@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@heroui/react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import type { BootstrapResponse } from "../shared/contracts";
 import { fetchBootstrap, fetchSession } from "./state/api";
@@ -166,7 +167,7 @@ function BootstrapError({ onRetry }: { onRetry: () => void }) {
           role="alert"
           title={EMPTY_COPY.bootstrap.title}
           description="Workspace could not load. No changes were made. Check the connection and retry."
-          action={<button type="button" className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-foreground" onClick={onRetry}>Retry loading workspace</button>}
+          action={<Button onPress={onRetry}>Retry loading workspace</Button>}
         />
       </main>
     </div>

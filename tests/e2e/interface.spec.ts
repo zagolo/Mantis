@@ -194,8 +194,12 @@ test("ready-only emptiness explains phone fixes and broadens without starting a 
   });
   await page.getByLabel("Campaign", { exact: true }).click();
   await page.getByRole("option", { name: "Lamina founder sales", exact: true }).click();
-  await page.getByRole("checkbox", { name: "Ready to call" }).uncheck();
-  await page.getByRole("checkbox", { name: "Ready to call" }).check();
+  const readyFilter = page.getByRole("checkbox", { name: "Ready to call" });
+  const readyFilterLabel = page.locator("label").filter({ has: readyFilter });
+  await readyFilterLabel.click();
+  await expect(readyFilter).not.toBeChecked();
+  await readyFilterLabel.click();
+  await expect(readyFilter).toBeChecked();
   await expect(page.getByText("No dialable leads")).toBeVisible();
   await page.getByRole("button", { name: "Show contacts that need a phone fix" }).click();
   await expect(page.getByRole("table", { name: "Leads" })).toContainText("Alex Rivera");

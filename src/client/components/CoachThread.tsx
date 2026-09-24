@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, TextArea } from "@heroui/react";
 import type { CalendarConnectionStatus, PublicCoachMessage } from "../../shared/contracts";
 import { CalendarEventCard } from "./CalendarEventCard";
 import { REVIEW_COMPOSER } from "./reviewChatLayout";
@@ -104,10 +104,10 @@ export function CoachThread({
           void submit();
         }}
       >
-        <textarea
+        <TextArea
           aria-label="Message the coach"
           placeholder={connected ? "Steer the coach…" : "Waiting for the call…"}
-          className="min-h-11 min-w-0 w-full flex-1 resize-none bg-transparent text-[15px] leading-relaxed outline-none"
+          className="min-h-11 min-w-0 w-full flex-1 resize-none"
           value={draft}
           disabled={!connected || pending}
           onChange={(event) => setDraft(event.target.value)}

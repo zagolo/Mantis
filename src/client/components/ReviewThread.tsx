@@ -1,4 +1,5 @@
 import { AuiIf, ComposerPrimitive, MessagePrimitive, ThreadPrimitive } from "@assistant-ui/react";
+import { Button, TextArea } from "@heroui/react";
 import { SCROLL } from "../layout/shell";
 import type { CalendarConnectionStatus, PublicCalendarProposal, PublicProposal } from "../../shared/contracts";
 import { REVIEW_COLUMN, REVIEW_COMPOSER } from "./reviewChatLayout";
@@ -33,7 +34,6 @@ function SuggestionChips({
   disabled?: boolean;
 }) {
   const failedWrite = proposal.status === "pending_retry";
-  const chip = "review-chip rounded-lg px-3.5 py-2 text-sm font-medium disabled:opacity-50";
 
   return (
     <div className="review-suggestions flex flex-wrap items-center gap-2" aria-label="Review suggestions">
@@ -41,19 +41,19 @@ function SuggestionChips({
         <ThreadPrimitive.Suggestion
           send
           prompt="Retry the Sheet write"
-          className={`${chip} bg-accent text-accent-foreground`}
           disabled={disabled}
+          asChild
         >
-          Retry the Sheet write
+          <Button>Retry the Sheet write</Button>
         </ThreadPrimitive.Suggestion>
       ) : (
         <ThreadPrimitive.Suggestion
           send
           prompt="Write this update"
-          className={`${chip} bg-accent text-accent-foreground`}
           disabled={disabled}
+          asChild
         >
-          Write this update
+          <Button>Write this update</Button>
         </ThreadPrimitive.Suggestion>
       )}
       {proposal.kind === "non_connect" && !failedWrite ? (
@@ -61,18 +61,18 @@ function SuggestionChips({
           <ThreadPrimitive.Suggestion
             send
             prompt="Retry later"
-            className={`${chip} bg-surface-secondary text-muted hover:text-foreground`}
             disabled={disabled}
+            asChild
           >
-            Retry later
+            <Button variant="outline">Retry later</Button>
           </ThreadPrimitive.Suggestion>
           <ThreadPrimitive.Suggestion
             send
             prompt="Skip this contact"
-            className={`${chip} bg-surface-secondary text-muted hover:text-foreground`}
             disabled={disabled}
+            asChild
           >
-            Skip this contact
+            <Button variant="outline">Skip this contact</Button>
           </ThreadPrimitive.Suggestion>
         </>
       ) : null}
@@ -138,15 +138,11 @@ export function ReviewThread({
               <ComposerPrimitive.Input
                 aria-label="Review message"
                 placeholder="Message the review assistant…"
-                className="min-h-11 min-w-0 w-full flex-1 bg-transparent"
+                render={<TextArea className="min-h-11 min-w-0 w-full flex-1" />}
                 disabled={disabled}
               />
-              <ComposerPrimitive.Send
-                aria-label="Send"
-                className="review-send min-h-10 shrink-0 rounded-lg bg-accent px-4 text-sm font-medium text-accent-foreground disabled:opacity-50"
-                disabled={disabled}
-              >
-                Send
+              <ComposerPrimitive.Send asChild disabled={disabled}>
+                <Button aria-label="Send" className="min-h-10 shrink-0">Send</Button>
               </ComposerPrimitive.Send>
             </ComposerPrimitive.Root>
           </div>

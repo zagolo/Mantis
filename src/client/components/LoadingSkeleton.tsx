@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { SPLIT, SPLIT_PANE, SPLIT_RAIL } from "../layout/shell";
-import { AuthWash } from "./AuthShell";
 import { REVIEW_COLUMN, REVIEW_COMPOSER } from "./reviewChatLayout";
 
 export function PageSpinner({
@@ -358,9 +357,6 @@ export function LoginSkeleton({ fields = 2 }: { fields?: 2 | 3 }) {
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden">
       <div className="relative z-20 h-[3px] bg-accent" />
-      <AuthWash />
-      <div className="absolute right-[max(1rem,env(safe-area-inset-right))] top-5 z-30">
-      </div>
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12" role="status" aria-label={label}>
         <p className="mb-4 text-sm text-muted">{label}</p>
         <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, Checkbox, Input, TextArea } from "@heroui/react";
 import type { CalendarConnectionStatus, PublicCalendarProposal } from "../../shared/contracts";
 import {
   approveCalendarProposal,
@@ -19,9 +19,6 @@ function fromLocalInput(value: string, fallback: string): string {
   const parsed = Date.parse(value);
   return Number.isNaN(parsed) ? fallback : new Date(parsed).toISOString();
 }
-
-const field =
-  "mt-1 w-full rounded-lg bg-surface-secondary px-3 py-2 text-sm text-foreground outline-none focus:outline-2 focus:outline-offset-2 focus:outline-[var(--focus)]";
 
 export function CalendarEventCard({
   proposal,
@@ -140,43 +137,42 @@ export function CalendarEventCard({
         <div className="mt-3 grid gap-3">
           <label className="text-xs font-medium text-muted">
             Title
-            <input className={field} value={title} onChange={(event) => setTitle(event.target.value)} disabled={!pending} />
+            <Input className="mt-1" value={title} onChange={(event) => setTitle(event.target.value)} disabled={!pending} />
           </label>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-medium text-muted">
               Start
-              <input className={field} type="datetime-local" value={start} onChange={(event) => setStart(event.target.value)} disabled={!pending} />
+              <Input className="mt-1" type="datetime-local" value={start} onChange={(event) => setStart(event.target.value)} disabled={!pending} />
             </label>
             <label className="text-xs font-medium text-muted">
               End
-              <input className={field} type="datetime-local" value={end} onChange={(event) => setEnd(event.target.value)} disabled={!pending} />
+              <Input className="mt-1" type="datetime-local" value={end} onChange={(event) => setEnd(event.target.value)} disabled={!pending} />
             </label>
           </div>
           <label className="text-xs font-medium text-muted">
             Timezone
-            <input className={field} value={timezone} onChange={(event) => setTimezone(event.target.value)} disabled={!pending} />
+            <Input className="mt-1" value={timezone} onChange={(event) => setTimezone(event.target.value)} disabled={!pending} />
           </label>
           {operatorOnly ? null : (
             <>
           <label className="text-xs font-medium text-muted">
             Attendees (emails)
-            <input
-              className={field}
+            <Input
+              className="mt-1"
               value={attendees}
               onChange={(event) => setAttendees(event.target.value)}
               placeholder="Add emails — the Sheet has no email column"
               disabled={!pending}
             />
           </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={meet} onChange={(event) => setMeet(event.target.checked)} disabled={!pending} />
+          <Checkbox isSelected={meet} onChange={setMeet} isDisabled={!pending}>
             Google Meet
-          </label>
+          </Checkbox>
             </>
           )}
           <label className="text-xs font-medium text-muted">
             Notes
-            <textarea className={`${field} min-h-16`} value={notes} onChange={(event) => setNotes(event.target.value)} disabled={!pending} />
+            <TextArea className="mt-1 min-h-16" value={notes} onChange={(event) => setNotes(event.target.value)} disabled={!pending} />
           </label>
         </div>
       )}
@@ -208,14 +204,9 @@ export function CalendarEventCard({
               {busyAction === "approve" ? "Sending invitation…" : "Approve and send"}
             </Button>
           )}
-          <button
-            type="button"
-            className="text-sm text-muted hover:text-foreground hover:underline hover:underline-offset-4 disabled:opacity-50"
-            disabled={busy}
-            onClick={() => void onDismiss()}
-          >
+          <Button type="button" variant="tertiary" isDisabled={busy} isPending={busyAction === "dismiss"} onPress={() => void onDismiss()}>
             {busyAction === "dismiss" ? "Dismissing…" : "Dismiss"}
-          </button>
+          </Button>
         </div>
       ) : null}
     </article>

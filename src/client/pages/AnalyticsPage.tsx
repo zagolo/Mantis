@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, Input } from "@heroui/react";
 import { useSearchParams } from "react-router-dom";
 import { CampaignSelect } from "../components/CampaignSelect";
 import { DailySummaryPanel } from "../components/DailySummaryPanel";
@@ -9,9 +9,6 @@ import { fetchSummary } from "../state/api";
 import type { DailySummary } from "../../shared/contracts";
 import { PAGE_TITLES } from "../copy";
 import { usePageTitle } from "../usePageTitle";
-
-const presetClass = "min-h-9 rounded-md px-3 text-sm font-semibold text-muted hover:text-foreground";
-const presetActiveClass = "min-h-9 rounded-md bg-surface px-3 text-sm font-semibold text-foreground shadow-sm";
 
 function utcDayStamp(date = new Date()): string {
   return date.toISOString().slice(0, 10);
@@ -108,26 +105,16 @@ export function AnalyticsPage() {
 
         <form className="flex min-w-0 flex-wrap items-center gap-3" onSubmit={(event) => event.preventDefault()}>
           <div className="flex flex-wrap items-center gap-1 rounded-lg bg-surface-secondary p-1">
-            <button
-              type="button"
-              className={date === today ? presetActiveClass : presetClass}
-              aria-pressed={date === today}
-              onClick={() => setFilter({ date: today })}
-            >
+            <Button size="sm" variant={date === today ? "primary" : "tertiary"} aria-pressed={date === today} onPress={() => setFilter({ date: today })}>
               Today
-            </button>
-            <button
-              type="button"
-              className={date === shiftUtcDay(today, -1) ? presetActiveClass : presetClass}
-              aria-pressed={date === shiftUtcDay(today, -1)}
-              onClick={() => setFilter({ date: shiftUtcDay(today, -1) })}
-            >
+            </Button>
+            <Button size="sm" variant={date === shiftUtcDay(today, -1) ? "primary" : "tertiary"} aria-pressed={date === shiftUtcDay(today, -1)} onPress={() => setFilter({ date: shiftUtcDay(today, -1) })}>
               Yesterday
-            </button>
-            <input
+            </Button>
+            <Input
               type="date"
               aria-label="Summary date"
-              className="field-quiet h-9 w-[10.5rem] rounded-md px-2 text-sm text-foreground"
+              className="w-[10.5rem]"
               value={date}
               max={today}
               onChange={(event) => {

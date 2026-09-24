@@ -163,16 +163,17 @@ export function AppLayout() {
                 }}
               />
               {selectedCampaign?.brief && !hideCampaignChrome ? (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0"
                   aria-label={NAV_COPY.editOffering}
-                  className="shrink-0 text-sm text-muted hover:text-foreground hover:underline hover:underline-offset-4 disabled:opacity-50"
-                  disabled={pending || campaignBusy || Boolean(editor)}
-                  onClick={() => setEditor("edit")}
+                  isDisabled={pending || campaignBusy || Boolean(editor)}
+                  onPress={() => setEditor("edit")}
                 >
                   <span className="sm:hidden" aria-hidden="true">Edit</span>
                   <span className="hidden sm:inline">Edit offering</span>
-                </button>
+                </Button>
               ) : null}
             </div>
           ) : null}
@@ -191,19 +192,18 @@ export function AppLayout() {
               </p>
             ) : null}
             {hideCampaignChrome || onHome ? null : (
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                isIconOnly
                 aria-label={NAV_COPY.dial}
-                title={NAV_COPY.dial}
-                className="header-icon-link"
-                disabled={pending || campaignBusy || Boolean(editor) || Boolean(liveCall)}
-                onClick={() => {
+                isDisabled={pending || campaignBusy || Boolean(editor) || Boolean(liveCall)}
+                onPress={() => {
                   setDialError(null);
                   setDialOpen(true);
                 }}
               >
                 <Icon name="phone" className="text-current" size={20} />
-              </button>
+              </Button>
             )}
             <Link
               to="/notifications"

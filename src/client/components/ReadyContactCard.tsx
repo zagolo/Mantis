@@ -141,14 +141,9 @@ export function ReadyContactCard({
             Skip
           </Button>
         ) : null}
-        <button
-          type="button"
-          className="min-h-11 text-sm font-semibold text-muted hover:text-foreground hover:underline hover:underline-offset-4"
-          disabled={pending || starting}
-          onClick={onRefresh}
-        >
+        <Button variant="tertiary" isDisabled={pending || starting} onPress={onRefresh}>
           Refresh
-        </button>
+        </Button>
         {disabledReason ? <p className="w-full text-sm text-muted">{disabledReason}</p> : null}
       </Card.Footer>
     </Card>
