@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button, Checkbox, Input, TextArea } from "@heroui/react";
+import { Button, Checkbox, Input, Link, TextArea } from "@heroui/react";
 import type { CalendarConnectionStatus, PublicCalendarProposal } from "../../shared/contracts";
 import {
   approveCalendarProposal,
@@ -111,7 +111,7 @@ export function CalendarEventCard({
   }
 
   return (
-    <article className="rounded-lg border-t-[3px] border-t-accent bg-surface p-4 shadow-sm" aria-label={heading}>
+    <article className="rounded-lg bg-surface p-4" aria-label={heading}>
       <p className="text-sm font-semibold">{heading}</p>
       <p className="mt-1 text-xs text-muted">
         {operatorOnly
@@ -125,9 +125,9 @@ export function CalendarEventCard({
           {proposal.htmlLink ? (
             <>
               {" "}
-              <a className="font-medium text-accent underline-offset-4 hover:underline" href={proposal.htmlLink} target="_blank" rel="noreferrer">
+              <Link href={proposal.htmlLink} target="_blank" rel="noreferrer">
                 Open in Calendar
-              </a>
+              </Link>
             </>
           ) : null}
         </p>
@@ -193,14 +193,14 @@ export function CalendarEventCard({
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {!calendar.connected ? (
             calendar.configured ? (
-              <a className="text-sm font-medium text-accent underline-offset-4 hover:underline" href="/api/google/calendar/connect">
+              <Link href="/api/google/calendar/connect">
                 Connect Calendar
-              </a>
+              </Link>
             ) : (
               <p className="text-sm text-muted">Calendar OAuth is not configured.</p>
             )
           ) : (
-            <Button className="min-h-11 rounded-lg!" isDisabled={busy} onPress={() => void onApprove()}>
+            <Button className="min-h-11" isDisabled={busy} onPress={() => void onApprove()}>
               {busyAction === "approve" ? "Sending invitation…" : "Approve and send"}
             </Button>
           )}

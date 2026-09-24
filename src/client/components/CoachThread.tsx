@@ -66,7 +66,7 @@ export function CoachThread({
             return (
               <div
                 key={message.id}
-                className="ml-auto w-fit max-w-[min(100%,22rem)] rounded-lg bg-surface px-3.5 py-2 text-sm leading-relaxed shadow-sm"
+                className="ml-auto w-fit max-w-[min(100%,22rem)] rounded-lg bg-surface px-3.5 py-2 text-sm leading-relaxed"
               >
                 {message.text}
               </div>
@@ -118,7 +118,7 @@ export function CoachThread({
             }
           }}
         />
-        <Button type="submit" className="min-h-10 shrink-0 rounded-lg!" isDisabled={!connected || pending || !draft.trim()} isPending={pending}>
+        <Button type="submit" className="min-h-10 shrink-0" isDisabled={!connected || pending || !draft.trim()} isPending={pending}>
           {pending ? "Sending…" : "Send"}
         </Button>
       </form>

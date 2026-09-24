@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { Link as HeroLink } from "@heroui/react";
+import type { ComponentPropsWithRef } from "react";
 import type { BootstrapResponse } from "../../shared/contracts";
 import type { DeviceStatus } from "../state/calls";
 
@@ -42,13 +44,13 @@ export function ReadinessChip({
     >
       {state.kind !== "ready" ? (
         blocking ? (
-          <Link to="/notifications#queue" className="truncate font-medium text-danger hover:underline hover:underline-offset-4">
+          <HeroLink className="truncate" render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/notifications#queue" />}>
             {state.label}
-          </Link>
+          </HeroLink>
         ) : (
-          <Link to="/settings" className="truncate font-medium text-danger hover:underline hover:underline-offset-4">
+          <HeroLink className="truncate" render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/settings" />}>
             {state.label}
-          </Link>
+          </HeroLink>
         )
       ) : null}
       {twilioConfigured ? (

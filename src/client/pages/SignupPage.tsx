@@ -1,6 +1,6 @@
-import { type FormEvent, useRef, useState } from "react";
+import { type ComponentPropsWithRef, type FormEvent, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Input } from "@heroui/react";
+import { Button, Input, Link as HeroLink } from "@heroui/react";
 import { AuthShell } from "../components/AuthShell";
 import { AUTH_COPY, PAGE_TITLES } from "../copy";
 import { signup } from "../state/api";
@@ -49,9 +49,9 @@ export function SignupPage({ onLoggedIn }: SignupPageProps) {
       footer={
         <>
           {AUTH_COPY.signUpFooter}{" "}
-          <Link className="font-semibold text-foreground hover:underline hover:underline-offset-4" to="/login">
+          <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/login" />}>
             {AUTH_COPY.signUpFooterAction}
-          </Link>
+          </HeroLink>
         </>
       }
     >
@@ -107,7 +107,7 @@ export function SignupPage({ onLoggedIn }: SignupPageProps) {
             {error}
           </p>
         ) : null}
-        <Button type="submit" size="lg" className="w-full rounded-lg!" isDisabled={pending} isPending={pending}>
+        <Button type="submit" size="lg" className="w-full" isDisabled={pending} isPending={pending}>
           {pending ? AUTH_COPY.signUpPending : AUTH_COPY.signUpSubmit}
         </Button>
       </form>

@@ -59,7 +59,7 @@ export function CustomDialer({
   return (
     <Modal.Backdrop isOpen={open} onOpenChange={(next) => { if (!next && !calling) onClose(); }}>
       <Modal.Container size="sm">
-        <Modal.Dialog className="rounded-lg" aria-label={NAV_COPY.dial}>
+        <Modal.Dialog aria-label={NAV_COPY.dial}>
           <Modal.CloseTrigger aria-label="Close" />
           <Modal.Header className="pr-8">
             <Modal.Heading>{NAV_COPY.dial}</Modal.Heading>
@@ -76,7 +76,7 @@ export function CustomDialer({
               id="custom-dial-number"
               inputMode="tel"
               autoComplete="tel"
-              className="mt-5 w-full border-0 bg-transparent text-center font-mono text-2xl font-semibold tracking-wide text-foreground outline-none placeholder:text-muted"
+              className="mt-5 w-full"
               placeholder="Enter a number"
               value={digits}
               disabled={calling}
@@ -100,7 +100,7 @@ export function CustomDialer({
                     <Button
                       key={key}
                       variant="outline"
-                      className="min-h-11 rounded-lg! font-semibold"
+                      className="min-h-11 font-semibold"
                       isDisabled={calling}
                       aria-label="Backspace"
                       onPress={backspace}
@@ -113,7 +113,7 @@ export function CustomDialer({
                   <Button
                     key={key}
                     variant="outline"
-                    className="min-h-11 rounded-lg! font-mono text-lg font-semibold"
+                    className="min-h-11 font-mono text-lg font-semibold"
                     isDisabled={calling}
                     aria-label={key === "+" ? "Add plus" : `Dial ${key}`}
                     onPress={() => append(key)}
@@ -131,11 +131,11 @@ export function CustomDialer({
               <p className="mt-4 text-sm text-muted">{disabledReason}</p>
             ) : null}
             <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
-              <Button variant="outline" className="min-h-11 rounded-lg!" isDisabled={calling} onPress={onClose}>
+              <Button variant="outline" className="min-h-11" isDisabled={calling} onPress={onClose}>
                 Cancel
               </Button>
               <Button
-                className="min-h-11 rounded-lg!"
+                className="min-h-11"
                 isDisabled={calling || Boolean(disabledReason) || digits.trim().length < 3}
                 isPending={calling}
                 onPress={submit}

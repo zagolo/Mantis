@@ -7,7 +7,7 @@ import { CalendarEventCard } from "./CalendarEventCard";
 
 function UserMessage() {
   return (
-    <MessagePrimitive.Root className="ml-auto w-fit max-w-[min(100%,34rem)] rounded-lg bg-surface px-4 py-2.5 text-[15px] leading-relaxed text-foreground shadow-sm">
+    <MessagePrimitive.Root className="ml-auto w-fit max-w-[min(100%,34rem)] rounded-lg bg-surface px-4 py-2.5 text-[15px] leading-relaxed text-foreground">
       <MessagePrimitive.Content />
     </MessagePrimitive.Root>
   );

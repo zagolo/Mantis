@@ -41,7 +41,7 @@ export function ContactCardSkeleton({
 }) {
   return (
     <div
-      className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-lg border-t-[3px] border-t-accent bg-surface shadow-sm max-lg:pb-[5.5rem]"
+      className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col overflow-hidden rounded-lg bg-surface max-lg:pb-[5.5rem]"
       role={label ? "status" : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
@@ -75,7 +75,7 @@ export function ContactCardSkeleton({
           </div>
         </div>
       </div>
-      <div className="relative z-20 isolate mt-auto flex shrink-0 flex-wrap items-center gap-x-4 gap-y-3 bg-surface px-5 py-4 shadow-[0_-8px_24px_-12px_var(--elev-shadow)] sm:gap-x-5 sm:px-8 sm:pb-8 sm:pt-4 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-20 max-lg:px-[max(1.25rem,env(safe-area-inset-left))] max-lg:pr-[max(1.25rem,env(safe-area-inset-right))] max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pt-4">
+      <div className="relative z-20 isolate mt-auto flex shrink-0 flex-wrap items-center gap-x-4 gap-y-3 bg-surface px-5 py-4 sm:gap-x-5 sm:px-8 sm:pb-8 sm:pt-4 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-20 max-lg:px-[max(1.25rem,env(safe-area-inset-left))] max-lg:pr-[max(1.25rem,env(safe-area-inset-right))] max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pt-4">
         <Pulse className="h-11 w-28 rounded-lg" />
         {skip ? <Pulse className="h-11 w-20 rounded-lg" /> : null}
         <Pulse className="h-3.5 w-14" />
@@ -84,7 +84,7 @@ export function ContactCardSkeleton({
   );
 }
 
-const BRIEF_CARD_CLASS = "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm";
+const BRIEF_CARD_CLASS = "flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface";
 const BRIEF_LOADING_CLASS = BRIEF_CARD_CLASS;
 
 export function BriefLoading({
@@ -136,7 +136,7 @@ export function QueueTableSkeleton() {
   return (
     <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-5" aria-hidden="true">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 p-1">
-        <Pulse className="h-9 min-w-52 flex-1 rounded-lg bg-surface shadow-sm" />
+        <Pulse className="h-9 min-w-52 flex-1 rounded-lg bg-surface" />
         <Pulse ground className="h-3.5 w-12" />
         <div className="flex items-center gap-3">
           <Pulse ground className="h-3.5 w-12" />
@@ -147,14 +147,14 @@ export function QueueTableSkeleton() {
       </div>
       <ul className="space-y-3 lg:hidden">
         {[1, 2, 3].map((row) => (
-          <li key={row} className="rounded-lg bg-surface px-4 py-3 shadow-sm">
+          <li key={row} className="rounded-lg bg-surface px-4 py-3">
             <Pulse className="h-4 w-36" />
             <Pulse className="mt-1.5 h-3.5 w-44" />
             <Pulse className="mt-2 h-3 w-28" />
           </li>
         ))}
       </ul>
-      <div className="hidden min-h-0 flex-1 rounded-lg bg-surface shadow-sm lg:block">
+      <div className="hidden min-h-0 flex-1 rounded-lg bg-surface lg:block">
         <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1.6fr)_minmax(0,1.2fr)_minmax(0,1fr)] gap-4 px-4 py-3">
           <Pulse className="h-3 w-10" />
           <Pulse className="h-3 w-16" />
@@ -205,7 +205,7 @@ export function LeadDetailSkeleton() {
 export function AnalyticsStatsSkeleton({ labeled = true }: { labeled?: boolean }) {
   return (
     <section
-      className="rounded-lg bg-surface px-5 py-6 shadow-sm sm:px-8 sm:py-8 lg:px-10 lg:py-10"
+      className="rounded-lg bg-surface px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10"
       role={labeled ? "status" : undefined}
       aria-label={labeled ? "Loading analytics…" : undefined}
       aria-hidden={labeled ? undefined : true}
@@ -253,7 +253,7 @@ export function AnalyticsSkeleton() {
             <Pulse className="h-9 w-20 rounded-md" />
             <Pulse className="h-9 w-[10.5rem] rounded-md" />
           </div>
-          <Pulse className="h-11 w-full rounded-lg bg-surface shadow-sm sm:w-72" />
+          <Pulse className="h-11 w-full rounded-lg bg-surface sm:w-72" />
         </div>
       </div>
       <div className="mt-8">
@@ -274,7 +274,7 @@ export function NotificationsSkeleton() {
             <Pulse ground className="h-4 w-16" />
             <Pulse ground className="h-4 w-4" />
           </div>
-          <div className="mt-5 rounded-lg border-t-[3px] border-t-accent bg-surface p-5 shadow-sm">
+          <div className="mt-5 rounded-lg bg-surface p-5">
             <Pulse className="h-5 w-48" />
             <Pulse className="mt-1 h-3.5 w-56 max-w-full" />
             <Pulse className="mt-4 h-3.5 w-24" />
@@ -285,7 +285,7 @@ export function NotificationsSkeleton() {
             <Pulse ground className="h-4 w-14" />
             <Pulse ground className="h-4 w-4" />
           </div>
-          <ul className="mt-5 rounded-lg bg-surface shadow-sm">
+          <ul className="mt-5 rounded-lg bg-surface">
             {[1, 2, 3, 4].map((row) => (
               <li key={row} className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 py-3.5">
                 <Pulse className="h-4 w-36" />
@@ -308,7 +308,7 @@ export function SettingsSkeleton() {
         {[1, 2, 3].map((section) => (
           <div key={section}>
             <Pulse ground className="h-4 w-20" />
-            <div className="mt-3 rounded-lg border-t-[3px] border-t-accent bg-surface p-5 shadow-sm">
+            <div className="mt-3 rounded-lg bg-surface p-5">
               <Pulse className="h-5 w-48" />
               <Pulse className="mt-1 h-3.5 w-64 max-w-full" />
               <Pulse className="mt-4 h-11 w-36 rounded-lg" />

@@ -14,7 +14,6 @@ export function AuthShell({
 }) {
   return (
     <div className="relative flex min-h-dvh flex-col overflow-hidden">
-      <div className="relative z-20 h-[3px] bg-accent" />
       <main className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 py-12">
         <p className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
           <span className="flex size-6 items-center justify-center">

@@ -1,4 +1,5 @@
-import { useLayoutEffect } from "react";
+import { type ComponentPropsWithRef, useLayoutEffect } from "react";
+import { Link as HeroLink } from "@heroui/react";
 import { Link, useLocation } from "react-router-dom";
 import { EmptyState } from "../components/EmptyState";
 import { diagnosticDetail, diagnosticHeading, diagnosticMeta, EMPTY_COPY, PAGE_TITLES } from "../copy";
@@ -46,12 +47,7 @@ export function NotificationsPage() {
                   const failed = item.status === "pending_retry";
                   return (
                     <li key={item.id}>
-                      <article
-                        className={`rounded-lg bg-surface p-5 shadow-sm ${
-                          failed ? "border-t-[3px] border-t-danger" : "border-t-[3px] border-t-accent"
-                        }`}
-                        aria-label={reviewAlertTitle(item)}
-                      >
+                      <article className="rounded-lg bg-surface p-5" aria-label={reviewAlertTitle(item)}>
                         <h3 className="text-base font-semibold tracking-tight text-foreground">
                           {item.contactName.trim() || item.leadId}
                         </h3>
@@ -60,12 +56,9 @@ export function NotificationsPage() {
                             ? "Sheet write not confirmed. Open review to inspect before intentionally retrying."
                             : "CRM write waiting."}
                         </p>
-                        <Link
-                          to={reviewHref(item.sessionId)}
-                          className="mt-4 inline-block text-sm font-semibold text-foreground hover:underline hover:underline-offset-4"
-                        >
+                        <HeroLink className="mt-4" render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to={reviewHref(item.sessionId)} />}>
                           Open review
-                        </Link>
+                        </HeroLink>
                       </article>
                     </li>
                   );
@@ -84,7 +77,7 @@ export function NotificationsPage() {
             {issues.length === 0 && !sheetBlocking ? (
               <p className="mt-5 max-w-[32em] text-sm leading-relaxed text-muted">No skipped Sheet rows.</p>
             ) : (
-              <ul className="mt-5 rounded-lg bg-surface shadow-sm">
+              <ul className="mt-5 rounded-lg bg-surface">
                 {sheetBlocking && issues.length === 0 ? (
                   <li className="px-5 py-4">
                     <p className="text-[15px] font-semibold tracking-tight text-foreground">Sheet needs a fix</p>

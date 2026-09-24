@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { type ComponentPropsWithRef, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Button } from "@heroui/react";
+import { Button, Link as HeroLink } from "@heroui/react";
 import type { CalendarConnectionStatus, ProviderStatus, SheetInfo } from "../../shared/contracts";
 import { NAV_COPY, EMPTY_COPY, PAGE_TITLES, SETTINGS_COPY } from "../copy";
 import { SCROLL } from "../layout/shell";
@@ -164,7 +164,7 @@ export function SettingsView({
               <p className="mt-1 max-w-[36em] text-sm leading-relaxed text-muted">{SETTINGS_COPY.account.hint}</p>
               <Button
                 variant="outline"
-                className="mt-4 min-h-11 rounded-lg!"
+                className="mt-4 min-h-11"
                 isDisabled={signingOut}
                 onPress={onSignOut}
               >
@@ -183,7 +183,7 @@ export function SettingsView({
                 <p className="mt-1 max-w-[36em] text-sm leading-relaxed text-muted">{SETTINGS_COPY.calendar.connectedHint}</p>
                 <Button
                   variant="outline"
-                  className="mt-4 min-h-11 rounded-lg!"
+                  className="mt-4 min-h-11"
                   isDisabled={disconnecting}
                   onPress={onDisconnect}
                 >
@@ -191,7 +191,7 @@ export function SettingsView({
                 </Button>
               </div>
             ) : (
-              <div className="mt-3 rounded-lg border-t-[3px] border-t-accent bg-surface p-5 shadow-sm">
+              <div className="mt-3 rounded-lg bg-surface p-5">
                 <p className="text-base font-semibold tracking-tight">
                   {calendar.configured ? SETTINGS_COPY.calendar.disconnectedTitle : SETTINGS_COPY.calendar.unconfiguredTitle}
                 </p>
@@ -200,7 +200,7 @@ export function SettingsView({
                 </p>
                 {calendar.configured ? (
                   <Button
-                    className="mt-4 min-h-11 rounded-lg!"
+                    className="mt-4 min-h-11"
                     onPress={() => {
                       window.location.href = "/api/google/calendar/connect";
                     }}
@@ -223,18 +223,13 @@ export function SettingsView({
                   {sheet.backend === "memory" ? SETTINGS_COPY.sheet.sample : sheet.message}
                 </p>
                 {sheet.url ? (
-                  <a
-                    className="mt-4 inline-block text-sm font-semibold text-foreground hover:underline hover:underline-offset-4"
-                    href={sheet.url}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                  <HeroLink className="mt-4" href={sheet.url} target="_blank" rel="noreferrer">
                     {SETTINGS_COPY.sheet.openSheet}
-                  </a>
+                  </HeroLink>
                 ) : null}
               </div>
             ) : (
-              <div className="mt-3 rounded-lg border-t-[3px] border-t-accent bg-surface p-5 shadow-sm">
+              <div className="mt-3 rounded-lg bg-surface p-5">
                 <p className="text-base font-semibold tracking-tight">
                   {sheet.status === "error" ? EMPTY_COPY.sheet.title : SETTINGS_COPY.sheet.emptyTitle}
                 </p>
@@ -248,26 +243,23 @@ export function SettingsView({
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   {hasCampaigns ? (
                     canEditOffering ? (
-                      <Button className="min-h-11 rounded-lg!" onPress={onEditOffering}>
+                      <Button className="min-h-11" onPress={onEditOffering}>
                         {SETTINGS_COPY.sheet.editOffering}
                       </Button>
                     ) : (
-                      <Button className="min-h-11 rounded-lg!" onPress={onNewCampaign}>
+                      <Button className="min-h-11" onPress={onNewCampaign}>
                         {SETTINGS_COPY.sheet.createCampaign}
                       </Button>
                     )
                   ) : (
-                    <Button className="min-h-11 rounded-lg!" onPress={onNewCampaign}>
+                    <Button className="min-h-11" onPress={onNewCampaign}>
                       {SETTINGS_COPY.sheet.createCampaign}
                     </Button>
                   )}
                   {sheetBlocking ? (
-                    <Link
-                      className="text-sm font-semibold text-foreground hover:underline hover:underline-offset-4"
-                      to="/notifications#queue"
-                    >
+                    <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/notifications#queue" />}>
                       {SETTINGS_COPY.sheet.queueIssues}
-                    </Link>
+                    </HeroLink>
                   ) : null}
                 </div>
               </div>
@@ -292,7 +284,7 @@ export function SettingsView({
                 </p>
               </div>
             ) : (
-              <div className="mt-3 rounded-lg border-t-[3px] border-t-accent bg-surface p-5 shadow-sm">
+              <div className="mt-3 rounded-lg bg-surface p-5">
                 <p className="text-base font-semibold tracking-tight">{SETTINGS_COPY.twilio.emptyTitle}</p>
                 <p className="mt-1 max-w-[36em] text-sm leading-relaxed text-muted">{SETTINGS_COPY.twilio.emptyHint}</p>
               </div>

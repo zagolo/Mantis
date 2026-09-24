@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { type ComponentPropsWithRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Alert, Button, Checkbox, Input, SearchField } from "@heroui/react";
+import { Alert, Button, Checkbox, Input, Link as HeroLink, SearchField } from "@heroui/react";
 import { useSession } from "../state/session";
 import { EmptyState } from "../components/EmptyState";
 import { LeadsTable, type LeadSortKey } from "../components/LeadsTable";
@@ -71,7 +71,7 @@ export function LeadsPage() {
             icon="campaign"
             title={EMPTY_COPY.campaign.title}
             description={EMPTY_COPY.campaign.description}
-            action={<Button className="rounded-lg!" onPress={() => setEditor("new")}>Create a campaign</Button>}
+            action={<Button onPress={() => setEditor("new")}>Create a campaign</Button>}
           />
         </div>
       ) : sheetUnconfigured ? (
@@ -81,7 +81,7 @@ export function LeadsPage() {
             title={EMPTY_COPY.sheet.title}
             description={data.sheet.message || EMPTY_COPY.sheet.description}
             action={
-              <Button className="rounded-lg!" onPress={() => setEditor(campaign.brief ? "edit" : "new")}>
+              <Button onPress={() => setEditor(campaign.brief ? "edit" : "new")}>
                 Open Sheet connection
               </Button>
             }
@@ -94,10 +94,10 @@ export function LeadsPage() {
             title={EMPTY_COPY.queue.title}
             description={EMPTY_COPY.queue.description}
             action={<div className="flex flex-wrap items-center gap-3">
-              <Button variant="outline" className="rounded-lg!" isDisabled={pending || campaignBusy} onPress={onRefresh}>
+              <Button variant="outline" isDisabled={pending || campaignBusy} onPress={onRefresh}>
                 {pending ? "Refreshing contacts…" : "Refresh contacts"}
               </Button>
-              <Button variant="outline" className="rounded-lg!" onPress={() => setEditor("edit")}>Check Sheet connection</Button>
+              <Button variant="outline" onPress={() => setEditor("edit")}>Check Sheet connection</Button>
             </div>}
           />
         </div>
@@ -238,12 +238,9 @@ function LeadsQueue({
             </Checkbox.Content>
           </Checkbox>
           {undialableCount > 0 ? (
-            <Link
-              to="/notifications#queue"
-              className="inline-flex min-h-11 items-center hover:text-foreground hover:underline hover:underline-offset-4"
-            >
+            <HeroLink className="min-h-11" render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/notifications#queue" />}>
               {undialableCount} need a phone fix
-            </Link>
+            </HeroLink>
           ) : null}
           <div className="flex items-center gap-0.5" role="group" aria-label="Sort leads">
             {([["queue", "Queue"], ["name", "Name"], ["company", "Company"], ["status", "Status"]] as Array<[LeadSortKey, string]>).map(([key, label]) => (

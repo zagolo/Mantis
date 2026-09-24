@@ -53,7 +53,7 @@ export function DailySummaryPanel({
   emptyCopy?: string;
 }) {
   return (
-    <section className="rounded-lg bg-surface px-5 py-6 shadow-sm sm:px-8 sm:py-8 lg:px-10 lg:py-10" aria-label="Daily summary">
+    <section className="rounded-lg bg-surface px-5 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10" aria-label="Daily summary">
       {emptyCopy ? (
         <p className="mb-8 max-w-[36em] text-sm leading-relaxed text-muted">{emptyCopy}</p>
       ) : null}

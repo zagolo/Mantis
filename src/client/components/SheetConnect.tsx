@@ -77,12 +77,11 @@ export function SheetConnect({
       {mode === "choose" ? (
         <div className="flex flex-col gap-3">
           {sampleAvailable ? (
-            <div className="flex w-full flex-col gap-2 rounded-lg bg-surface p-4 text-left shadow-sm">
+            <div className="flex w-full flex-col gap-2 rounded-lg bg-surface p-4 text-left">
               <p className="font-semibold">{copy.sampleLeads}</p>
               <p className="text-sm leading-relaxed text-muted">{copy.sampleLeadsHint}</p>
               <div className="pt-1">
                 <Button
-                  className="rounded-lg!"
                   isDisabled={pending}
                   isPending={pending}
                   onPress={() => {
@@ -132,7 +131,7 @@ export function SheetConnect({
             />
           </label>
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" className="rounded-lg!" isDisabled={pending || url.trim().length < 8} isPending={pending}>
+            <Button type="submit" isDisabled={pending || url.trim().length < 8} isPending={pending}>
               {copy.linkAction}
             </Button>
             <Button type="button" variant="tertiary" isDisabled={pending} onPress={() => setMode("choose")}>Back</Button>
@@ -171,7 +170,7 @@ export function SheetConnect({
             <span className="text-sm text-muted">{copy.shareHint}</span>
           </label>
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" className="rounded-lg!" isDisabled={pending || title.trim().length < 1} isPending={pending}>
+            <Button type="submit" isDisabled={pending || title.trim().length < 1} isPending={pending}>
               {copy.createAction}
             </Button>
             <Button type="button" variant="tertiary" isDisabled={pending} onPress={() => setMode("choose")}>Back</Button>

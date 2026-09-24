@@ -44,7 +44,7 @@ function LoadSentinel({
 function UpNextActions({ onSkip, skipDisabled }: { onSkip: () => void; skipDisabled: boolean }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Button variant="outline" className="min-h-11 rounded-lg!" isDisabled={skipDisabled} onPress={onSkip}>
+      <Button variant="outline" className="min-h-11" isDisabled={skipDisabled} onPress={onSkip}>
         Skip
       </Button>
     </div>
@@ -94,7 +94,7 @@ export function LeadsTable({
               <li key={lead.leadId}>
                 <article
                   aria-label={QUEUE_COPY.upNext}
-                  className="rounded-lg border-t-[3px] border-t-accent bg-surface px-4 py-3 shadow-sm"
+                  className="rounded-lg bg-surface px-4 py-3"
                 >
                   <p className="text-xs font-semibold text-accent">{QUEUE_COPY.upNext}</p>
                   <Link
@@ -131,7 +131,7 @@ export function LeadsTable({
             <li key={lead.leadId}>
               <Link
                 to={`/leads/${encodeURIComponent(lead.leadId)}`}
-                className="block min-h-11 rounded-lg bg-surface px-4 py-3 shadow-sm"
+                className="block min-h-11 rounded-lg bg-surface px-4 py-3"
                 aria-label={`Open ${lead.fullName || lead.leadId}`}
               >
                 <p className="font-semibold">{lead.fullName || "Unnamed contact"}</p>
@@ -160,7 +160,7 @@ export function LeadsTable({
       </ul>
       <div
         ref={tableScrollRef}
-        className={`hidden min-h-0 flex-1 ${SCROLL} ${SCROLL_X} rounded-lg bg-surface shadow-sm lg:block`}
+        className={`hidden min-h-0 flex-1 ${SCROLL} ${SCROLL_X} rounded-lg bg-surface lg:block`}
       >
         <table className="w-full text-left text-sm" aria-label="Leads">
           <thead className="sticky top-0 z-10 bg-surface">
@@ -181,7 +181,7 @@ export function LeadsTable({
                 <tr
                   key={lead.leadId}
                   aria-label={next ? QUEUE_COPY.upNext : undefined}
-                  className={next ? "border-t-[3px] border-t-accent" : "hover:bg-surface-secondary"}
+                  className="hover:bg-surface-secondary"
                 >
                   <td className="px-4 py-2.5">
                     {next ? <p className="text-xs font-semibold text-accent">{QUEUE_COPY.upNext}</p> : null}
