@@ -1,5 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Alert, Button } from "@heroui/react";
+import { Alert, Button, Link as HeroLink } from "@heroui/react";
+import { buttonVariants } from "@heroui/styles";
+import type { ComponentPropsWithRef } from "react";
 import { useSession } from "../state/session";
 import { finalizeCall } from "../state/api";
 import { cancelCallSession, createCustomDialSession, fetchCallSession } from "../state/calls";
@@ -14,7 +16,6 @@ import { NAV_COPY, PRODUCT_NAME, notificationsNavLabel } from "../copy";
 import { Icon } from "../components/Icon";
 import { notificationCount } from "../notifications";
 import { SHELL, isWorkspacePath } from "./shell";
-import "./header.css";
 import type { CallSessionView } from "../state/calls";
 import { useLayoutEffect, useState } from "react";
 
@@ -134,7 +135,6 @@ export function AppLayout() {
   return (
     <div className={`flex min-h-dvh flex-col ${lockWorkspace ? "lg:h-dvh lg:overflow-hidden lg:overscroll-none" : ""}`}>
       <header className={`sticky top-0 z-50 overflow-x-clip bg-background ${liveCall ? "hidden" : ""}`}>
-        <div className="h-[3px] bg-accent" />
         <div className={`${SHELL} flex h-14 min-w-0 items-center gap-1.5 sm:gap-6`}>
           <Link
             to="/leads"
@@ -163,16 +163,17 @@ export function AppLayout() {
                 }}
               />
               {selectedCampaign?.brief && !hideCampaignChrome ? (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0"
                   aria-label={NAV_COPY.editOffering}
-                  className="shrink-0 text-sm text-muted hover:text-foreground hover:underline hover:underline-offset-4 disabled:opacity-50"
-                  disabled={pending || campaignBusy || Boolean(editor)}
-                  onClick={() => setEditor("edit")}
+                  isDisabled={pending || campaignBusy || Boolean(editor)}
+                  onPress={() => setEditor("edit")}
                 >
                   <span className="sm:hidden" aria-hidden="true">Edit</span>
                   <span className="hidden sm:inline">Edit offering</span>
-                </button>
+                </Button>
               ) : null}
             </div>
           ) : null}
@@ -191,49 +192,47 @@ export function AppLayout() {
               </p>
             ) : null}
             {hideCampaignChrome || onHome ? null : (
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                isIconOnly
                 aria-label={NAV_COPY.dial}
-                title={NAV_COPY.dial}
-                className="header-icon-link"
-                disabled={pending || campaignBusy || Boolean(editor) || Boolean(liveCall)}
-                onClick={() => {
+                isDisabled={pending || campaignBusy || Boolean(editor) || Boolean(liveCall)}
+                onPress={() => {
                   setDialError(null);
                   setDialOpen(true);
                 }}
               >
                 <Icon name="phone" className="text-current" size={20} />
-              </button>
+              </Button>
             )}
-            <Link
-              to="/notifications"
+            <HeroLink
               aria-label={notificationsLabel}
-              title={notificationsLabel}
-              className={`header-icon-link ${onNotifications ? "is-active" : ""}`}
+              className={buttonVariants({ size: "sm", isIconOnly: true, variant: onNotifications ? "secondary" : "ghost" })}
+              render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/notifications" title={notificationsLabel} />}
             >
-              <Icon name="bell" className="text-current" size={20} />
-              {alertCount > 0 ? <span className="header-icon-badge">{alertCount}</span> : null}
-            </Link>
-            <Link
-              to="/analytics"
+              <span className="relative inline-flex">
+                <Icon name="bell" size={20} />
+                {alertCount > 0 ? <span className="absolute -right-2 -top-2 text-xs" aria-hidden="true">{alertCount}</span> : null}
+              </span>
+            </HeroLink>
+            <HeroLink
               aria-label={NAV_COPY.analytics}
-              title={NAV_COPY.analytics}
-              className={`header-icon-link ${onAnalytics ? "is-active" : ""}`}
+              className={buttonVariants({ size: "sm", isIconOnly: true, variant: onAnalytics ? "secondary" : "ghost" })}
+              render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/analytics" title={NAV_COPY.analytics} />}
             >
-              <Icon name="chart" className="text-current" size={20} />
-            </Link>
-            <Link
-              to="/settings"
+              <Icon name="chart" size={20} />
+            </HeroLink>
+            <HeroLink
               aria-label={NAV_COPY.settings}
-              title={NAV_COPY.settings}
-              className={`header-icon-link ${onSettings ? "is-active" : ""}`}
+              className={buttonVariants({ size: "sm", isIconOnly: true, variant: onSettings ? "secondary" : "ghost" })}
+              render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/settings" title={NAV_COPY.settings} />}
             >
-              <Icon name="settings" className="text-current" size={20} />
-            </Link>
+              <Icon name="settings" size={20} />
+            </HeroLink>
             {hideCampaignChrome ? null : (
               <Button
                 size="sm"
-                className="header-primary rounded-lg! max-sm:w-10 max-sm:min-w-10 max-sm:px-0"
+                className="max-sm:w-10 max-sm:min-w-10 max-sm:px-0"
                 aria-label={NAV_COPY.newCampaign}
                 isDisabled={pending || campaignBusy || Boolean(editor)}
                 onPress={() => setEditor("new")}
@@ -254,10 +253,10 @@ export function AppLayout() {
               <Alert.Title>Incoming call from {incoming.from}</Alert.Title>
               <Alert.Description>Answer to talk in your browser, or decline to send them away.</Alert.Description>
               <div className="mt-4 flex flex-wrap gap-3">
-                <Button className="min-h-11 rounded-lg!" isDisabled={pending} onPress={() => void onAnswer()}>
+                <Button className="min-h-11" isDisabled={pending} onPress={() => void onAnswer()}>
                   Answer
                 </Button>
-                <Button variant="outline" className="min-h-11 rounded-lg!" onPress={declineIncoming}>
+                <Button variant="outline" className="min-h-11" onPress={declineIncoming}>
                   Decline
                 </Button>
               </div>

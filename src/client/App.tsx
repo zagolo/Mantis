@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { Button, Link as HeroLink } from "@heroui/react";
+import type { ComponentPropsWithRef } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import type { BootstrapResponse } from "../shared/contracts";
 import { fetchBootstrap, fetchSession } from "./state/api";
@@ -89,7 +91,6 @@ function AuthGate() {
     return (
       <div className="flex min-h-dvh flex-col lg:h-dvh lg:overflow-hidden">
         <header className="sticky top-0 z-50 bg-background">
-          <div className="h-[3px] bg-accent" />
           <div className={`${SHELL} flex h-14 min-w-0 items-center gap-2 sm:gap-6`}>
             <p className="flex shrink-0 items-center gap-2 text-[15px] font-semibold tracking-tight">
               <span className="flex size-6 items-center justify-center">
@@ -99,10 +100,9 @@ function AuthGate() {
             </p>
             {auth === "loading" ? (
               <nav className="ml-auto flex min-w-0 flex-1 flex-wrap items-center justify-end gap-x-3 text-xs sm:gap-5 sm:text-sm" aria-label="Workspace">
-                <Link to="/leads" className="hover:text-accent">Queue</Link>
-                <Link to="/analytics" className="hover:text-accent">Analytics</Link>
-                <Link to="/notifications" className="hover:text-accent">Notifications</Link>
-                <Link to="/settings" className="hover:text-accent">Settings</Link>
+                {([ ["/leads", "Queue"], ["/analytics", "Analytics"], ["/notifications", "Notifications"], ["/settings", "Settings"] ] as const).map(([to, label]) => (
+                  <HeroLink key={to} render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to={to} />}>{label}</HeroLink>
+                ))}
               </nav>
             ) : (
               <div className="ml-auto flex items-center gap-2" aria-hidden="true">
@@ -166,7 +166,7 @@ function BootstrapError({ onRetry }: { onRetry: () => void }) {
           role="alert"
           title={EMPTY_COPY.bootstrap.title}
           description="Workspace could not load. No changes were made. Check the connection and retry."
-          action={<button type="button" className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-foreground" onClick={onRetry}>Retry loading workspace</button>}
+          action={<Button onPress={onRetry}>Retry loading workspace</Button>}
         />
       </main>
     </div>

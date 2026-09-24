@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, TextArea } from "@heroui/react";
 import type { CalendarConnectionStatus, PublicCoachMessage } from "../../shared/contracts";
 import { CalendarEventCard } from "./CalendarEventCard";
 import { REVIEW_COMPOSER } from "./reviewChatLayout";
@@ -66,7 +66,7 @@ export function CoachThread({
             return (
               <div
                 key={message.id}
-                className="ml-auto w-fit max-w-[min(100%,22rem)] rounded-lg bg-surface px-3.5 py-2 text-sm leading-relaxed shadow-sm"
+                className="ml-auto w-fit max-w-[min(100%,22rem)] rounded-lg bg-surface px-3.5 py-2 text-sm leading-relaxed"
               >
                 {message.text}
               </div>
@@ -104,10 +104,10 @@ export function CoachThread({
           void submit();
         }}
       >
-        <textarea
+        <TextArea
           aria-label="Message the coach"
           placeholder={connected ? "Steer the coach…" : "Waiting for the call…"}
-          className="min-h-11 min-w-0 w-full flex-1 resize-none bg-transparent text-[15px] leading-relaxed outline-none"
+          className="min-h-11 min-w-0 w-full flex-1 resize-none"
           value={draft}
           disabled={!connected || pending}
           onChange={(event) => setDraft(event.target.value)}
@@ -118,7 +118,7 @@ export function CoachThread({
             }
           }}
         />
-        <Button type="submit" className="min-h-10 shrink-0 rounded-lg!" isDisabled={!connected || pending || !draft.trim()} isPending={pending}>
+        <Button type="submit" className="min-h-10 shrink-0" isDisabled={!connected || pending || !draft.trim()} isPending={pending}>
           {pending ? "Sending…" : "Send"}
         </Button>
       </form>

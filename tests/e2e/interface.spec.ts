@@ -20,13 +20,30 @@ test("dark from first paint with legacy preferences; routes remain usable at 360
   await page.addInitScript(() => localStorage.setItem("mantis-theme", "light"));
   await page.goto(`${server.baseURL}/login`);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect.poll(() => page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const root = getComputedStyle(document.documentElement);
+    const dark = document.createElement("div");
+    dark.style.backgroundColor = "var(--background)";
+    document.body.append(dark);
+    const stockBackground = getComputedStyle(dark).backgroundColor;
+    dark.remove();
+    return root.backgroundColor === stockBackground && body.backgroundColor === stockBackground
+      && stockBackground !== "rgba(0, 0, 0, 0)";
+  })).toBe(true);
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
   await signIn(page, server.baseURL);
+  await expect(page.getByRole("link", { name: "Analytics" })).toBeVisible();
+  await page.getByRole("link", { name: "Analytics" }).click();
+  await expect(page).toHaveURL(/\/analytics$/);
+  await page.getByRole("link", { name: "Settings" }).click();
+  await expect(page).toHaveURL(/\/settings$/);
   for (const width of [360, 1440]) {
     await page.setViewportSize({ width, height: 800 });
-    for (const route of ["/leads", "/analytics", "/notifications", "/settings", "/leads/L-100"]) {
+    for (const route of ["/calls/missing-session/review", "/leads", "/notifications", "/settings", "/analytics", "/leads/L-100"]) {
       await page.goto(`${server.baseURL}${route}`);
       await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor === getComputedStyle(document.body).backgroundColor)).toBe(true);
       await expect(page.getByRole("main")).toBeVisible();
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     }
@@ -194,8 +211,12 @@ test("ready-only emptiness explains phone fixes and broadens without starting a 
   });
   await page.getByLabel("Campaign", { exact: true }).click();
   await page.getByRole("option", { name: "Lamina founder sales", exact: true }).click();
-  await page.getByRole("checkbox", { name: "Ready to call" }).uncheck();
-  await page.getByRole("checkbox", { name: "Ready to call" }).check();
+  const readyFilter = page.getByRole("checkbox", { name: "Ready to call" });
+  const readyFilterLabel = page.locator("label").filter({ has: readyFilter });
+  await readyFilterLabel.click();
+  await expect(readyFilter).not.toBeChecked();
+  await readyFilterLabel.click();
+  await expect(readyFilter).toBeChecked();
   await expect(page.getByText("No dialable leads")).toBeVisible();
   await page.getByRole("button", { name: "Show contacts that need a phone fix" }).click();
   await expect(page.getByRole("table", { name: "Leads" })).toContainText("Alex Rivera");

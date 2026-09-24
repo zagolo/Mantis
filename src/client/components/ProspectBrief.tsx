@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Link } from "@heroui/react";
 import type { ProspectPreparation } from "../../shared/campaigns";
 import { SCROLL } from "../layout/shell";
 import { Icon, QuoteMark } from "./Icon";
@@ -27,15 +28,9 @@ function FactColumn({
               {fact.sourceIds.map((id) => {
                 const source = research.sources.find((item) => item.id === id);
                 return source ? (
-                  <a
-                    key={id}
-                    href={source.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="ml-1 font-semibold text-link hover:underline"
-                  >
+                  <Link key={id} href={source.url} target="_blank" rel="noreferrer" className="ml-1">
                     [{research.sources.indexOf(source) + 1}]
-                  </a>
+                  </Link>
                 ) : null;
               })}
             </span>
@@ -166,9 +161,9 @@ export function ProspectBrief({
               {research.sources.map((source, index) => (
                 <li key={source.id} className="flex gap-2">
                   <span className="shrink-0 tabular-nums text-muted">{index + 1}.</span>
-                  <a href={source.url} target="_blank" rel="noreferrer" className="font-semibold text-link hover:underline">
+                  <Link href={source.url} target="_blank" rel="noreferrer">
                     {source.title}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ol>
@@ -183,7 +178,7 @@ export function ProspectBrief({
 
   if (compact) {
     return (
-      <section className="space-y-6 rounded-lg bg-surface p-4 shadow-sm" aria-label="AI prospect brief">
+      <section className="space-y-6 rounded-lg bg-surface p-4" aria-label="AI prospect brief">
         {meta}
         {body}
       </section>
@@ -192,7 +187,7 @@ export function ProspectBrief({
 
   return (
     <section
-      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface"
       aria-label="AI prospect brief"
       data-brief-state="ready"
     >

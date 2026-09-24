@@ -5,14 +5,13 @@ import {
   type ChatModelAdapter,
   type ThreadMessage
 } from "@assistant-ui/react";
-import { Alert } from "@heroui/react";
+import { Alert, Button } from "@heroui/react";
 import type { PublicCalendarProposal, PublicProposal } from "../../shared/contracts";
 import { openingReviewMessage } from "../../shared/reviewOpening";
 import { fetchCalendarProposals, interviewReview, type ReviewInterviewResponse } from "../state/api";
 import { ReviewThread } from "./ReviewThread";
 import { REVIEW_COLUMN } from "./reviewChatLayout";
 import { useSession } from "../state/session";
-import "./ReviewChat.css";
 
 function textFromMessage(message: ThreadMessage): string {
   return message.content
@@ -144,7 +143,7 @@ export function ReviewChat({
             {calendarError ? (
               <div role="alert" className="rounded-lg border border-danger p-3 text-sm text-foreground">
                 Calendar drafts could not load. Review remains available; no invitation was sent.
-                <button type="button" className="ml-3 font-semibold text-accent underline" onClick={() => setCalendarRetry((value) => value + 1)}>Retry calendar drafts</button>
+                <Button className="ml-3" size="sm" variant="outline" onPress={() => setCalendarRetry((value) => value + 1)}>Retry calendar drafts</Button>
               </div>
             ) : null}
 

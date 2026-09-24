@@ -2,123 +2,6 @@
 @import "@heroui/styles";
 @plugin "tailwind-scrollbar";
 
-@theme inline {
-  --radius-3xl: var(--radius);
-  --radius-4xl: var(--radius);
-}
-
-.auth-wash {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.auth-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(72px);
-}
-
-.auth-blob-a {
-  top: -14rem;
-  right: -10rem;
-  width: 36rem;
-  height: 36rem;
-  background: var(--auth-blob-a);
-}
-
-.auth-blob-b {
-  bottom: -12rem;
-  left: -9rem;
-  width: 28rem;
-  height: 28rem;
-  background: var(--auth-blob-b);
-}
-
-.auth-blob-c {
-  top: 38%;
-  left: 12%;
-  width: 18rem;
-  height: 18rem;
-  background: var(--auth-blob-c);
-}
-
-:root,
-.dark,
-[data-theme="dark"] {
-  color-scheme: dark;
-  --radius: 12px;
-  --field-radius: 10px;
-  --gray-50: #edf4ee;
-  --gray-100: #d5e3da;
-  --gray-200: #b0c4b7;
-  --gray-300: #8ca599;
-  --gray-400: #8ca599;
-  --gray-500: #a7baae;
-  --gray-900: #14211c;
-  --green-100: #192f24;
-  --green-200: #234936;
-  --green-300: #a5ddae;
-  --green-400: #a5ddae;
-  --green-500: #a5ddae;
-  --green-600: #72b888;
-  --green-700: #244c34;
-  --green-800: #1c3a2b;
-  --green-900: #102319;
-  --red-100: #391e20;
-  --red-500: #f0a7a0;
-  --amber-100: #382d1c;
-  --amber-500: #e5c482;
-  --success-500: #a5ddae;
-}
-
-.dark,
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  /* Cool evergreen ground — same family as the mint mark, not navy and not true black. */
-  --background: hsl(156 19% 8%);
-  --foreground: hsl(148 22% 94%);
-  --surface: hsl(155 17% 12%);
-  --surface-foreground: hsl(148 22% 94%);
-  --surface-secondary: hsl(155 13% 17%);
-  --overlay: hsl(150 16% 13%);
-  --muted: hsl(150 12% 72%);
-  --accent: var(--green-400);
-  --accent-foreground: var(--green-900);
-  --accent-soft: hsl(149 25% 20%);
-  --accent-soft-foreground: hsl(148 38% 88%);
-  --success: hsl(154 42% 52%);
-  --success-foreground: var(--green-900);
-  --warning: hsl(36 88% 58%);
-  --warning-foreground: hsl(32 48% 12%);
-  --danger: hsl(4 72% 62%);
-  --danger-foreground: hsl(0 0% 100%);
-  --danger-soft: hsl(4 32% 18%);
-  --warning-soft: hsl(36 30% 20%);
-  --warning-soft-foreground: hsl(36 80% 82%);
-  --border: hsl(155 12% 25%);
-  --separator: hsl(155 12% 25%);
-  --focus: var(--green-300);
-  --link: var(--green-300);
-  --default: hsl(150 12% 16%);
-  --default-foreground: hsl(148 22% 94%);
-  --field-background: hsl(155 17% 12%);
-  --field-foreground: hsl(148 22% 94%);
-  --field-placeholder: hsl(150 10% 67%);
-  --field-border: hsl(150 10% 37%);
-  --elev-shadow: hsl(152 30% 2% / 0.45);
-  --wash-spot: hsl(148 32% 16% / 0.55);
-  --wash-from: hsl(156 19% 8%);
-  --wash-to: hsl(154 16% 7%);
-  --auth-blob-a: hsl(148 42% 18% / 0.8);
-  --auth-blob-b: hsl(152 36% 14% / 0.65);
-  --auth-blob-c: hsl(146 40% 20% / 0.4);
-  --surface-shadow: 0 0 0 0 transparent;
-  --overlay-shadow: 0 0 1px 0 hsl(148 20% 90% / 0.16) inset, 0 18px 40px 0 hsl(152 30% 2% / 0.45);
-}
-
 html,
 body,
 #root {
@@ -129,46 +12,24 @@ body,
 html {
   overflow-x: clip;
   scrollbar-gutter: stable;
-  @apply scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border scrollbar-hover:scrollbar-thumb-muted;
-  font-family: "DM Sans", "Trebuchet MS", sans-serif;
+  background: var(--background);
 }
 
 body {
   margin: 0;
-  background:
-    radial-gradient(1200px 480px at 50% -80px, var(--wash-spot), transparent 70%),
-    linear-gradient(180deg, var(--wash-from), var(--wash-to));
+  background: var(--background);
   color: var(--foreground);
-  line-height: 1.5;
 }
 
-button:focus-visible,
-select:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
-/* Supporting fields: quiet at rest; darker brand outline only when focused. */
-.field-quiet {
-  background: var(--surface-secondary);
-  color: var(--field-foreground);
-}
-
-input.field-quiet:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px var(--focus);
-}
-
-/* Quiet operator surfaces: reading regions stay still, controls communicate state. */
-h1, h2, h3, .header-primary { font-family: "Space Grotesk", "Trebuchet MS", sans-serif; }
-h1 { letter-spacing: -0.035em; }
-button, a, input, textarea, select { transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
-button:disabled, [aria-disabled="true"] { cursor: not-allowed; }
-:focus-visible { outline: 2px solid var(--focus) !important; outline-offset: 3px; }
-.auth-blob { filter: blur(90px); }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { type ComponentPropsWithRef, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Button } from "@heroui/react";
+import { Button, Link as HeroLink } from "@heroui/react";
 import { useSession } from "../state/session";
 import { selectLead } from "../state/api";
 import { CallingPanel } from "../components/CallingPanel";
@@ -53,7 +53,7 @@ export function LeadDetailPage() {
     <Button
       variant="outline"
       size="sm"
-      className="min-h-11 rounded-lg! sm:min-h-0"
+      className="min-h-11 sm:min-h-0"
       isDisabled={preparing || pending}
       onPress={regeneratePrep}
     >
@@ -70,9 +70,9 @@ export function LeadDetailPage() {
             title={EMPTY_COPY.leadUnspecified.title}
             description={EMPTY_COPY.leadUnspecified.description}
             action={
-              <Link to="/leads" className="text-sm font-semibold text-muted hover:text-foreground hover:underline hover:underline-offset-4">
+              <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/leads" />}>
                 Back to ready
-              </Link>
+              </HeroLink>
             }
           />
         </div>
@@ -89,9 +89,9 @@ export function LeadDetailPage() {
             title={EMPTY_COPY.leadMissing.title}
             description={`${decodedId} is not in this queue. It may have been called, skipped, or is no longer eligible.`}
             action={
-              <Link to="/leads" className="text-sm font-semibold text-muted hover:text-foreground hover:underline hover:underline-offset-4">
+              <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/leads" />}>
                 Back to ready
-              </Link>
+              </HeroLink>
             }
           />
         </div>
@@ -103,7 +103,7 @@ export function LeadDetailPage() {
     return <EmptyState icon="error" role="alert" title="Contact not loaded"
       description="The contact selection was not confirmed. No call has started."
       action={<><Button onPress={() => setSelectionRetry((value) => value + 1)}>Retry opening contact</Button>
-        <Link to="/leads">Back to queue</Link></>} />;
+        <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/leads" />}>Back to queue</HeroLink></>} />;
   }
 
   if (!leadReady && selectError !== `${data.selectedCampaignId}:${decodedId}`) {

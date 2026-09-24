@@ -263,7 +263,7 @@ export function CallingPanel({
           <div className="flex shrink-0 items-center gap-2">
             <Button
               variant={muted ? "primary" : "outline"}
-              className="min-h-11 rounded-lg!"
+              className="min-h-11"
               onPress={() => {
                 const next = !muted;
                 setTwilioMuted(next);
@@ -275,7 +275,7 @@ export function CallingPanel({
             </Button>
             <Button
               variant="danger"
-              className={warningCue ? "min-h-11 rounded-lg! ring-2 ring-danger ring-offset-2 ring-offset-background" : "min-h-11 rounded-lg!"}
+              className={warningCue ? "min-h-11 ring-2 ring-danger ring-offset-2 ring-offset-background" : "min-h-11"}
               onPress={() => {
                 hangUpTwilioCall();
                 if (session.status !== "in_progress") {
@@ -311,7 +311,7 @@ export function CallingPanel({
               {prep ? (
                 <ProspectBrief preparation={prep} compact />
               ) : (
-                <div className="space-y-4 rounded-lg bg-surface p-4 shadow-sm">
+                <div className="space-y-4 rounded-lg bg-surface p-4">
                   {opening ? (
                     <div className="min-w-0 overflow-hidden rounded-lg bg-accent-soft p-4">
                       <QuoteMark />
@@ -325,7 +325,7 @@ export function CallingPanel({
           </aside>
         ) : null}
 
-        <section className="order-2 flex min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-sm max-lg:min-h-[18rem] lg:h-full">
+        <section className="order-2 flex min-h-0 flex-col overflow-hidden rounded-lg bg-surface max-lg:min-h-[18rem] lg:h-full">
           <h3 className="shrink-0 px-5 pt-4 text-sm font-semibold">Live transcript</h3>
           <ol
             ref={transcriptRef}
@@ -419,7 +419,7 @@ export function CallingPanel({
           </div>
 
           {warningCue ? null : (
-            <details className="rounded-lg bg-surface p-4 shadow-sm">
+            <details className="rounded-lg bg-surface p-4">
               <summary className="cursor-pointer text-sm font-semibold">Need to press a key?</summary>
               <p className="mt-2 text-xs text-muted">
                 {canSendDigits
@@ -436,7 +436,7 @@ export function CallingPanel({
                     onPress={() => {
                       void sendDigit(digit);
                     }}
-                    className="min-h-11 rounded-lg! font-mono text-lg font-semibold"
+                    className="min-h-11 font-mono text-lg font-semibold"
                   >
                     {dtmfPending === digit ? "…" : digit}
                   </Button>

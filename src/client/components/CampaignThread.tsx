@@ -4,7 +4,7 @@ import {
   MessagePrimitive,
   ThreadPrimitive
 } from "@assistant-ui/react";
-import { Alert } from "@heroui/react";
+import { Alert, Button, TextArea } from "@heroui/react";
 import { SCROLL } from "../layout/shell";
 
 function UserMessage() {
@@ -66,15 +66,11 @@ export function CampaignThread({
             <ComposerPrimitive.Input
               aria-label="Campaign message"
               placeholder="Message the campaign assistant…"
-              className="min-h-16 flex-1 resize-none rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground"
+              render={<TextArea className="min-h-16 flex-1 resize-none" />}
               disabled={disabled}
             />
-            <ComposerPrimitive.Send
-              aria-label="Send"
-              className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground disabled:opacity-50"
-              disabled={disabled}
-            >
-              Send
+            <ComposerPrimitive.Send asChild disabled={disabled}>
+              <Button aria-label="Send">Send</Button>
             </ComposerPrimitive.Send>
           </ComposerPrimitive.Root>
         </ThreadPrimitive.ViewportFooter>

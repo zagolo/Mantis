@@ -1,7 +1,7 @@
-import { type FormEvent, useRef, useState } from "react";
+import { type ComponentPropsWithRef, type FormEvent, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@heroui/react";
-import { AUTH_FIELD_CLASS, AuthShell } from "../components/AuthShell";
+import { Button, Input, Link as HeroLink } from "@heroui/react";
+import { AuthShell } from "../components/AuthShell";
 import { AUTH_COPY, PAGE_TITLES } from "../copy";
 import { login } from "../state/api";
 import { usePageTitle } from "../usePageTitle";
@@ -42,16 +42,16 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
       footer={
         <>
           {AUTH_COPY.signInFooter}{" "}
-          <Link className="font-semibold text-foreground hover:underline hover:underline-offset-4" to="/signup">
+          <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/signup" />}>
             {AUTH_COPY.signInFooterAction}
-          </Link>
+          </HeroLink>
         </>
       }
     >
       <form className="mt-8 flex flex-col gap-5" onSubmit={(event) => void onSubmit(event)}>
         <label className="flex flex-col gap-2" htmlFor="email">
           <span className="text-sm font-semibold">{AUTH_COPY.email}</span>
-          <input
+          <Input
             id="email"
             name="email"
             type="email"
@@ -61,12 +61,11 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
             aria-describedby={error ? "login-error" : undefined}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className={AUTH_FIELD_CLASS}
           />
         </label>
         <label className="flex flex-col gap-2" htmlFor="password">
           <span className="text-sm font-semibold">{AUTH_COPY.password}</span>
-          <input
+          <Input
             id="password"
             name="password"
             type="password"
@@ -77,7 +76,6 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
             aria-describedby={error ? "login-error" : undefined}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className={AUTH_FIELD_CLASS}
           />
         </label>
         {error ? (
@@ -85,7 +83,7 @@ export function LoginPage({ onLoggedIn }: LoginPageProps) {
             {error}
           </p>
         ) : null}
-        <Button type="submit" size="lg" className="w-full rounded-lg!" isDisabled={pending} isPending={pending}>
+        <Button type="submit" size="lg" className="w-full" isDisabled={pending} isPending={pending}>
           {pending ? AUTH_COPY.signInPending : AUTH_COPY.signInSubmit}
         </Button>
       </form>

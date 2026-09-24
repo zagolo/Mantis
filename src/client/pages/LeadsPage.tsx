@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { type ComponentPropsWithRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Alert, Button } from "@heroui/react";
+import { Alert, Button, Checkbox, Input, Link as HeroLink, SearchField } from "@heroui/react";
 import { useSession } from "../state/session";
 import { EmptyState } from "../components/EmptyState";
 import { LeadsTable, type LeadSortKey } from "../components/LeadsTable";
@@ -71,7 +71,7 @@ export function LeadsPage() {
             icon="campaign"
             title={EMPTY_COPY.campaign.title}
             description={EMPTY_COPY.campaign.description}
-            action={<Button className="rounded-lg!" onPress={() => setEditor("new")}>Create a campaign</Button>}
+            action={<Button onPress={() => setEditor("new")}>Create a campaign</Button>}
           />
         </div>
       ) : sheetUnconfigured ? (
@@ -81,7 +81,7 @@ export function LeadsPage() {
             title={EMPTY_COPY.sheet.title}
             description={data.sheet.message || EMPTY_COPY.sheet.description}
             action={
-              <Button className="rounded-lg!" onPress={() => setEditor(campaign.brief ? "edit" : "new")}>
+              <Button onPress={() => setEditor(campaign.brief ? "edit" : "new")}>
                 Open Sheet connection
               </Button>
             }
@@ -94,10 +94,10 @@ export function LeadsPage() {
             title={EMPTY_COPY.queue.title}
             description={EMPTY_COPY.queue.description}
             action={<div className="flex flex-wrap items-center gap-3">
-              <Button variant="outline" className="rounded-lg!" isDisabled={pending || campaignBusy} onPress={onRefresh}>
+              <Button variant="outline" isDisabled={pending || campaignBusy} onPress={onRefresh}>
                 {pending ? "Refreshing contacts…" : "Refresh contacts"}
               </Button>
-              <Button variant="outline" className="rounded-lg!" onPress={() => setEditor("edit")}>Check Sheet connection</Button>
+              <Button variant="outline" onPress={() => setEditor("edit")}>Check Sheet connection</Button>
             </div>}
           />
         </div>
@@ -225,58 +225,40 @@ function LeadsQueue({
   return (
     <section aria-label={QUEUE_COPY.section} className="flex min-h-0 min-w-0 flex-1 flex-col gap-5">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 p-1">
-        <label className="min-w-0 flex-1 basis-48 text-sm">
-          <span className="sr-only">Search leads</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search name, company, phone…"
-            aria-label="Search leads"
-            className="field-quiet w-full rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-[var(--field-placeholder)]"
-          />
-        </label>
+        <SearchField aria-label="Search leads" value={query} onChange={setQuery} className="min-w-0 flex-1 basis-48">
+          <Input placeholder="Search name, company, phone…" />
+        </SearchField>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted">
-          <label className="flex min-h-11 items-center gap-2">
-            <input
-              type="checkbox"
-              checked={dialableOnly}
-              aria-label="Ready to call"
-              className="size-3.5 accent-[var(--accent)]"
-              onChange={(event) => setDialableOnly(event.target.checked)}
-            />
-            Ready
-          </label>
+          <Checkbox isSelected={dialableOnly} onChange={setDialableOnly} aria-label="Ready to call">
+            <Checkbox.Content aria-label="Ready to call">
+              <Checkbox.Control>
+                <Checkbox.Indicator />
+              </Checkbox.Control>
+              Ready to call
+            </Checkbox.Content>
+          </Checkbox>
           {undialableCount > 0 ? (
-            <Link
-              to="/notifications#queue"
-              className="inline-flex min-h-11 items-center hover:text-foreground hover:underline hover:underline-offset-4"
-            >
+            <HeroLink className="min-h-11" render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/notifications#queue" />}>
               {undialableCount} need a phone fix
-            </Link>
+            </HeroLink>
           ) : null}
           <div className="flex items-center gap-0.5" role="group" aria-label="Sort leads">
             {([["queue", "Queue"], ["name", "Name"], ["company", "Company"], ["status", "Status"]] as Array<[LeadSortKey, string]>).map(([key, label]) => (
-              <button
+              <Button
                 key={key}
-                type="button"
+                size="sm"
+                variant={sortKey === key ? "primary" : "tertiary"}
                 aria-pressed={sortKey === key}
-                className={`min-h-11 px-1.5 ${sortKey === key ? "font-semibold text-foreground" : "hover:text-foreground"}`}
-                onClick={() => toggleSort(key)}
+                onPress={() => toggleSort(key)}
               >
                 {label}{sortKey === key ? (sortDir === 1 ? " ↑" : " ↓") : ""}
-              </button>
+              </Button>
             ))}
           </div>
           {onRefresh ? (
-            <button
-              type="button"
-              className="min-h-11 font-semibold hover:text-foreground hover:underline hover:underline-offset-4 disabled:opacity-50"
-              disabled={refreshDisabled}
-              onClick={onRefresh}
-            >
+            <Button size="sm" variant="tertiary" isDisabled={refreshDisabled} onPress={onRefresh}>
               {refreshDisabled ? "Refreshing…" : "Refresh"}
-            </button>
+            </Button>
           ) : null}
         </div>
       </div>

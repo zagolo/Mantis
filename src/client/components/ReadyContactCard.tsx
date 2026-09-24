@@ -40,7 +40,7 @@ export function ReadyContactCard({
   const briefLocked = preparing && !opening;
 
   return (
-    <Card aria-label="Next contact" className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col gap-0! overflow-hidden! rounded-lg! border-t-[3px] border-t-accent p-0! max-lg:pb-[5.5rem]">
+    <Card aria-label="Next contact" className="flex h-full min-h-0 min-w-0 w-full flex-1 flex-col gap-0! overflow-hidden! p-0! max-lg:pb-[5.5rem]">
       <Card.Header className="relative z-20 flex min-w-0 shrink-0 flex-col items-start gap-1 bg-surface px-5 pt-5 sm:px-8 sm:pt-8">
         <h1 className="text-xl font-semibold leading-[1.15] tracking-tight break-words sm:text-2xl">
           {lead.fullName || "Unnamed contact"}
@@ -123,12 +123,12 @@ export function ReadyContactCard({
         </div>
         </div>
       </div>
-      <Card.Footer className="relative z-20 isolate mt-auto flex shrink-0 flex-wrap items-center gap-x-4 gap-y-3 bg-surface! px-5 py-4 shadow-[0_-8px_24px_-12px_var(--elev-shadow)] sm:gap-x-5 sm:px-8 sm:pb-8 sm:pt-4 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-20 max-lg:px-[max(1.25rem,env(safe-area-inset-left))] max-lg:pr-[max(1.25rem,env(safe-area-inset-right))] max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pt-4">
+      <Card.Footer className="relative z-20 isolate mt-auto flex shrink-0 flex-wrap items-center gap-x-4 gap-y-3 bg-surface! px-5 py-4 sm:gap-x-5 sm:px-8 sm:pb-8 sm:pt-4 max-lg:fixed max-lg:inset-x-0 max-lg:bottom-0 max-lg:z-20 max-lg:px-[max(1.25rem,env(safe-area-inset-left))] max-lg:pr-[max(1.25rem,env(safe-area-inset-right))] max-lg:pb-[max(1rem,env(safe-area-inset-bottom))] max-lg:pt-4">
         {sheetBlocking ? null : (
           <Button
             ref={callButtonRef}
             size="lg"
-            className="min-h-11 min-w-28 rounded-lg!"
+            className="min-h-11 min-w-28"
             isDisabled={Boolean(disabledReason) || pending || starting || preparing}
             isPending={starting}
             onPress={onCall}
@@ -137,18 +137,13 @@ export function ReadyContactCard({
           </Button>
         )}
         {onSkip ? (
-          <Button variant="outline" className="min-h-11 rounded-lg!" isDisabled={pending || starting} onPress={onSkip}>
+          <Button variant="outline" className="min-h-11" isDisabled={pending || starting} onPress={onSkip}>
             Skip
           </Button>
         ) : null}
-        <button
-          type="button"
-          className="min-h-11 text-sm font-semibold text-muted hover:text-foreground hover:underline hover:underline-offset-4"
-          disabled={pending || starting}
-          onClick={onRefresh}
-        >
+        <Button variant="tertiary" isDisabled={pending || starting} onPress={onRefresh}>
           Refresh
-        </button>
+        </Button>
         {disabledReason ? <p className="w-full text-sm text-muted">{disabledReason}</p> : null}
       </Card.Footer>
     </Card>

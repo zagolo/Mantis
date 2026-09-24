@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { type ComponentPropsWithRef, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Button, Link as HeroLink } from "@heroui/react";
 import { useSession } from "../state/session";
 import { fetchProposalBySession } from "../state/api";
 import { ReviewChat } from "../components/ReviewChat";
@@ -79,9 +80,9 @@ export function ReviewPage() {
             title={EMPTY_COPY.reviewSession.title}
             description={EMPTY_COPY.reviewSession.description}
             action={
-              <Link to="/leads" className="text-sm font-medium underline underline-offset-2">
+              <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/leads" />}>
                 Back to ready
-              </Link>
+              </HeroLink>
             }
           />
         </div>
@@ -105,8 +106,8 @@ export function ReviewPage() {
             icon="review"
             title={EMPTY_COPY.reviewMissing.title}
             description={fetchError?.sessionId === sessionId ? fetchError.message : EMPTY_COPY.reviewMissing.description}
-            action={<><button type="button" className="rounded-lg bg-accent px-4 py-2 font-semibold text-accent-foreground" onClick={() => setRetry((value) => value + 1)}>Retry loading review</button>
-              <Link to="/leads" className="text-sm font-medium underline underline-offset-2">Back to queue</Link></>}
+            action={<><Button onPress={() => setRetry((value) => value + 1)}>Retry loading review</Button>
+              <HeroLink render={(props) => <Link {...(props as ComponentPropsWithRef<typeof Link>)} to="/leads" />}>Back to queue</HeroLink></>}
           />
         </div>
       </div>

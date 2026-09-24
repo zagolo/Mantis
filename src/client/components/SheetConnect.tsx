@@ -1,15 +1,11 @@
 import { useRef, useState } from "react";
-import { Alert, Button } from "@heroui/react";
+import { Alert, Button, Input } from "@heroui/react";
 import type { SheetInfo } from "../../shared/contracts";
 import { DEFAULT_SHEET_TITLE, EMPTY_COPY } from "../copy";
 import { SCROLL } from "../layout/shell";
 import { createLeadsSheet, linkLeadsSheet } from "../state/api";
 
-const choiceClass =
-  "flex w-full flex-col gap-2 rounded-lg bg-surface p-4 text-left shadow-sm hover:bg-surface-secondary disabled:opacity-50";
 const fieldClass = "flex flex-col gap-2";
-const inputClass = "w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-foreground";
-const quietLinkClass = "text-sm font-semibold text-muted hover:text-foreground hover:underline hover:underline-offset-4";
 
 export function SheetConnect({
   sheet,
@@ -81,12 +77,11 @@ export function SheetConnect({
       {mode === "choose" ? (
         <div className="flex flex-col gap-3">
           {sampleAvailable ? (
-            <div className="flex w-full flex-col gap-2 rounded-lg bg-surface p-4 text-left shadow-sm">
+            <div className="flex w-full flex-col gap-2 rounded-lg bg-surface p-4 text-left">
               <p className="font-semibold">{copy.sampleLeads}</p>
               <p className="text-sm leading-relaxed text-muted">{copy.sampleLeadsHint}</p>
               <div className="pt-1">
                 <Button
-                  className="rounded-lg!"
                   isDisabled={pending}
                   isPending={pending}
                   onPress={() => {
@@ -100,18 +95,18 @@ export function SheetConnect({
           ) : null}
           {googleReady ? (
             <>
-              <button type="button" className={choiceClass} disabled={pending} onClick={() => setMode("link")}>
+              <Button type="button" variant="secondary" className="h-auto w-full flex-col items-start gap-2 whitespace-normal p-4 text-left" isDisabled={pending} onPress={() => setMode("link")}>
                 <span className="font-semibold">{copy.linkExisting}</span>
                 <span className="text-sm leading-relaxed text-muted">
                   Use a spreadsheet you already keep leads in.
                 </span>
-              </button>
-              <button type="button" className={choiceClass} disabled={pending} onClick={() => setMode("create")}>
+              </Button>
+              <Button type="button" variant="secondary" className="h-auto w-full flex-col items-start gap-2 whitespace-normal p-4 text-left" isDisabled={pending} onPress={() => setMode("create")}>
                 <span className="font-semibold">{copy.createNew}</span>
                 <span className="text-sm leading-relaxed text-muted">
                   Create one with the Mantis headers.
                 </span>
-              </button>
+              </Button>
             </>
           ) : null}
         </div>
@@ -127,22 +122,19 @@ export function SheetConnect({
         >
           <label className={fieldClass} htmlFor="sheet-url">
             <span className="text-sm font-semibold">{copy.urlLabel}</span>
-            <input
+            <Input
               id="sheet-url"
               value={url}
               onChange={(event) => setUrl(event.target.value)}
               placeholder={copy.urlPlaceholder}
               autoComplete="off"
-              className={inputClass}
             />
           </label>
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" className="rounded-lg!" isDisabled={pending || url.trim().length < 8} isPending={pending}>
+            <Button type="submit" isDisabled={pending || url.trim().length < 8} isPending={pending}>
               {copy.linkAction}
             </Button>
-            <button type="button" className={quietLinkClass} disabled={pending} onClick={() => setMode("choose")}>
-              Back
-            </button>
+            <Button type="button" variant="tertiary" isDisabled={pending} onPress={() => setMode("choose")}>Back</Button>
           </div>
         </form>
       ) : null}
@@ -161,31 +153,27 @@ export function SheetConnect({
         >
           <label className={fieldClass} htmlFor="sheet-title">
             <span className="text-sm font-semibold">{copy.titleLabel}</span>
-            <input
+            <Input
               id="sheet-title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              className={inputClass}
             />
           </label>
           <label className={fieldClass} htmlFor="sheet-email">
             <span className="text-sm font-semibold">{copy.shareLabel}</span>
-            <input
+            <Input
               id="sheet-email"
               type="email"
               value={shareEmail}
               onChange={(event) => setShareEmail(event.target.value)}
-              className={inputClass}
             />
             <span className="text-sm text-muted">{copy.shareHint}</span>
           </label>
           <div className="flex flex-wrap items-center gap-3">
-            <Button type="submit" className="rounded-lg!" isDisabled={pending || title.trim().length < 1} isPending={pending}>
+            <Button type="submit" isDisabled={pending || title.trim().length < 1} isPending={pending}>
               {copy.createAction}
             </Button>
-            <button type="button" className={quietLinkClass} disabled={pending} onClick={() => setMode("choose")}>
-              Back
-            </button>
+            <Button type="button" variant="tertiary" isDisabled={pending} onPress={() => setMode("choose")}>Back</Button>
           </div>
         </form>
       ) : null}

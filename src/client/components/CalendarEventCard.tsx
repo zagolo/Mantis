@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@heroui/react";
+import { Button, Checkbox, Input, Link, TextArea } from "@heroui/react";
 import type { CalendarConnectionStatus, PublicCalendarProposal } from "../../shared/contracts";
 import {
   approveCalendarProposal,
@@ -19,9 +19,6 @@ function fromLocalInput(value: string, fallback: string): string {
   const parsed = Date.parse(value);
   return Number.isNaN(parsed) ? fallback : new Date(parsed).toISOString();
 }
-
-const field =
-  "mt-1 w-full rounded-lg bg-surface-secondary px-3 py-2 text-sm text-foreground outline-none focus:outline-2 focus:outline-offset-2 focus:outline-[var(--focus)]";
 
 export function CalendarEventCard({
   proposal,
@@ -114,7 +111,7 @@ export function CalendarEventCard({
   }
 
   return (
-    <article className="rounded-lg border-t-[3px] border-t-accent bg-surface p-4 shadow-sm" aria-label={heading}>
+    <article className="rounded-lg bg-surface p-4" aria-label={heading}>
       <p className="text-sm font-semibold">{heading}</p>
       <p className="mt-1 text-xs text-muted">
         {operatorOnly
@@ -128,9 +125,9 @@ export function CalendarEventCard({
           {proposal.htmlLink ? (
             <>
               {" "}
-              <a className="font-medium text-accent underline-offset-4 hover:underline" href={proposal.htmlLink} target="_blank" rel="noreferrer">
+              <Link href={proposal.htmlLink} target="_blank" rel="noreferrer">
                 Open in Calendar
-              </a>
+              </Link>
             </>
           ) : null}
         </p>
@@ -140,43 +137,45 @@ export function CalendarEventCard({
         <div className="mt-3 grid gap-3">
           <label className="text-xs font-medium text-muted">
             Title
-            <input className={field} value={title} onChange={(event) => setTitle(event.target.value)} disabled={!pending} />
+            <Input className="mt-1" value={title} onChange={(event) => setTitle(event.target.value)} disabled={!pending} />
           </label>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="text-xs font-medium text-muted">
               Start
-              <input className={field} type="datetime-local" value={start} onChange={(event) => setStart(event.target.value)} disabled={!pending} />
+              <Input className="mt-1" type="datetime-local" value={start} onChange={(event) => setStart(event.target.value)} disabled={!pending} />
             </label>
             <label className="text-xs font-medium text-muted">
               End
-              <input className={field} type="datetime-local" value={end} onChange={(event) => setEnd(event.target.value)} disabled={!pending} />
+              <Input className="mt-1" type="datetime-local" value={end} onChange={(event) => setEnd(event.target.value)} disabled={!pending} />
             </label>
           </div>
           <label className="text-xs font-medium text-muted">
             Timezone
-            <input className={field} value={timezone} onChange={(event) => setTimezone(event.target.value)} disabled={!pending} />
+            <Input className="mt-1" value={timezone} onChange={(event) => setTimezone(event.target.value)} disabled={!pending} />
           </label>
           {operatorOnly ? null : (
             <>
-          <label className="text-xs font-medium text-muted">
-            Attendees (emails)
-            <input
-              className={field}
-              value={attendees}
-              onChange={(event) => setAttendees(event.target.value)}
-              placeholder="Add emails — the Sheet has no email column"
-              disabled={!pending}
-            />
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={meet} onChange={(event) => setMeet(event.target.checked)} disabled={!pending} />
-            Google Meet
-          </label>
+              <label className="text-xs font-medium text-muted">
+                Attendees (emails)
+                <Input
+                  className="mt-1"
+                  value={attendees}
+                  onChange={(event) => setAttendees(event.target.value)}
+                  placeholder="Add emails — the Sheet has no email column"
+                  disabled={!pending}
+                />
+              </label>
+              <Checkbox isSelected={meet} onChange={setMeet} isDisabled={!pending}>
+                <Checkbox.Content>
+                  <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                  Google Meet
+                </Checkbox.Content>
+              </Checkbox>
             </>
           )}
           <label className="text-xs font-medium text-muted">
             Notes
-            <textarea className={`${field} min-h-16`} value={notes} onChange={(event) => setNotes(event.target.value)} disabled={!pending} />
+            <TextArea className="mt-1 min-h-16" value={notes} onChange={(event) => setNotes(event.target.value)} disabled={!pending} />
           </label>
         </div>
       )}
@@ -197,25 +196,20 @@ export function CalendarEventCard({
         <div className="mt-4 flex flex-wrap items-center gap-3">
           {!calendar.connected ? (
             calendar.configured ? (
-              <a className="text-sm font-medium text-accent underline-offset-4 hover:underline" href="/api/google/calendar/connect">
+              <Link href="/api/google/calendar/connect">
                 Connect Calendar
-              </a>
+              </Link>
             ) : (
               <p className="text-sm text-muted">Calendar OAuth is not configured.</p>
             )
           ) : (
-            <Button className="min-h-11 rounded-lg!" isDisabled={busy} onPress={() => void onApprove()}>
+            <Button className="min-h-11" isDisabled={busy} onPress={() => void onApprove()}>
               {busyAction === "approve" ? "Sending invitation…" : "Approve and send"}
             </Button>
           )}
-          <button
-            type="button"
-            className="text-sm text-muted hover:text-foreground hover:underline hover:underline-offset-4 disabled:opacity-50"
-            disabled={busy}
-            onClick={() => void onDismiss()}
-          >
+          <Button type="button" variant="tertiary" isDisabled={busy} isPending={busyAction === "dismiss"} onPress={() => void onDismiss()}>
             {busyAction === "dismiss" ? "Dismissing…" : "Dismiss"}
-          </button>
+          </Button>
         </div>
       ) : null}
     </article>
