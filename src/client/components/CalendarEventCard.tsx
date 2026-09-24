@@ -155,19 +155,22 @@ export function CalendarEventCard({
           </label>
           {operatorOnly ? null : (
             <>
-          <label className="text-xs font-medium text-muted">
-            Attendees (emails)
-            <Input
-              className="mt-1"
-              value={attendees}
-              onChange={(event) => setAttendees(event.target.value)}
-              placeholder="Add emails — the Sheet has no email column"
-              disabled={!pending}
-            />
-          </label>
-          <Checkbox isSelected={meet} onChange={setMeet} isDisabled={!pending}>
-            Google Meet
-          </Checkbox>
+              <label className="text-xs font-medium text-muted">
+                Attendees (emails)
+                <Input
+                  className="mt-1"
+                  value={attendees}
+                  onChange={(event) => setAttendees(event.target.value)}
+                  placeholder="Add emails — the Sheet has no email column"
+                  disabled={!pending}
+                />
+              </label>
+              <Checkbox isSelected={meet} onChange={setMeet} isDisabled={!pending}>
+                <Checkbox.Content>
+                  <Checkbox.Control><Checkbox.Indicator /></Checkbox.Control>
+                  Google Meet
+                </Checkbox.Content>
+              </Checkbox>
             </>
           )}
           <label className="text-xs font-medium text-muted">

@@ -121,6 +121,56 @@ test("login through approve loads the next lead", async ({ page, server }) => {
   await expect(upNext(page).getByLabel("Last call")).toContainText("no-answer");
 });
 
+test("calendar Meet change stays a draft until explicit approval", async ({ page, server }) => {
+  await login(page, server.baseURL);
+  await chooseCampaign(page, "Lamina founder sales");
+  await openLead(page, "Alex Rivera");
+  const live = await connectLiveCall(page, server);
+  const draft = {
+    id: "draft-meeting",
+    sessionId: live.sessionId,
+    source: "call_review",
+    status: "pending",
+    intent: "meeting",
+    linkedProposalId: null,
+    title: "Intro",
+    start: "2026-09-25T14:00:00.000Z",
+    end: "2026-09-25T14:30:00.000Z",
+    timezone: "UTC",
+    attendees: ["contact@example.com"],
+    meet: true,
+    notes: "",
+    htmlLink: null,
+    lastError: null
+  };
+  let approvals = 0;
+  let submittedMeet: boolean | undefined;
+  await page.route(`**/api/calls/${live.sessionId}/calendar/proposals`, (route) =>
+    route.fulfill({ json: { proposals: [draft] } }));
+  await page.route("**/api/calendar/proposals/draft-meeting/approve", async (route) => {
+    approvals++;
+    submittedMeet = (route.request().postDataJSON() as { meet: boolean }).meet;
+    await route.fulfill({ json: { proposal: { ...draft, status: "sent", meet: submittedMeet } } });
+  });
+  const completed = await server.signedPost("/twilio/voice/status", {
+    sessionId: live.sessionId,
+    CallSid: live.parentSid,
+    CallStatus: "completed"
+  });
+  expect(completed.status).toBe(204);
+  await expect(page).toHaveURL(/\/calls\/.+\/review/);
+  const calendar = page.getByRole("article", { name: "Calendar invite" });
+  const meet = calendar.getByRole("checkbox", { name: "Google Meet" });
+  await expect(meet).toBeChecked();
+  await calendar.getByText("Google Meet").click();
+  await expect(meet).not.toBeChecked();
+  expect(approvals).toBe(0);
+  await calendar.getByRole("button", { name: "Approve and send" }).click();
+  await expect(calendar).toContainText("Sent.");
+  expect(approvals).toBe(1);
+  expect(submittedMeet).toBe(false);
+});
+
 test("contact hangup opens review in this tab", async ({ page, server }) => {
   await login(page, server.baseURL);
   await chooseCampaign(page, "Lamina founder sales");
