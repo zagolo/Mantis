@@ -123,12 +123,8 @@ export function ReviewThread({
             </AuiIf>
           </div>
         </ThreadPrimitive.Viewport>
-        <ThreadPrimitive.ViewportFooter className="relative shrink-0 bg-transparent">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 -top-12 h-12 bg-gradient-to-b from-transparent to-background"
-          />
-          <div className={`${REVIEW_COLUMN} relative pb-1 pt-1`}>
+        <ThreadPrimitive.ViewportFooter className="shrink-0">
+          <div className={`${REVIEW_COLUMN} pb-1 pt-1`}>
             <AuiIf condition={(state) => state.thread.isRunning}>
               <p role="status" className="mb-3 text-sm text-muted">
                 Reviewing the call…

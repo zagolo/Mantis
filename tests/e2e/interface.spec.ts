@@ -22,12 +22,14 @@ test("dark from first paint with legacy preferences; routes remain usable at 360
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect.poll(() => page.evaluate(() => {
     const body = getComputedStyle(document.body);
+    const root = getComputedStyle(document.documentElement);
     const dark = document.createElement("div");
     dark.style.backgroundColor = "var(--background)";
     document.body.append(dark);
     const stockBackground = getComputedStyle(dark).backgroundColor;
     dark.remove();
-    return body.backgroundColor === stockBackground && stockBackground !== "rgba(0, 0, 0, 0)";
+    return root.backgroundColor === stockBackground && body.backgroundColor === stockBackground
+      && stockBackground !== "rgba(0, 0, 0, 0)";
   })).toBe(true);
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
   await signIn(page, server.baseURL);
@@ -38,9 +40,10 @@ test("dark from first paint with legacy preferences; routes remain usable at 360
   await expect(page).toHaveURL(/\/settings$/);
   for (const width of [360, 1440]) {
     await page.setViewportSize({ width, height: 800 });
-    for (const route of ["/leads", "/analytics", "/notifications", "/settings", "/leads/L-100"]) {
+    for (const route of ["/calls/missing-session/review", "/leads", "/notifications", "/settings", "/analytics", "/leads/L-100"]) {
       await page.goto(`${server.baseURL}${route}`);
       await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor === getComputedStyle(document.body).backgroundColor)).toBe(true);
       await expect(page.getByRole("main")).toBeVisible();
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     }
