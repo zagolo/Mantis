@@ -7,74 +7,42 @@ const semgrepImage =
 
 @object()
 export class Mantis {
-  /** Run every tracked Semgrep rule against the repository source. */
   @func()
-  async semgrep(
-    /** +defaultPath="/" */
-    source: Directory,
-  ): Promise<string> {
-    return dag
-      .container()
-      .from(semgrepImage)
+  async semgrep(/** +defaultPath="/" */ source: Directory): Promise<string> {
+    return dag.container().from(semgrepImage)
       .withDirectory("/src", source, { exclude: [".git", ".dagger", "node_modules", "dist"] })
       .withWorkdir("/src")
-      .withExec(["semgrep", "scan", "--config", ".semgrep", "--error", "--exclude", ".semgrep/**"])
+      .withExec(["semgrep", "--test", ".semgrep"])
+      .withExec(["semgrep", "scan", "--config", ".semgrep", "--error", "--exclude", ".semgrep"])
       .stdout();
   }
 
-  /** Validate the tracked Alint contract without requiring product dependencies. */
-  @func()
-  async alint(
-    /** +defaultPath="/" */
-    source: Directory,
-  ): Promise<string> {
-    return dag
-      .container()
-      .from(nodeImage)
-      .withDirectory("/src", source, { exclude: [".git", "node_modules", "dist"] })
+  private auditTools(source: Directory) {
+    return dag.container().from(nodeImage)
       .withWorkdir("/src")
-      .withExec([
-        "node",
-        "-e",
-        "const fs=require('fs'); const text=fs.readFileSync('.alint.yml','utf8'); if (!text.includes('alint://bundled/hygiene/no-tracked-artifacts@v1') || !text.includes('alint://bundled/agent-hygiene@v1')) process.exit(1); console.log('alint configuration validated');",
-      ])
-      .stdout();
-  }
-
-  /** Validate the tracked ls-lint contract and its conservative .dagger scope. */
-  @func()
-  async lsLint(
-    /** +defaultPath="/" */
-    source: Directory,
-  ): Promise<string> {
-    return dag
-      .container()
-      .from(nodeImage)
       .withDirectory("/src", source, { exclude: [".git", "node_modules", "dist"] })
-      .withWorkdir("/src")
-      .withExec([
-        "node",
-        "-e",
-        "const fs=require('fs'); const text=fs.readFileSync('.ls-lint.yml','utf8'); if (!text.includes('.dagger:') || !text.includes('.ts: kebab-case')) process.exit(1); console.log('ls-lint configuration validated');",
-      ])
+      .withExec(["npm", "install", "--global", "--ignore-scripts", "@asamarts/alint@0.15.0", "@ls-lint/ls-lint@2.3.1"]);
+  }
+
+  @func()
+  async alint(/** +defaultPath="/" */ source: Directory): Promise<string> {
+    return this.auditTools(source)
+      .withExec(["alint", "validate-config"])
+      .withExec(["alint", "check", "--fail-on-warning", "--format", "github", "--no-docs"])
       .stdout();
   }
 
-  /** Factory code-gate entry point: audits run before native repository checks. */
   @func()
-  async qualification(
-    /** +defaultPath="/" */
-    source: Directory,
-  ): Promise<string> {
-    const auditResults = [
-      await this.semgrep(source),
-      await this.alint(source),
-      await this.lsLint(source),
-    ];
+  async lsLint(/** +defaultPath="/" */ source: Directory): Promise<string> {
+    return this.auditTools(source)
+      .withExec(["ls-lint", "--config", ".ls-lint.yml"])
+      .stdout();
+  }
 
-    const nativeResult = await dag
-      .container()
-      .from(nodeImage)
+  @func()
+  async qualification(/** +defaultPath="/" */ source: Directory): Promise<string> {
+    const audits = [await this.semgrep(source), await this.alint(source), await this.lsLint(source)];
+    const native = await dag.container().from(nodeImage)
       .withWorkdir("/app")
       .withEnvVariable("CI", "true")
       .withEnvVariable("NODE_ENV", "development")
@@ -83,40 +51,20 @@ export class Mantis {
       .withFile("package-lock.json", source.file("package-lock.json"))
       .withExec(["npm", "ci", "--include=dev", "--prefer-offline"])
       .withExec(["npx", "--no-install", "playwright", "install", "--with-deps", "chromium"])
-      .withDirectory("/app", source, {
-        exclude: [
-          ".git",
-          ".devenv",
-          ".direnv",
-          ".dagger",
-          "node_modules",
-          "dist",
-          ".env",
-          ".env.*",
-          "data",
-          "recordings",
-          "transcripts",
-          ".firecrawl",
-          "config/sheets.yaml",
-          "test-results",
-          "playwright-report",
-        ],
-      })
+      .withDirectory("/app", source, { exclude: [
+        ".git", ".devenv", ".direnv", ".dagger", "node_modules", "dist", ".env", ".env.*",
+        "data", "recordings", "transcripts", ".firecrawl", "config/sheets.yaml",
+        "test-results", "playwright-report",
+      ] })
       .withExec(["npm", "run", "skills:check"])
       .withExec(["npm", "run", "typecheck"])
       .withExec(["npm", "test"])
-      // Dependency installation needs dev tools; the delivered bundle needs production semantics.
       .withEnvVariable("NODE_ENV", "production")
       .withEnvVariable("VITE_E2E", "false")
       .withExec(["npm", "run", "build"])
       .withExec(["npm", "run", "test:e2e"])
-      .withExec([
-        "node",
-        "-e",
-        "console.log('Typecheck, unit/integration tests, production build, and fake-provider browser tests completed.')",
-      ])
+      .withExec(["node", "-e", "const fs=require('fs'); for(const dir of ['dist/client','dist/e2e-client']) { if (!fs.existsSync(`${dir}/index.html`) || !fs.readdirSync(`${dir}/assets`).length) process.exit(1) }"])
       .stdout();
-
-    return [...auditResults, nativeResult].join("\n");
+    return [...audits, native].join("\n");
   }
 }
