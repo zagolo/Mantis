@@ -35,6 +35,7 @@ in {
   env.SALES_LITELLM_PORT = default "4001";
   env.VITE_E2E = default "false";
   env.NVM_DIR = default "";
+  env.PLAYWRIGHT_BROWSERS_PATH = default "${config.devenv.root}/.devenv/playwright-browsers";
 
   # Inventory also reports these script-local variables. The scripts overwrite
   # them before use; empty public defaults do not configure or run deployment.
@@ -54,17 +55,18 @@ in {
   env.USER_NAME = default "";
 
   tasks."mantis:prepare" = {
-    exec = ''
-      npm ci --include=dev
-      npm run build
-      mkdir -p .devenv/state/mantis
-    '';
-    before = [ "devenv:processes:app" ];
+    exec = "node devenv/prepare.mjs";
+    before = [ "devenv:enterShell" "devenv:processes:app" ];
   };
-  # The app applies its transaction-backed, idempotent SQLite migrations before
-  # listening. Readiness verifies those migrations and authentication setup.
+  # Ephemeral local signing key only when no development secret was injected.
+  # It is not persisted or reused across restarts; supplied keys take precedence.
   processes.app = {
-    exec = "npm start";
+    exec = ''
+      if [ -z "$SESSION_SECRET" ]; then
+        export SESSION_SECRET="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))')"
+      fi
+      exec npm start
+    '';
     ready.exec = "curl --fail --silent --output /dev/null http://127.0.0.1:$PORT/health/ready";
   };
 }
